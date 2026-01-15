@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMNI-MATRIX V6 | 智能核心</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ff66;
+            --bg-dark: #0a0a0a;
+            --panel-bg: #111;
+            --border-color: #333;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #ddd;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .nav-deck {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .nav-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: #888;
+            padding: 10px 15px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--neon-cyan);
+            color: #000;
+            border-color: var(--neon-cyan);
+            font-weight: bold;
+        }
+
+        .container {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+            display: none;
+            padding: 20px;
+            animation: fade 0.2s;
+        }
+        .container.active { display: block; }
+        @keyframes fade { from { opacity: 0.8; } to { opacity: 1; } }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.4rem;
+            color: var(--neon-cyan);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            color: #888;
+            font-family: 'Share Tech Mono', monospace;
+            margin: 20px 0 10px 0;
+            font-size: 0.9rem;
+            border-left: 2px solid var(--neon-cyan);
+            padding-left: 8px;
+        }
+
+        .cyber-input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            transition: border 0.2s;
+        }
+        .cyber-input:focus { border-color: var(--neon-cyan); }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            background: var(--neon-cyan);
+            border: none;
+            color: #000;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            margin-top: 5px;
+        }
+        .btn-secondary:hover { background: var(--neon-pink); color: #fff; }
+
+        .upload-area {
+            border: 1px dashed #444;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+            position: relative;
+            background: #151515;
+        }
+        .upload-area:hover { border-color: var(--neon-cyan); background: #1a1a1a; }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .file-list { border: 1px solid #333; max-height: 150px; overflow-y: auto; margin-bottom: 10px; }
+        .file-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; }
+        .control-btn { cursor: pointer; color: var(--neon-cyan); margin-left: 5px; }
+
+        .conversion-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .conversion-table th, .conversion-table td { text-align: left; padding: 8px; border-bottom: 1px solid #222; }
+        .conversion-table th { color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
+        .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 6px; width: 100%; }
+
+        .currency-display {
+            background: #000; border: 1px solid var(--neon-green);
+            padding: 15px; margin-top: 15px; text-align: center;
+            color: var(--neon-green); font-family: 'Share Tech Mono', monospace;
+        }
+
+        .hf-token-edit { font-size: 0.7rem; color: #444; text-decoration: underline; cursor: pointer; margin-left: 10px; }
+        .hf-token-edit:hover { color: var(--neon-cyan); }
+
+        #bgOutput { max-width: 100%; border: 1px solid #333; margin-top: 10px; display: block; margin-left: auto; margin-right: auto; background: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23222"/><rect x="5" y="5" width="5" height="5" fill="%23222"/></svg>'); }
+
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #000;
+            border-top: 1px solid #333; text-align: center; padding: 10px;
+            font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-deck">
+        <button class="nav-btn active" onclick="switchTab('pdf')">PDF 聚合</button>
+        <button class="nav-btn" onclick="switchTab('converter')">量子换算</button>
+        <button class="nav-btn" onclick="switchTab('image')">格式转换</button>
+        <button class="nav-btn" onclick="switchTab('removebg')">背景移除</button>
+        <button class="nav-btn" onclick="switchTab('chat')">AI 对话</button>
+        <button class="nav-btn" onclick="switchTab('currency')">实时汇率</button>
+    </div>
+
+    <!-- PDF 模块 -->
+    <div id="module-pdf" class="container active">
+        <h1>PDF 核心聚合</h1>
+        <input type="text" id="pdfFileName" class="cyber-input" value="说明书" placeholder="输入输出文件名">
+        <div class="upload-area">
+            <input type="file" id="fileInput" multiple accept=".pdf, .jpg, .jpeg, .png">
+            <p>点击或拖拽上传 PDF/图片</p>
+        </div>
+        <div class="file-list" id="fileList"></div>
+        <p id="status-pdf" style="font-size:0.8rem; color:var(--neon-cyan); min-height:20px;"></p>
+        <button id="clearBtn" class="btn-action btn-secondary" onclick="clearAllFiles()">清空列表</button>
+    </div>
+
+    <!-- 量子换算模块 -->
+    <div id="module-converter" class="container">
+        <h1>量子换算系统</h1>
+
+        <div class="section-title">重量</div>
+        <table class="conversion-table">
+            <tr><td>千克</td><td><input type="number" class="weight-input" data-unit="kg" oninput="convertWeights()"></td></tr>
+            <tr><td>磅</td><td><input type="number" class="weight-input" data-unit="lb" oninput="convertWeights()"></td></tr>
+            <tr><td>盎司</td><td><input type="number" class="weight-input" data-unit="oz" oninput="convertWeights()"></td></tr>
+            <tr><td>克</td><td><input type="number" class="weight-input" data-unit="g" oninput="convertWeights()"></td></tr>
+        </table>
+
+        <div class="section-title">体积</div>
+        <table class="conversion-table">
+            <tr><td>升</td><td><input type="number" class="volume-input" data-unit="l" oninput="convertVolumes()"></td></tr>
+            <tr><td>毫升</td><td><input type="number" class="volume-input" data-unit="ml" oninput="convertVolumes()"></td></tr>
+            <tr><td>加仑</td><td><input type="number" class="volume-input" data-unit="gal" oninput="convertVolumes()"></td></tr>
+            <tr><td>品脱</td><td><input type="number" class="volume-input" data-unit="pt" oninput="convertVolumes()"></td></tr>
+        </table>
+
+        <div class="section-title">长度</div>
+        <table class="conversion-table">
+            <tr><td>米</td><td><input type="number" class="length-input" data-unit="m" oninput="convertLengths()"></td></tr>
+            <tr><td>厘米</td><td><input type="number" class="length-input" data-unit="cm" oninput="convertLengths()"></td></tr>
+            <tr><td>英寸</td><td><input type="number" class="length-input" data-unit="inch" oninput="convertLengths()"></td></tr>
+            <tr><td>英尺</td><td><input type="number" class="length-input" data-unit="ft" oninput="convertLengths()"></td></tr>
+        </table>
+    </div>
+
+    <!-- 格式转换 -->
+    <div id="module-image" class="container">
+        <h1>图像嬗变</h1>
+        <div class="upload-area">
+            <input type="file" id="imgConvertInput" accept="image/*">
+            <p>上传图片</p>
+        </div>
+        <select id="imgTargetFormat" class="cyber-input">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WEBP</option>
+        </select>
+        <button class="btn-action" onclick="convertImage()">执行转换并下载</button>
+        <p id="status-img" style="text-align:center; color:var(--neon-cyan); margin-top:10px;"></p>
+    </div>
+
+    <!-- 背景移除 -->
+    <div id="module-removebg" class="container">
+        <h1>
+            背景移除
+            <span class="hf-token-edit" onclick="toggleHFToken()">修改 Token</span>
+        </h1>
+
+        <div id="hfTokenContainer" style="display:none;">
+            <input type="text" id="hfToken" class="cyber-input" placeholder="输入新的 HF Token（可保留，不影响本地去背景）">
+            <button class="btn-action btn-secondary" onclick="saveHFToken()">保存 Token</button>
+        </div>
+
+        <div class="upload-area">
+            <input type="file" id="bgInput" accept="image/*">
+            <p>点击或拖拽上传图片去背景（本地推理，不上传服务器）</p>
+        </div>
+
+        <button id="bgProcessBtn" class="btn-action" onclick="processRemoveBg()">执行去背景</button>
+        <p id="status-bg" style="text-align:center; color:var(--neon-cyan); margin-top:10px;"></p>
+        <div id="bgResult" style="display:none; text-align:center;">
+            <img id="bgOutput" alt="Result">
+            <br><br>
+            <a id="bgDownload" class="btn-action" style="display:inline-block; width:auto; padding:8px 20px;">下载</a>
+        </div>
+    </div>
+
+    <!-- AI 对话 -->
+    <div id="module-chat" class="container">
+        <h1>AI 核心对话</h1>
+
+        <div style="display:flex; gap:10px;">
+            <select id="chatModel" class="cyber-input" style="flex:2">
+                <option value="deepseek-ai/DeepSeek-V2.5">DeepSeek-V2.5 (强力推理)</option>
+                <option value="Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B (通用)</option>
+                <option value="meta-llama/Llama-3.1-8B-Instruct">Llama-3.1-8B (Meta)</option>
+            </select>
+            <select id="chatRole" class="cyber-input" style="flex:1">
+                <option value="default">默认对话</option>
+                <option value="coder">代码专家</option>
+                <option value="translator">专业翻译</option>
+                <option value="writer">文案写作</option>
+            </select>
+        </div>
+
+        <textarea id="chatBox" class="cyber-input" rows="6" placeholder="输入指令..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-action" onclick="sendMessage()" style="flex:2">发送</button>
+            <button class="btn-action btn-secondary" onclick="clearChat()" style="flex:1">清空</button>
+        </div>
+        <p id="chatStatus" style="text-align:center; color:var(--neon-cyan); margin-top:5px;"></p>
+    </div>
+
+    <!-- 实时汇率 -->
+    <div id="module-currency" class="container">
+        <h1>实时汇率</h1>
+        <div style="display:flex; gap:10px;">
+            <select id="sourceCurrency" class="cyber-input" onchange="updateCurrencyDisplay()">
+                <option value="CNY">CNY 人民币</option>
+                <option value="USD">USD 美元</option>
+                <option value="EUR">EUR 欧元</option>
+                <option value="JPY">JPY 日元</option>
+                <option value="HKD">HKD 港币</option>
+                <option value="GBP">GBP 英镑</option>
+            </select>
+            <select id="targetCurrency" class="cyber-input" onchange="updateCurrencyDisplay()">
+                <option value="USD">USD 美元</option>
+                <option value="CNY">CNY 人民币</option>
+                <option value="EUR">EUR 欧元</option>
+                <option value="JPY">JPY 日元</option>
+                <option value="HKD">HKD 港币</option>
+                <option value="GBP">GBP 英镑</option>
+            </select>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:15px;">
+            <input type="number" id="amountInput" class="cyber-input" style="text-align:right" placeholder="金额" oninput="calcCurrency('amount')">
+            <span style="font-family:'Share Tech Mono'; color:#888; font-size:1.2rem;">↔</span>
+            <input type="number" id="resultInput" class="cyber-input" placeholder="结果" oninput="calcCurrency('result')">
+        </div>
+
+        <button class="btn-action" onclick="fetchRates()">>>> 刷新汇率数据</button>
+
+        <div class="currency-display" id="currencyInfo">
+            <div id="rateDisplay">点击刷新按钮获取实时汇率</div>
+            <div id="updateTime" style="font-size:0.7rem; color:#666; margin-top:5px;"></div>
+        </div>
+    </div>
+
+    <footer>SYSTEM CORE DESIGNED BY CHE RUI</footer>
+
+<script>
+    // 配置区域（粘回你自己的值）
+    const SILICONFLOW_API_KEY = 'YOUR_SILICONFLOW_API_KEY';
+    const SILICONFLOW_BASE_URL = 'https://api.siliconflow.cn/v1';
+
+    // 默认 HF Token（保留：不再用于去背景网络上传；你也可以继续用于其它需求）
+    const DEFAULT_HF_TOKEN = 'YOUR_HF_TOKEN';
+    let currentHFToken = DEFAULT_HF_TOKEN;
+
+    let liveRates = {};
+    let lastBase = "CNY";
+
+    function switchTab(name) {
+        document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('module-' + name).classList.add('active');
+        const index = ['pdf','converter','image','removebg','chat','currency'].indexOf(name);
+        if(index >= 0) document.querySelectorAll('.nav-btn')[index].classList.add('active');
+        if(name === 'currency' && Object.keys(liveRates).length === 0) fetchRates();
+    }
+
+    /* --- PDF 模块 --- */
+    let pdfFiles = [];
+    document.getElementById('fileInput').addEventListener('change', async e => {
+        const files = Array.from(e.target.files);
+        if(files.length > 0) {
+            pdfFiles = pdfFiles.concat(files);
+            updatePdfList();
+            if(pdfFiles.length >= 2) processPdf();
+        }
+    });
+    function updatePdfList() {
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        pdfFiles.forEach((f, i) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `<span>${i+1}. ${f.name}</span><span class="control-btn" onclick="removePdf(${i})">✕</span>`;
+            list.appendChild(div);
+        });
+    }
+    window.removePdf = (i) => { pdfFiles.splice(i, 1); updatePdfList(); };
+    window.clearAllFiles = () => { pdfFiles = []; updatePdfList(); document.getElementById('status-pdf').innerText = ''; };
+    async function processPdf() {
+        if(pdfFiles.length === 0) return;
+        document.getElementById('status-pdf').innerText = '正在聚合...';
+        try {
+            const { PDFDocument } = PDFLib;
+            const mergedPdf = await PDFDocument.create();
+            for (let file of pdfFiles) {
+                const arrayBuffer = await file.arrayBuffer();
+                if (file.type === 'application/pdf') {
+                    const pdf = await PDFDocument.load(arrayBuffer);
+                    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    pages.forEach(p => mergedPdf.addPage(p));
+                } else {
+                    let img = file.type === 'image/png' ? await mergedPdf.embedPng(arrayBuffer) : await mergedPdf.embedJpg(arrayBuffer);
+                    const page = mergedPdf.addPage([img.width, img.height]);
+                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                }
+            }
+            const bytes = await mergedPdf.save();
+            let name = document.getElementById('pdfFileName').value.trim() || "说明书";
+            if(!name.endsWith('.pdf')) name += ".pdf";
+            download(bytes, name, "application/pdf");
+            document.getElementById('status-pdf').innerText = '聚合完成，已下载';
+            setTimeout(() => { pdfFiles = []; updatePdfList(); }, 3000);
+        } catch(e) {
+            document.getElementById('status-pdf').innerText = '错误: ' + e.message;
+        }
+    }
+
+    /* --- 量子换算 --- */
+    const weightMap = { kg:1, g:1000, lb:2.20462, oz:35.274 };
+    const volumeMap = { l:1, ml:1000, gal:0.264172, pt:2.11338 };
+    const lengthMap = { m:1, cm:100, mm:1000, inch:39.3701, ft:3.28084 };
+
+    function convert(type, map, selector) {
+        const inputs = document.querySelectorAll(selector);
+        let sourceUnit = null, sourceVal = null;
+        const activeEl = document.activeElement;
+
+        inputs.forEach(input => {
+            if(input === activeEl) {
+                sourceUnit = input.dataset.unit;
+                sourceVal = parseFloat(input.value);
+            } else if(sourceVal === null && input.value !== "") {
+                sourceUnit = input.dataset.unit;
+                sourceVal = parseFloat(input.value);
+            }
+        });
+        if(sourceUnit === null || isNaN(sourceVal)) return;
+        inputs.forEach(input => {
+            if(input === activeEl) return;
+            const unit = input.dataset.unit;
+            if(unit !== sourceUnit) {
+                const baseVal = sourceVal / map[sourceUnit];
+                input.value = (baseVal * map[unit]).toFixed(4);
+            }
+        });
+    }
+    window.convertWeights = () => convert('w', weightMap, '.weight-input');
+    window.convertVolumes = () => convert('v', volumeMap, '.volume-input');
+    window.convertLengths = () => convert('l', lengthMap, '.length-input');
+
+    /* --- 图片转格式 --- */
+    document.getElementById('imgConvertInput').addEventListener('change', function(){
+        if(this.files.length) document.getElementById('status-img').innerText = `已选择: ${this.files[0].name}`;
+    });
+    window.convertImage = () => {
+        const file = document.getElementById('imgConvertInput').files[0];
+        if(!file) return alert('请先上传图片');
+        const format = document.getElementById('imgTargetFormat').value;
+        const status = document.getElementById('status-img');
+        status.innerText = "处理中...";
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = e => {
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width; canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if(format === 'image/jpeg') { ctx.fillStyle="#FFF"; ctx.fillRect(0,0,canvas.width,canvas.height); }
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(blob => {
+                    let ext = format.split('/')[1];
+                    download(blob, `convert.${ext}`, format);
+                    status.innerText = "下载完成";
+                }, format, 0.9);
+            };
+        };
+        reader.readAsDataURL(file);
+    };
+
+    /* --- 背景移除：保留 Token UI（但去背景不再走网络上传） --- */
+    window.toggleHFToken = () => {
+        const div = document.getElementById('hfTokenContainer');
+        div.style.display = div.style.display === 'none' ? 'block' : 'none';
+    };
+    window.saveHFToken = () => {
+        const val = document.getElementById('hfToken').value.trim();
+        if(val) {
+            currentHFToken = val;
+            alert("Token 已更新");
+            document.getElementById('hfTokenContainer').style.display = 'none';
+        }
+    };
+
+    /* --- AI 聊天 --- */
+    window.sendMessage = async () => {
+        const box = document.getElementById('chatBox');
+        const model = document.getElementById('chatModel').value;
+        const role = document.getElementById('chatRole').value;
+        const status = document.getElementById('chatStatus');
+        const prompt = box.value.trim();
+        if(!prompt) return;
+
+        let systemPrompt = "You are a helpful assistant.";
+        if(role === 'coder') systemPrompt = "You are an expert software engineer. Output clean, efficient code with comments.";
+        if(role === 'translator') systemPrompt = "You are a professional translator. Translate the user's text accurately.";
+        if(role === 'writer') systemPrompt = "You are a creative writer. Write engaging content based on the user's topic.";
+
+        status.innerText = "思考中...";
+        try {
+            const res = await fetch(`${SILICONFLOW_BASE_URL}/chat/completions`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${SILICONFLOW_API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: 'user', content: prompt }
+                    ],
+                    stream: false
+                })
+            });
+            const data = await res.json();
+            if(data.choices && data.choices[0]) {
+                box.value = `\n[AI]: ${data.choices[0].message.content}\n-------------------\n` + box.value;
+                status.innerText = "完成";
+            } else {
+                throw new Error(data.message || "Unknown Error");
+            }
+        } catch(e) {
+            status.innerText = "错误: " + e.message;
+        }
+    };
+    window.clearChat = () => { document.getElementById('chatBox').value = ''; document.getElementById('chatStatus').innerText = ''; };
+
+    /* --- 实时汇率 (双向逻辑) --- */
+    async function fetchRates() {
+        const btn = document.querySelector('button[onclick="fetchRates()"]');
+        btn.innerText = "正在更新...";
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/CNY');
+            const data = await res.json();
+            if(data.result === "success") {
+                liveRates = data.rates;
+                lastBase = data.base_code;
+                document.getElementById('updateTime').innerText = "更新时间: " + new Date().toLocaleTimeString();
+                document.getElementById('currencyInfo').style.borderColor = "var(--neon-green)";
+                document.getElementById('rateDisplay').innerText = `数据源: ExchangeRate-API`;
+                calcCurrency('amount');
+            } else {
+                throw new Error("数据获取失败");
+            }
+        } catch(e) {
+            document.getElementById('rateDisplay').innerText = "API 连接失败";
+            console.error(e);
+        } finally {
+            btn.innerText = ">>> 刷新汇率数据";
+        }
+    }
+
+    window.updateCurrencyDisplay = () => calcCurrency('amount');
+
+    window.calcCurrency = (sourceInputId) => {
+        const source = document.getElementById('sourceCurrency').value;
+        const target = document.getElementById('targetCurrency').value;
+        const rateTarget = liveRates[target];
+        const rateSource = liveRates[source];
+
+        if(!rateTarget || !rateSource) return;
+
+        const amountEl = document.getElementById('amountInput');
+        const resultEl = document.getElementById('resultInput');
+
+        if(sourceInputId === 'amount') {
+            const val = parseFloat(amountEl.value);
+            if(!isNaN(val)) {
+                const valInBase = val / rateSource;
+                resultEl.value = (valInBase * rateTarget).toFixed(4);
+            } else {
+                resultEl.value = "";
+            }
+        } else {
+            const val = parseFloat(resultEl.value);
+            if(!isNaN(val)) {
+                const valInBase = val / rateTarget;
+                amountEl.value = (valInBase * rateSource).toFixed(4);
+            } else {
+                amountEl.value = "";
+            }
+        }
+    };
+
+    /* --- 工具 --- */
+    function download(data, filename, type) {
+        const blob = data instanceof Blob ? data : new Blob([data], {type});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+</script>
+
+<!-- 关键修复：去背景改为 Transformers.js 本地推理（在线网页可用，无需后端/CORS） -->
+<script type="module">
+  import { AutoModel, AutoProcessor, env, RawImage } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+  // 下载模型走 HF Hub，禁用本地模型检查
+  env.allowLocalModels = false;
+  // 用 WASM proxy 避免 UI 卡死
+  env.backends.onnx.wasm.proxy = true;
+
+  const MODEL_ID = 'briaai/RMBG-1.4';
+
+  let model = null;
+  let processor = null;
+  let loading = null;
+  let lastObjectURL = null;
+
+  function setStatus(msg) {
+    const el = document.getElementById('status-bg');
+    if (el) el.innerText = msg;
+  }
+
+  async function ensureLoaded() {
+    if (model && processor) return;
+    if (loading) return loading;
+
+    loading = (async () => {
+      setStatus('加载模型中（首次约几十 MB）...');
+
+      model = await AutoModel.from_pretrained(MODEL_ID, {
+        config: { model_type: 'custom' },
+        progress_callback: (p) => {
+          // p 结构在不同版本会略有差异：尽量稳健显示
+          if (p && typeof p === 'object') {
+            const name = p.file || p.url || 'model';
+            const pct = (typeof p.progress === 'number') ? Math.round(p.progress * 100) : null;
+            setStatus(pct !== null ? `下载中: ${name} ${pct}%` : `下载中: ${name}`);
+          }
+        }
+      });
+
+      processor = await AutoProcessor.from_pretrained(MODEL_ID, {
+        config: {
+          do_normalize: true,
+          do_pad: false,
+          do_rescale: true,
+          do_resize: true,
+          image_mean: [0.5, 0.5, 0.5],
+          feature_extractor_type: "ImageFeatureExtractor",
+          image_std: [1, 1, 1],
+          resample: 2,
+          rescale_factor: 0.00392156862745098,
+          size: { width: 1024, height: 1024 },
+        }
+      });
+
+      setStatus('模型已就绪');
+    })();
+
+    return loading;
+  }
+
+  document.getElementById('bgInput').addEventListener('change', function () {
+    const f = this.files && this.files[0];
+    setStatus(f ? `已选择: ${f.name}` : '');
+    document.getElementById('bgResult').style.display = 'none';
+  });
+
+  // 覆盖原 window.processRemoveBg
+  window.processRemoveBg = async () => {
+    const file = document.getElementById('bgInput').files[0];
+    const btn = document.getElementById('bgProcessBtn');
+
+    if (!file) { setStatus('请上传图片'); return; }
+
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    try {
+      await ensureLoaded();
+      setStatus('分析中...');
+
+      const image = await RawImage.fromBlob(file);
+
+      // 预处理
+      const { pixel_values } = await processor(image);
+
+      // 推理
+      const { output } = await model({ input: pixel_values });
+
+      // mask resize 回原图尺寸
+      const mask = await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(image.width, image.height);
+
+      // 合成透明背景 PNG
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(image.toCanvas(), 0, 0);
+
+      const pixelData = ctx.getImageData(0, 0, image.width, image.height);
+      for (let i = 0; i < mask.data.length; ++i) {
+        pixelData.data[4 * i + 3] = mask.data[i];
+      }
+      ctx.putImageData(pixelData, 0, 0);
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => b ? resolve(b) : reject(new Error('导出 PNG 失败')), 'image/png');
+      });
+
+      if (lastObjectURL) URL.revokeObjectURL(lastObjectURL);
+      lastObjectURL = URL.createObjectURL(blob);
+
+      document.getElementById('bgOutput').src = lastObjectURL;
+      const dl = document.getElementById('bgDownload');
+      dl.href = lastObjectURL;
+      dl.download = 'no-bg.png';
+
+      document.getElementById('bgResult').style.display = 'block';
+      setStatus('处理成功（本地完成，可下载）');
+    } catch (e) {
+      setStatus('失败: ' + (e && e.message ? e.message : String(e)));
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  };
+</script>
+</body>
+</html>
