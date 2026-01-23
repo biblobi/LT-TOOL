@@ -204,28 +204,65 @@
     <div id="module-converter" class="container">
         <h1>量子换算系统</h1>
 
-        <div class="section-title">重量</div>
+        <div class="section-title">重量 Mass</div>
         <table class="conversion-table">
-            <tr><td>千克</td><td><input type="number" class="weight-input" data-unit="kg" oninput="convertWeights()"></td></tr>
-            <tr><td>磅</td><td><input type="number" class="weight-input" data-unit="lb" oninput="convertWeights()"></td></tr>
-            <tr><td>盎司</td><td><input type="number" class="weight-input" data-unit="oz" oninput="convertWeights()"></td></tr>
-            <tr><td>克</td><td><input type="number" class="weight-input" data-unit="g" oninput="convertWeights()"></td></tr>
+            <tr><th colspan="2">公制 Metric</th></tr>
+            <tr><td>吨 Tonne (t)</td><td><input type="number" class="mass-input" data-unit="t" oninput="convertMass()"></td></tr>
+            <tr><td>千克 Kilogram (kg)</td><td><input type="number" class="mass-input" data-unit="kg" oninput="convertMass()"></td></tr>
+            <tr><td>克 Gram (g)</td><td><input type="number" class="mass-input" data-unit="g" oninput="convertMass()"></td></tr>
+            <tr><td>毫克 Milligram (mg)</td><td><input type="number" class="mass-input" data-unit="mg" oninput="convertMass()"></td></tr>
+
+            <tr><th colspan="2">美制 US</th></tr>
+            <tr><td>磅 Pound (lb)</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
+            <tr><td>盎司 Ounce (oz)</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
+            <tr><td>短吨 US short ton (ton)</td><td><input type="number" class="mass-input" data-unit="ton_us" oninput="convertMass()"></td></tr>
+
+            <tr><th colspan="2">英制 Imperial</th></tr>
+            <tr><td>英石 Stone (st)</td><td><input type="number" class="mass-input" data-unit="st" oninput="convertMass()"></td></tr>
+            <tr><td>长吨 UK long ton (ton)</td><td><input type="number" class="mass-input" data-unit="ton_uk" oninput="convertMass()"></td></tr>
         </table>
 
-        <div class="section-title">体积</div>
+        <div class="section-title">体积 Volume</div>
         <table class="conversion-table">
-            <tr><td>升</td><td><input type="number" class="volume-input" data-unit="l" oninput="convertVolumes()"></td></tr>
-            <tr><td>毫升</td><td><input type="number" class="volume-input" data-unit="ml" oninput="convertVolumes()"></td></tr>
-            <tr><td>加仑</td><td><input type="number" class="volume-input" data-unit="gal" oninput="convertVolumes()"></td></tr>
-            <tr><td>品脱</td><td><input type="number" class="volume-input" data-unit="pt" oninput="convertVolumes()"></td></tr>
+            <tr><th colspan="2">公制 Metric</th></tr>
+            <tr><td>立方米 Cubic meter (m3)</td><td><input type="number" class="vol-input" data-unit="m3" oninput="convertVolume()"></td></tr>
+            <tr><td>升 Liter (L)</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
+            <tr><td>毫升 Milliliter (mL)</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
+
+            <tr><th colspan="2">美制 US</th></tr>
+            <tr><td>美制加仑 US gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
+            <tr><td>美制夸脱 US quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
+            <tr><td>美制品脱 US pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
+            <tr><td>美制液盎司 US fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
+
+            <tr><th colspan="2">英制 Imperial</th></tr>
+            <tr><td>英制加仑 Imperial gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
+            <tr><td>英制夸脱 Imperial quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
+            <tr><td>英制品脱 Imperial pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
+            <tr><td>英制液盎司 Imperial fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
         </table>
 
-        <div class="section-title">长度</div>
+        <div class="section-title">长度 Length</div>
         <table class="conversion-table">
-            <tr><td>米</td><td><input type="number" class="length-input" data-unit="m" oninput="convertLengths()"></td></tr>
-            <tr><td>厘米</td><td><input type="number" class="length-input" data-unit="cm" oninput="convertLengths()"></td></tr>
-            <tr><td>英寸</td><td><input type="number" class="length-input" data-unit="inch" oninput="convertLengths()"></td></tr>
-            <tr><td>英尺</td><td><input type="number" class="length-input" data-unit="ft" oninput="convertLengths()"></td></tr>
+            <tr><th colspan="2">公制 Metric</th></tr>
+            <tr><td>千米 Kilometer (km)</td><td><input type="number" class="len-input" data-unit="km" oninput="convertLength()"></td></tr>
+            <tr><td>米 Meter (m)</td><td><input type="number" class="len-input" data-unit="m" oninput="convertLength()"></td></tr>
+            <tr><td>厘米 Centimeter (cm)</td><td><input type="number" class="len-input" data-unit="cm" oninput="convertLength()"></td></tr>
+            <tr><td>毫米 Millimeter (mm)</td><td><input type="number" class="len-input" data-unit="mm" oninput="convertLength()"></td></tr>
+
+            <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
+            <tr><td>英寸 Inch (in)</td><td><input type="number" class="len-input" data-unit="in" oninput="convertLength()"></td></tr>
+            <tr><td>英尺 Foot (ft)</td><td><input type="number" class="len-input" data-unit="ft" oninput="convertLength()"></td></tr>
+            <tr><td>码 Yard (yd)</td><td><input type="number" class="len-input" data-unit="yd" oninput="convertLength()"></td></tr>
+            <tr><td>英里 Mile (mi)</td><td><input type="number" class="len-input" data-unit="mi" oninput="convertLength()"></td></tr>
+            <tr><td>海里 Nautical mile (nmi)</td><td><input type="number" class="len-input" data-unit="nmi" oninput="convertLength()"></td></tr>
+        </table>
+
+        <div class="section-title">温度 Temperature</div>
+        <table class="conversion-table">
+            <tr><td>摄氏 Celsius (C)</td><td><input type="number" class="temp-input" data-unit="c" oninput="convertTemperature()"></td></tr>
+            <tr><td>华氏 Fahrenheit (F)</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
+            <tr><td>开尔文 Kelvin (K)</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
         </table>
     </div>
 
@@ -247,15 +284,12 @@
 
     <!-- 背景移除 -->
     <div id="module-removebg" class="container">
-        <h1>
-            背景移除
-            <span class="hf-token-edit" onclick="toggleHFToken()">修改 Token</span>
-        </h1>
+        <h1>背景移除</h1>
 
-        <div id="hfTokenContainer" style="display:none;">
-            <input type="text" id="hfToken" class="cyber-input" placeholder="输入新的 HF Token（可保留，不影响本地去背景）">
-            <button class="btn-action btn-secondary" onclick="saveHFToken()">保存 Token</button>
-        </div>
+        <select id="bgEngine" class="cyber-input">
+            <option value="auto">自动（WebGPU 优先）</option>
+            <option value="wasm">兼容（WASM/CPU）</option>
+        </select>
 
         <div class="upload-area">
             <input type="file" id="bgInput" accept="image/*">
@@ -273,13 +307,18 @@
 
     <!-- AI 对话 -->
     <div id="module-chat" class="container">
-        <h1>AI 核心对话</h1>
+        <h1>AI 核心对话 <span class="hf-token-edit" onclick="toggleChatKey()">设置 Key</span></h1>
+
+        <div id="chatKeyContainer" style="display:none;">
+            <input type="password" id="chatApiKey" class="cyber-input" placeholder="输入 OpenRouter API Key">
+            <button class="btn-action btn-secondary" onclick="saveChatKey()">保存 Key</button>
+        </div>
 
         <div style="display:flex; gap:10px;">
             <select id="chatModel" class="cyber-input" style="flex:2">
-                <option value="deepseek-ai/DeepSeek-V2.5">DeepSeek-V2.5 (强力推理)</option>
-                <option value="Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B (通用)</option>
-                <option value="meta-llama/Llama-3.1-8B-Instruct">Llama-3.1-8B (Meta)</option>
+                <option value="xiaomi/mimo-v2-flash:free">MiMo-V2-Flash (free)</option>
+                <option value="deepseek/deepseek-r1-0528:free">DeepSeek-R1-0528 (free)</option>
+                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (free)</option>
             </select>
             <select id="chatRole" class="cyber-input" style="flex:1">
                 <option value="default">默认对话</option>
@@ -336,13 +375,10 @@
     <footer>SYSTEM CORE DESIGNED BY CHE RUI</footer>
 
 <script>
-    // 配置区域（粘回你自己的值）
-    const SILICONFLOW_API_KEY = 'YOUR_SILICONFLOW_API_KEY';
-    const SILICONFLOW_BASE_URL = 'https://api.siliconflow.cn/v1';
-
-    // 默认 HF Token（保留：不再用于去背景网络上传；你也可以继续用于其它需求）
-    const DEFAULT_HF_TOKEN = 'YOUR_HF_TOKEN';
-    let currentHFToken = DEFAULT_HF_TOKEN;
+    // 配置区域
+    const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+    const DEFAULT_OPENROUTER_KEY = '';
+    let currentOpenRouterKey = localStorage.getItem('openrouter_key') || DEFAULT_OPENROUTER_KEY;
 
     let liveRates = {};
     let lastBase = "CNY";
@@ -354,6 +390,7 @@
         const index = ['pdf','converter','image','removebg','chat','currency'].indexOf(name);
         if(index >= 0) document.querySelectorAll('.nav-btn')[index].classList.add('active');
         if(name === 'currency' && Object.keys(liveRates).length === 0) fetchRates();
+        if(name === 'removebg' && window.preloadRemoveBgModel) window.preloadRemoveBgModel();
     }
 
     /* --- PDF 模块 --- */
@@ -437,37 +474,97 @@
     }
 
     /* --- 量子换算 --- */
-    const weightMap = { kg:1, g:1000, lb:2.20462, oz:35.274 };
-    const volumeMap = { l:1, ml:1000, gal:0.264172, pt:2.11338 };
-    const lengthMap = { m:1, cm:100, mm:1000, inch:39.3701, ft:3.28084 };
+    function fmtNumber(n) {
+        if (!Number.isFinite(n)) return "";
+        let s = n.toFixed(8);
+        s = s.replace(/\.?0+$/g, "");
+        return s;
+    }
 
-    function convert(type, map, selector) {
-        const inputs = document.querySelectorAll(selector);
-        let sourceUnit = null, sourceVal = null;
+    function convertByFactor(selector, factorToBase) {
+        const inputs = Array.from(document.querySelectorAll(selector));
         const activeEl = document.activeElement;
+        const sourceEl = inputs.find(el => el === activeEl) || inputs.find(el => el.value !== "" && !Number.isNaN(parseFloat(el.value)));
+        if (!sourceEl) return;
 
+        const sourceUnit = sourceEl.dataset.unit;
+        const sourceVal = parseFloat(sourceEl.value);
+        if (Number.isNaN(sourceVal)) return;
+
+        const baseVal = sourceVal * factorToBase[sourceUnit];
         inputs.forEach(input => {
-            if(input === activeEl) {
-                sourceUnit = input.dataset.unit;
-                sourceVal = parseFloat(input.value);
-            } else if(sourceVal === null && input.value !== "") {
-                sourceUnit = input.dataset.unit;
-                sourceVal = parseFloat(input.value);
-            }
-        });
-        if(sourceUnit === null || isNaN(sourceVal)) return;
-        inputs.forEach(input => {
-            if(input === activeEl) return;
+            if (input === activeEl) return;
             const unit = input.dataset.unit;
-            if(unit !== sourceUnit) {
-                const baseVal = sourceVal / map[sourceUnit];
-                input.value = (baseVal * map[unit]).toFixed(4);
-            }
+            input.value = fmtNumber(baseVal / factorToBase[unit]);
         });
     }
-    window.convertWeights = () => convert('w', weightMap, '.weight-input');
-    window.convertVolumes = () => convert('v', volumeMap, '.volume-input');
-    window.convertLengths = () => convert('l', lengthMap, '.length-input');
+
+    const MASS = {
+        t: 1000,
+        kg: 1,
+        g: 0.001,
+        mg: 0.000001,
+        lb: 0.45359237,
+        oz: 0.028349523125,
+        st: 6.35029318,
+        ton_us: 907.18474,
+        ton_uk: 1016.0469088
+    };
+
+    const VOL = {
+        m3: 1000,
+        l: 1,
+        ml: 0.001,
+        gal_us: 3.785411784,
+        qt_us: 0.946352946,
+        pt_us: 0.473176473,
+        floz_us: 0.0295735295625,
+        gal_imp: 4.54609,
+        qt_imp: 1.1365225,
+        pt_imp: 0.56826125,
+        floz_imp: 0.0284130625
+    };
+
+    const LEN = {
+        km: 1000,
+        m: 1,
+        cm: 0.01,
+        mm: 0.001,
+        in: 0.0254,
+        ft: 0.3048,
+        yd: 0.9144,
+        mi: 1609.344,
+        nmi: 1852
+    };
+
+    window.convertMass = () => convertByFactor('.mass-input', MASS);
+    window.convertVolume = () => convertByFactor('.vol-input', VOL);
+    window.convertLength = () => convertByFactor('.len-input', LEN);
+
+    window.convertTemperature = () => {
+        const inputs = Array.from(document.querySelectorAll('.temp-input'));
+        const activeEl = document.activeElement;
+        const sourceEl = inputs.find(el => el === activeEl) || inputs.find(el => el.value !== "" && !Number.isNaN(parseFloat(el.value)));
+        if (!sourceEl) return;
+
+        const sourceVal = parseFloat(sourceEl.value);
+        if (Number.isNaN(sourceVal)) return;
+
+        let celsius = null;
+        const unit = sourceEl.dataset.unit;
+        if (unit === 'c') celsius = sourceVal;
+        if (unit === 'f') celsius = (sourceVal - 32) / 1.8;
+        if (unit === 'k') celsius = sourceVal - 273.15;
+        if (celsius === null) return;
+
+        inputs.forEach(input => {
+            if (input === activeEl) return;
+            const u = input.dataset.unit;
+            if (u === 'c') input.value = fmtNumber(celsius);
+            if (u === 'f') input.value = fmtNumber(celsius * 1.8 + 32);
+            if (u === 'k') input.value = fmtNumber(celsius + 273.15);
+        });
+    };
 
     /* --- 图片转格式 --- */
     document.getElementById('imgConvertInput').addEventListener('change', function(){
@@ -499,18 +596,23 @@
         reader.readAsDataURL(file);
     };
 
-    /* --- 背景移除：保留 Token UI（但去背景不再走网络上传） --- */
-    window.toggleHFToken = () => {
-        const div = document.getElementById('hfTokenContainer');
+    window.toggleChatKey = () => {
+        const div = document.getElementById('chatKeyContainer');
+        const input = document.getElementById('chatApiKey');
+        input.value = currentOpenRouterKey || '';
         div.style.display = div.style.display === 'none' ? 'block' : 'none';
     };
-    window.saveHFToken = () => {
-        const val = document.getElementById('hfToken').value.trim();
-        if(val) {
-            currentHFToken = val;
-            alert("Token 已更新");
-            document.getElementById('hfTokenContainer').style.display = 'none';
+    window.saveChatKey = () => {
+        const val = document.getElementById('chatApiKey').value.trim();
+        if (val) {
+            currentOpenRouterKey = val;
+            localStorage.setItem('openrouter_key', val);
+            alert('Key 已保存');
+        } else {
+            currentOpenRouterKey = '';
+            localStorage.removeItem('openrouter_key');
         }
+        document.getElementById('chatKeyContainer').style.display = 'none';
     };
 
     /* --- AI 聊天 --- */
@@ -522,34 +624,57 @@
         const prompt = box.value.trim();
         if(!prompt) return;
 
+        const apiKey = currentOpenRouterKey || document.getElementById('chatApiKey').value.trim();
+        if (!apiKey) {
+            status.innerText = '请先设置 OpenRouter API Key';
+            return;
+        }
+
         let systemPrompt = "You are a helpful assistant.";
         if(role === 'coder') systemPrompt = "You are an expert software engineer. Output clean, efficient code with comments.";
         if(role === 'translator') systemPrompt = "You are a professional translator. Translate the user's text accurately.";
         if(role === 'writer') systemPrompt = "You are a creative writer. Write engaging content based on the user's topic.";
 
+        const messages = [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: prompt }
+        ];
+
         status.innerText = "思考中...";
         try {
-            const res = await fetch(`${SILICONFLOW_BASE_URL}/chat/completions`, {
+            const headers = {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'X-Title': 'OMNI-MATRIX'
+            };
+            const origin = (location.origin && location.origin !== 'null') ? location.origin : '';
+            if (origin) headers['HTTP-Referer'] = origin;
+
+            const res = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${SILICONFLOW_API_KEY}`, 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
-                    model: model,
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: 'user', content: prompt }
-                    ],
+                    model,
+                    messages,
                     stream: false
                 })
             });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || `HTTP ${res.status}`);
+            }
+
             const data = await res.json();
-            if(data.choices && data.choices[0]) {
-                box.value = `\n[AI]: ${data.choices[0].message.content}\n-------------------\n` + box.value;
+            const reply = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+            if(reply) {
+                box.value = `\n[AI]: ${reply}\n-------------------\n` + box.value;
                 status.innerText = "完成";
             } else {
-                throw new Error(data.message || "Unknown Error");
+                throw new Error((data && data.error && data.error.message) || "Empty response");
             }
         } catch(e) {
-            status.innerText = "错误: " + e.message;
+            status.innerText = "错误: " + (e && e.message ? e.message : String(e));
         }
     };
     window.clearChat = () => { document.getElementById('chatBox').value = ''; document.getElementById('chatStatus').innerText = ''; };
@@ -623,65 +748,61 @@
     }
 </script>
 
-<!-- 关键修复：去背景改为 Transformers.js 本地推理（在线网页可用，无需后端/CORS） -->
+<!-- 背景移除：Transformers.js WebGPU 优先 -->
 <script type="module">
-  import { AutoModel, AutoProcessor, env, RawImage } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+  import { pipeline, env, RawImage } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
 
-  // 下载模型走 HF Hub，禁用本地模型检查
   env.allowLocalModels = false;
-  // 用 WASM proxy 避免 UI 卡死
-  env.backends.onnx.wasm.proxy = true;
 
   const MODEL_ID = 'briaai/RMBG-1.4';
 
-  let model = null;
-  let processor = null;
+  let segmenter = null;
   let loading = null;
   let lastObjectURL = null;
+  let lastDevice = null;
 
   function setStatus(msg) {
     const el = document.getElementById('status-bg');
     if (el) el.innerText = msg;
   }
 
+  function pickDevice() {
+    const mode = document.getElementById('bgEngine')?.value || 'auto';
+    if (mode === 'wasm') return 'wasm';
+    const secure = location.protocol === 'https:' || location.hostname === 'localhost';
+    const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator;
+    return (secure && hasWebGPU) ? 'webgpu' : 'wasm';
+  }
+
+  function resetEngine() {
+    segmenter = null;
+    loading = null;
+    lastDevice = null;
+  }
+
   async function ensureLoaded() {
-    if (model && processor) return;
+    const device = pickDevice();
+    if (segmenter && device === lastDevice) return segmenter;
     if (loading) return loading;
 
     loading = (async () => {
-      setStatus('加载模型中（首次约几十 MB）...');
-
-      model = await AutoModel.from_pretrained(MODEL_ID, {
-        config: { model_type: 'custom' },
-        progress_callback: (p) => {
-          if (p && typeof p === 'object') {
-            const name = p.file || p.url || 'model';
-            const pct = (typeof p.progress === 'number') ? Math.round(p.progress * 100) : null;
-            setStatus(pct !== null ? `下载中: ${name} ${pct}%` : `下载中: ${name}`);
-          }
-        }
+      setStatus(`加载模型中... (${device})`);
+      segmenter = await pipeline('image-segmentation', MODEL_ID, {
+        device,
+        dtype: device === 'webgpu' ? 'fp16' : 'fp32'
       });
-
-      processor = await AutoProcessor.from_pretrained(MODEL_ID, {
-        config: {
-          do_normalize: true,
-          do_pad: false,
-          do_rescale: true,
-          do_resize: true,
-          image_mean: [0.5, 0.5, 0.5],
-          feature_extractor_type: "ImageFeatureExtractor",
-          image_std: [1, 1, 1],
-          resample: 2,
-          rescale_factor: 0.00392156862745098,
-          size: { width: 1024, height: 1024 },
-        }
-      });
-
-      setStatus('模型已就绪');
+      lastDevice = device;
+      setStatus(`模型已就绪 (${device})`);
+      return segmenter;
     })();
 
     return loading;
   }
+
+  document.getElementById('bgEngine').addEventListener('change', () => {
+    resetEngine();
+    setStatus('引擎已切换');
+  });
 
   document.getElementById('bgInput').addEventListener('change', function () {
     const f = this.files && this.files[0];
@@ -689,44 +810,40 @@
     document.getElementById('bgResult').style.display = 'none';
   });
 
-  // 覆盖原 window.processRemoveBg
+  window.preloadRemoveBgModel = ensureLoaded;
+
   window.processRemoveBg = async () => {
     const file = document.getElementById('bgInput').files[0];
     const btn = document.getElementById('bgProcessBtn');
-
     if (!file) { setStatus('请上传图片'); return; }
 
     btn.disabled = true;
     btn.style.opacity = '0.7';
 
     try {
-      await ensureLoaded();
+      const seg = await ensureLoaded();
       setStatus('分析中...');
 
       const image = await RawImage.fromBlob(file);
+      const result = await seg(image);
 
-      // 预处理
-      const { pixel_values } = await processor(image);
-
-      // 推理
-      const { output } = await model({ input: pixel_values });
-
-      // mask resize 回原图尺寸
-      const mask = await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(image.width, image.height);
-
-      // 合成透明背景 PNG
-      const canvas = document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(image.toCanvas(), 0, 0);
-
-      const pixelData = ctx.getImageData(0, 0, image.width, image.height);
-      for (let i = 0; i < mask.data.length; ++i) {
-        pixelData.data[4 * i + 3] = mask.data[i];
+      if (!Array.isArray(result) || result.length === 0) {
+        throw new Error('未得到分割结果');
       }
-      ctx.putImageData(pixelData, 0, 0);
 
+      let best = result[0];
+      for (const r of result) {
+        if ((r.score || 0) > (best.score || 0)) best = r;
+      }
+
+      if (!best.mask) throw new Error('分割结果缺少 mask');
+      let mask = best.mask;
+      if (mask.width !== image.width || mask.height !== image.height) {
+        mask = await mask.resize(image.width, image.height);
+      }
+
+      const output = await image.composite(mask, 'multiply');
+      const canvas = output.toCanvas();
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob((b) => b ? resolve(b) : reject(new Error('导出 PNG 失败')), 'image/png');
       });
@@ -740,7 +857,7 @@
       dl.download = 'no-bg.png';
 
       document.getElementById('bgResult').style.display = 'block';
-      setStatus('处理成功（本地完成，可下载）');
+      setStatus('处理成功（WebGPU 优先）');
     } catch (e) {
       setStatus('失败: ' + (e && e.message ? e.message : String(e)));
     } finally {
