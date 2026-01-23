@@ -150,6 +150,7 @@
         .file-list { border: 1px solid #333; max-height: 150px; overflow-y: auto; margin-bottom: 10px; }
         .file-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; }
         .control-btn { cursor: pointer; color: var(--neon-cyan); margin-left: 5px; }
+        .file-controls { display: inline-flex; gap: 6px; }
 
         .conversion-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         .conversion-table th, .conversion-table td { text-align: left; padding: 8px; border-bottom: 1px solid #222; }
@@ -195,6 +196,7 @@
         </div>
         <div class="file-list" id="fileList"></div>
         <p id="status-pdf" style="font-size:0.8rem; color:var(--neon-cyan); min-height:20px;"></p>
+        <button id="mergeBtn" class="btn-action" onclick="processPdf()">合并并下载</button>
         <button id="clearBtn" class="btn-action btn-secondary" onclick="clearAllFiles()">清空列表</button>
     </div>
 
@@ -356,28 +358,58 @@
 
     /* --- PDF 模块 --- */
     let pdfFiles = [];
-    document.getElementById('fileInput').addEventListener('change', async e => {
+    let autoMergedOnce = false;
+    document.getElementById('fileInput').addEventListener('change', e => {
         const files = Array.from(e.target.files);
-        if(files.length > 0) {
-            pdfFiles = pdfFiles.concat(files);
-            updatePdfList();
-            if(pdfFiles.length >= 2) processPdf();
+        if (!files.length) return;
+        const isFirstUpload = pdfFiles.length === 0;
+        pdfFiles = pdfFiles.concat(files);
+        if (isFirstUpload) sortPdfFilesByName();
+        updatePdfList();
+        if (isFirstUpload && !autoMergedOnce) {
+            autoMergedOnce = true;
+            processPdf();
+        } else {
+            document.getElementById('status-pdf').innerText = '列表已更新，点击“合并并下载”';
         }
     });
+    function sortPdfFilesByName() {
+        pdfFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+    }
     function updatePdfList() {
         const list = document.getElementById('fileList');
         list.innerHTML = '';
         pdfFiles.forEach((f, i) => {
             const div = document.createElement('div');
             div.className = 'file-item';
-            div.innerHTML = `<span>${i+1}. ${f.name}</span><span class="control-btn" onclick="removePdf(${i})">✕</span>`;
+            div.innerHTML = `<span>${i+1}. ${f.name}</span>
+                <span class="file-controls">
+                    <span class="control-btn" onclick="movePdf(${i}, -1)" title="上移">▲</span>
+                    <span class="control-btn" onclick="movePdf(${i}, 1)" title="下移">▼</span>
+                    <span class="control-btn" onclick="removePdf(${i})" title="移除">✕</span>
+                </span>`;
             list.appendChild(div);
         });
     }
+    window.movePdf = (i, dir) => {
+        const target = i + dir;
+        if(target < 0 || target >= pdfFiles.length) return;
+        const [item] = pdfFiles.splice(i, 1);
+        pdfFiles.splice(target, 0, item);
+        updatePdfList();
+    };
     window.removePdf = (i) => { pdfFiles.splice(i, 1); updatePdfList(); };
-    window.clearAllFiles = () => { pdfFiles = []; updatePdfList(); document.getElementById('status-pdf').innerText = ''; };
+    window.clearAllFiles = () => {
+        pdfFiles = [];
+        autoMergedOnce = false;
+        updatePdfList();
+        document.getElementById('status-pdf').innerText = '';
+    };
     async function processPdf() {
-        if(pdfFiles.length === 0) return;
+        if(pdfFiles.length === 0) {
+            document.getElementById('status-pdf').innerText = '请先添加文件';
+            return;
+        }
         document.getElementById('status-pdf').innerText = '正在聚合...';
         try {
             const { PDFDocument } = PDFLib;
@@ -399,7 +431,6 @@
             if(!name.endsWith('.pdf')) name += ".pdf";
             download(bytes, name, "application/pdf");
             document.getElementById('status-pdf').innerText = '聚合完成，已下载';
-            setTimeout(() => { pdfFiles = []; updatePdfList(); }, 3000);
         } catch(e) {
             document.getElementById('status-pdf').innerText = '错误: ' + e.message;
         }
@@ -623,7 +654,6 @@
       model = await AutoModel.from_pretrained(MODEL_ID, {
         config: { model_type: 'custom' },
         progress_callback: (p) => {
-          // p 结构在不同版本会略有差异：尽量稳健显示
           if (p && typeof p === 'object') {
             const name = p.file || p.url || 'model';
             const pct = (typeof p.progress === 'number') ? Math.round(p.progress * 100) : null;
