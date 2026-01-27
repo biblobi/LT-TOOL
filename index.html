@@ -287,16 +287,23 @@
         <h1>背景移除</h1>
 
         <select id="bgEngine" class="cyber-input">
-            <option value="auto">自动（WebGPU 优先）</option>
-            <option value="wasm">兼容（WASM/CPU）</option>
+            <option value="auto">自动（GPU 优先）</option>
+            <option value="gpu">GPU/WebGPU</option>
+            <option value="cpu">CPU</option>
         </select>
 
         <div class="upload-area">
-            <input type="file" id="bgInput" accept="image/*">
+            <input type="file" id="bgInput" accept="image/*" multiple>
             <p>点击或拖拽上传图片去背景（本地推理，不上传服务器）</p>
         </div>
 
-        <button id="bgProcessBtn" class="btn-action" onclick="processRemoveBg()">执行去背景</button>
+        <div class="file-list" id="bgQueueList"></div>
+
+        <div style="display:flex; gap:10px;">
+            <button id="bgProcessBtn" class="btn-action" onclick="startBgQueue()" style="flex:2">开始处理</button>
+            <button id="bgStopBtn" class="btn-action btn-secondary" onclick="stopBgQueue()" style="flex:1">停止</button>
+        </div>
+        <button id="bgClearBtn" class="btn-action btn-secondary" onclick="clearBgQueue()">清空队列</button>
         <p id="status-bg" style="text-align:center; color:var(--neon-cyan); margin-top:10px;"></p>
         <div id="bgResult" style="display:none; text-align:center;">
             <img id="bgOutput" alt="Result">
@@ -748,123 +755,258 @@
     }
 </script>
 
-<!-- 背景移除：Transformers.js WebGPU 优先 -->
+<!-- 背景移除：IMG.LY（质量更好，支持批量队列） -->
 <script type="module">
-  import { pipeline, env, RawImage } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+  let imglyModule = null;
+  let bgQueue = [];
+  let bgRunning = false;
+  let bgStopRequested = false;
+  let lastPreviewUrl = null;
+  let preloadDone = false;
 
-  env.allowLocalModels = false;
-
-  const MODEL_ID = 'briaai/RMBG-1.4';
-
-  let segmenter = null;
-  let loading = null;
-  let lastObjectURL = null;
-  let lastDevice = null;
+  const statusText = {
+    pending: '等待',
+    processing: '处理中',
+    done: '完成',
+    error: '失败'
+  };
 
   function setStatus(msg) {
     const el = document.getElementById('status-bg');
     if (el) el.innerText = msg;
   }
 
-  function pickDevice() {
-    const mode = document.getElementById('bgEngine')?.value || 'auto';
-    if (mode === 'wasm') return 'wasm';
+  function canWebGPU() {
     const secure = location.protocol === 'https:' || location.hostname === 'localhost';
-    const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator;
-    return (secure && hasWebGPU) ? 'webgpu' : 'wasm';
+    return secure && typeof navigator !== 'undefined' && 'gpu' in navigator;
   }
 
-  function resetEngine() {
-    segmenter = null;
-    loading = null;
-    lastDevice = null;
+  function getDevice() {
+    const mode = document.getElementById('bgEngine')?.value || 'auto';
+    if (mode === 'cpu') return 'cpu';
+    if (mode === 'gpu') return canWebGPU() ? 'gpu' : 'cpu';
+    return canWebGPU() ? 'gpu' : 'cpu';
   }
 
-  async function ensureLoaded() {
-    const device = pickDevice();
-    if (segmenter && device === lastDevice) return segmenter;
-    if (loading) return loading;
+  function makeOutName(fileName) {
+    const base = fileName.replace(/\.[^.]+$/, '');
+    return `${base}-no-bg.png`;
+  }
 
-    loading = (async () => {
-      setStatus(`加载模型中... (${device})`);
-      segmenter = await pipeline('image-segmentation', MODEL_ID, {
-        device,
-        dtype: device === 'webgpu' ? 'fp16' : 'fp32'
-      });
-      lastDevice = device;
+  function updateQueueUI() {
+    const list = document.getElementById('bgQueueList');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (bgQueue.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'file-item';
+      empty.innerHTML = '<span>队列为空</span><span>--</span>';
+      list.appendChild(empty);
+      return;
+    }
+
+    bgQueue.forEach((item, i) => {
+      const row = document.createElement('div');
+      row.className = 'file-item';
+
+      const left = document.createElement('span');
+      left.textContent = `${i + 1}. ${item.file.name}`;
+
+      const controls = document.createElement('span');
+      controls.className = 'file-controls';
+
+      const status = document.createElement('span');
+      status.textContent = statusText[item.status] || item.status;
+      controls.appendChild(status);
+
+      if (item.url) {
+        const dl = document.createElement('span');
+        dl.className = 'control-btn';
+        dl.textContent = '⬇';
+        dl.title = '下载';
+        dl.onclick = () => triggerDownload(item.url, item.outName);
+        controls.appendChild(dl);
+      }
+
+      row.appendChild(left);
+      row.appendChild(controls);
+      list.appendChild(row);
+    });
+  }
+
+  function setPreviewFromBlob(blob) {
+    if (lastPreviewUrl) URL.revokeObjectURL(lastPreviewUrl);
+    lastPreviewUrl = URL.createObjectURL(blob);
+    document.getElementById('bgOutput').src = lastPreviewUrl;
+    const dl = document.getElementById('bgDownload');
+    dl.href = lastPreviewUrl;
+    dl.download = 'no-bg.png';
+    document.getElementById('bgResult').style.display = 'block';
+  }
+
+  function triggerDownload(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function loadImgly() {
+    if (imglyModule) return imglyModule;
+    imglyModule = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
+    return imglyModule;
+  }
+
+  async function preloadImgly() {
+    if (preloadDone) return;
+    preloadDone = true;
+
+    const mod = await loadImgly();
+    if (typeof mod.preload !== 'function') return;
+
+    const device = getDevice();
+    const config = {
+      device,
+      model: 'isnet',
+      progress: (key, current, total) => {
+        if (typeof current === 'number' && typeof total === 'number' && total > 0) {
+          const pct = Math.round((current / total) * 100);
+          setStatus(`预加载: ${key} ${pct}%`);
+        } else {
+          setStatus(`预加载: ${key}`);
+        }
+      }
+    };
+
+    try {
+      await mod.preload(config);
       setStatus(`模型已就绪 (${device})`);
-      return segmenter;
-    })();
+    } catch (e) {
+      setStatus('预加载失败: ' + (e && e.message ? e.message : String(e)));
+    }
+  }
 
-    return loading;
+  async function removeBackgroundOnce(file) {
+    const mod = await loadImgly();
+    const removeBackground = mod.default || mod.removeBackground;
+    if (!removeBackground) throw new Error('removeBackground 未找到');
+
+    const device = getDevice();
+
+    const config = {
+      device,
+      model: 'isnet',
+      output: { format: 'image/png', quality: 1, type: 'foreground' },
+      progress: (key, current, total) => {
+        if (typeof current === 'number' && typeof total === 'number' && total > 0) {
+          const pct = Math.round((current / total) * 100);
+          setStatus(`加载资源: ${key} ${pct}%`);
+        } else {
+          setStatus(`加载资源: ${key}`);
+        }
+      }
+    };
+
+    if (!crossOriginIsolated) {
+      setStatus('提示：当前页面未 cross-origin isolated，速度可能较慢');
+    }
+
+    setStatus(device === 'gpu' ? '推理中（GPU/WebGPU）...' : '推理中（CPU）...');
+    return await removeBackground(file, config);
   }
 
   document.getElementById('bgEngine').addEventListener('change', () => {
-    resetEngine();
     setStatus('引擎已切换');
-  });
-
-  document.getElementById('bgInput').addEventListener('change', function () {
-    const f = this.files && this.files[0];
-    setStatus(f ? `已选择: ${f.name}` : '');
     document.getElementById('bgResult').style.display = 'none';
   });
 
-  window.preloadRemoveBgModel = ensureLoaded;
+  document.getElementById('bgInput').addEventListener('change', function () {
+    const files = Array.from(this.files || []);
+    if (files.length === 0) return;
 
-  window.processRemoveBg = async () => {
-    const file = document.getElementById('bgInput').files[0];
-    const btn = document.getElementById('bgProcessBtn');
-    if (!file) { setStatus('请上传图片'); return; }
+    files.forEach((f) => {
+      bgQueue.push({
+        file: f,
+        status: 'pending',
+        url: '',
+        outName: makeOutName(f.name)
+      });
+    });
 
-    btn.disabled = true;
-    btn.style.opacity = '0.7';
+    updateQueueUI();
+    setStatus(`已加入队列: ${files.length} 张`);
+    this.value = '';
+  });
+
+  window.startBgQueue = async () => {
+    if (bgRunning) return;
+    if (bgQueue.length === 0) {
+      setStatus('队列为空');
+      return;
+    }
+
+    bgRunning = true;
+    bgStopRequested = false;
 
     try {
-      const seg = await ensureLoaded();
-      setStatus('分析中...');
+      for (let i = 0; i < bgQueue.length; i++) {
+        if (bgStopRequested) break;
 
-      const image = await RawImage.fromBlob(file);
-      const result = await seg(image);
+        const item = bgQueue[i];
+        if (item.status !== 'pending') continue;
 
-      if (!Array.isArray(result) || result.length === 0) {
-        throw new Error('未得到分割结果');
+        item.status = 'processing';
+        updateQueueUI();
+
+        try {
+          const blob = await removeBackgroundOnce(item.file);
+          item.status = 'done';
+          item.url = URL.createObjectURL(blob);
+          setPreviewFromBlob(blob);
+          triggerDownload(item.url, item.outName);
+        } catch (e) {
+          item.status = 'error';
+          console.error(e);
+        }
+
+        updateQueueUI();
       }
 
-      let best = result[0];
-      for (const r of result) {
-        if ((r.score || 0) > (best.score || 0)) best = r;
-      }
-
-      if (!best.mask) throw new Error('分割结果缺少 mask');
-      let mask = best.mask;
-      if (mask.width !== image.width || mask.height !== image.height) {
-        mask = await mask.resize(image.width, image.height);
-      }
-
-      const output = await image.composite(mask, 'multiply');
-      const canvas = output.toCanvas();
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((b) => b ? resolve(b) : reject(new Error('导出 PNG 失败')), 'image/png');
-      });
-
-      if (lastObjectURL) URL.revokeObjectURL(lastObjectURL);
-      lastObjectURL = URL.createObjectURL(blob);
-
-      document.getElementById('bgOutput').src = lastObjectURL;
-      const dl = document.getElementById('bgDownload');
-      dl.href = lastObjectURL;
-      dl.download = 'no-bg.png';
-
-      document.getElementById('bgResult').style.display = 'block';
-      setStatus('处理成功（WebGPU 优先）');
-    } catch (e) {
-      setStatus('失败: ' + (e && e.message ? e.message : String(e)));
+      setStatus(bgStopRequested ? '已停止' : '队列处理完成');
     } finally {
-      btn.disabled = false;
-      btn.style.opacity = '1';
+      bgRunning = false;
     }
   };
+
+  window.stopBgQueue = () => {
+    bgStopRequested = true;
+    setStatus('已请求停止（当前图片处理完后停止）');
+  };
+
+  window.clearBgQueue = () => {
+    if (bgRunning) {
+      setStatus('处理中，无法清空');
+      return;
+    }
+
+    bgQueue.forEach((item) => {
+      if (item.url) URL.revokeObjectURL(item.url);
+    });
+    bgQueue = [];
+    updateQueueUI();
+    setStatus('队列已清空');
+    document.getElementById('bgResult').style.display = 'none';
+  };
+
+  window.processRemoveBg = () => window.startBgQueue();
+  window.preloadRemoveBgModel = preloadImgly;
+
+  updateQueueUI();
 </script>
 </body>
 </html>
+
