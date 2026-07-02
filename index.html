@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMNI-MATRIX V6 | 智能核心</title>
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
@@ -26,9 +27,10 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            width: 100%;
             color: #ddd;
-            padding: 20px;
-            padding-bottom: 80px;
+            padding: 16px;
+            padding-bottom: 16px;
         }
 
         .nav-deck {
@@ -36,9 +38,9 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             width: 100%;
-            max-width: 800px;
+            max-width: min(1400px, 100%);
         }
 
         .nav-btn {
@@ -70,6 +72,23 @@
             animation: fade 0.2s;
         }
         .container.active { display: block; }
+        .converter-home {
+            max-width: min(1400px, 100%);
+            min-height: calc(100vh - 128px);
+        }
+        #module-converter.active { display: flex; }
+        #module-converter {
+            flex-direction: column;
+        }
+        .converter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .converter-panel {
+            min-width: 0;
+        }
         @keyframes fade { from { opacity: 0.8; } to { opacity: 1; } }
 
         h1 {
@@ -87,10 +106,10 @@
         .section-title {
             color: #888;
             font-family: 'Share Tech Mono', monospace;
-            margin: 20px 0 10px 0;
+            margin: 0 0 10px 0;
             font-size: 0.9rem;
-            border-left: 2px solid var(--neon-cyan);
-            padding-left: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
         }
 
         .cyber-input {
@@ -152,7 +171,7 @@
         .control-btn { cursor: pointer; color: var(--neon-cyan); margin-left: 5px; }
         .file-controls { display: inline-flex; gap: 6px; }
 
-        .conversion-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .conversion-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
         .conversion-table th, .conversion-table td { text-align: left; padding: 8px; border-bottom: 1px solid #222; }
         .conversion-table th { color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 6px; width: 100%; }
@@ -169,8 +188,9 @@
         #bgOutput { max-width: 100%; border: 1px solid #333; margin-top: 10px; display: block; margin-left: auto; margin-right: auto; background: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23222"/><rect x="5" y="5" width="5" height="5" fill="%23222"/></svg>'); }
 
         footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: #000;
+            width: 100%; background: #000;
             border-top: 1px solid #333; text-align: center; padding: 10px;
+            margin-top: 12px;
             font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #666;
         }
     </style>
@@ -178,8 +198,8 @@
 <body>
 
     <div class="nav-deck">
-        <button class="nav-btn active" onclick="switchTab('pdf')">PDF 聚合</button>
-        <button class="nav-btn" onclick="switchTab('converter')">量子换算</button>
+        <button class="nav-btn active" onclick="switchTab('converter')">量子换算</button>
+        <button class="nav-btn" onclick="switchTab('pdf')">PDF 聚合</button>
         <button class="nav-btn" onclick="switchTab('image')">格式转换</button>
         <button class="nav-btn" onclick="switchTab('removebg')">背景移除</button>
         <button class="nav-btn" onclick="switchTab('chat')">AI 对话</button>
@@ -187,7 +207,7 @@
     </div>
 
     <!-- PDF 模块 -->
-    <div id="module-pdf" class="container active">
+    <div id="module-pdf" class="container">
         <h1>PDF 核心聚合</h1>
         <input type="text" id="pdfFileName" class="cyber-input" value="说明书" placeholder="输入输出文件名">
         <div class="upload-area">
@@ -201,69 +221,76 @@
     </div>
 
     <!-- 量子换算模块 -->
-    <div id="module-converter" class="container">
+    <div id="module-converter" class="container converter-home active">
         <h1>量子换算系统</h1>
 
-        <div class="section-title">重量 Mass</div>
-        <table class="conversion-table">
-            <tr><th colspan="2">公制 Metric</th></tr>
-            <tr><td>吨 Tonne (t)</td><td><input type="number" class="mass-input" data-unit="t" oninput="convertMass()"></td></tr>
-            <tr><td>千克 Kilogram (kg)</td><td><input type="number" class="mass-input" data-unit="kg" oninput="convertMass()"></td></tr>
-            <tr><td>克 Gram (g)</td><td><input type="number" class="mass-input" data-unit="g" oninput="convertMass()"></td></tr>
-            <tr><td>毫克 Milligram (mg)</td><td><input type="number" class="mass-input" data-unit="mg" oninput="convertMass()"></td></tr>
+        <div class="converter-grid">
+            <div class="converter-panel">
+                <div class="section-title">尺寸 Dimension</div>
+                <table class="conversion-table">
+                    <tr><th colspan="2">公制 Metric</th></tr>
+                    <tr><td>千米 Kilometer (km)</td><td><input type="number" class="len-input" data-unit="km" oninput="convertLength()"></td></tr>
+                    <tr><td>米 Meter (m)</td><td><input type="number" class="len-input" data-unit="m" oninput="convertLength()"></td></tr>
+                    <tr><td>厘米 Centimeter (cm)</td><td><input type="number" class="len-input" data-unit="cm" oninput="convertLength()"></td></tr>
+                    <tr><td>毫米 Millimeter (mm)</td><td><input type="number" class="len-input" data-unit="mm" oninput="convertLength()"></td></tr>
 
-            <tr><th colspan="2">美制 US</th></tr>
-            <tr><td>磅 Pound (lb)</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
-            <tr><td>盎司 Ounce (oz)</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
-            <tr><td>短吨 US short ton (ton)</td><td><input type="number" class="mass-input" data-unit="ton_us" oninput="convertMass()"></td></tr>
+                    <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
+                    <tr><td>英寸 Inch (in)</td><td><input type="number" class="len-input" data-unit="in" oninput="convertLength()"></td></tr>
+                    <tr><td>英尺 Foot (ft)</td><td><input type="number" class="len-input" data-unit="ft" oninput="convertLength()"></td></tr>
+                    <tr><td>码 Yard (yd)</td><td><input type="number" class="len-input" data-unit="yd" oninput="convertLength()"></td></tr>
+                    <tr><td>英里 Mile (mi)</td><td><input type="number" class="len-input" data-unit="mi" oninput="convertLength()"></td></tr>
+                    <tr><td>海里 Nautical mile (nmi)</td><td><input type="number" class="len-input" data-unit="nmi" oninput="convertLength()"></td></tr>
+                </table>
+            </div>
 
-            <tr><th colspan="2">英制 Imperial</th></tr>
-            <tr><td>英石 Stone (st)</td><td><input type="number" class="mass-input" data-unit="st" oninput="convertMass()"></td></tr>
-            <tr><td>长吨 UK long ton (ton)</td><td><input type="number" class="mass-input" data-unit="ton_uk" oninput="convertMass()"></td></tr>
-        </table>
+            <div class="converter-panel">
+                <div class="section-title">重量 Mass</div>
+                <table class="conversion-table">
+                    <tr><th colspan="2">公制 Metric</th></tr>
+                    <tr><td>千克 Kilogram (kg)</td><td><input type="number" class="mass-input" data-unit="kg" oninput="convertMass()"></td></tr>
+                    <tr><td>克 Gram (g)</td><td><input type="number" class="mass-input" data-unit="g" oninput="convertMass()"></td></tr>
+                    <tr><td>毫克 Milligram (mg)</td><td><input type="number" class="mass-input" data-unit="mg" oninput="convertMass()"></td></tr>
 
-        <div class="section-title">体积 Volume</div>
-        <table class="conversion-table">
-            <tr><th colspan="2">公制 Metric</th></tr>
-            <tr><td>立方米 Cubic meter (m3)</td><td><input type="number" class="vol-input" data-unit="m3" oninput="convertVolume()"></td></tr>
-            <tr><td>升 Liter (L)</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
-            <tr><td>毫升 Milliliter (mL)</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
+                    <tr><th colspan="2">美制 US</th></tr>
+                    <tr><td>磅 Pound (lb)</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
+                    <tr><td>盎司 Ounce (oz)</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
 
-            <tr><th colspan="2">美制 US</th></tr>
-            <tr><td>美制加仑 US gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
-            <tr><td>美制夸脱 US quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
-            <tr><td>美制品脱 US pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
-            <tr><td>美制液盎司 US fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
+                    <tr><th colspan="2">英制 Imperial</th></tr>
+                    <tr><td>英石 Stone (st)</td><td><input type="number" class="mass-input" data-unit="st" oninput="convertMass()"></td></tr>
+                </table>
+            </div>
 
-            <tr><th colspan="2">英制 Imperial</th></tr>
-            <tr><td>英制加仑 Imperial gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
-            <tr><td>英制夸脱 Imperial quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
-            <tr><td>英制品脱 Imperial pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
-            <tr><td>英制液盎司 Imperial fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
-        </table>
+            <div class="converter-panel">
+                <div class="section-title">体积 Volume</div>
+                <table class="conversion-table">
+                    <tr><th colspan="2">公制 Metric</th></tr>
+                    <tr><td>立方米 Cubic meter (m3)</td><td><input type="number" class="vol-input" data-unit="m3" oninput="convertVolume()"></td></tr>
+                    <tr><td>升 Liter (L)</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
+                    <tr><td>毫升 Milliliter (mL)</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
 
-        <div class="section-title">长度 Length</div>
-        <table class="conversion-table">
-            <tr><th colspan="2">公制 Metric</th></tr>
-            <tr><td>千米 Kilometer (km)</td><td><input type="number" class="len-input" data-unit="km" oninput="convertLength()"></td></tr>
-            <tr><td>米 Meter (m)</td><td><input type="number" class="len-input" data-unit="m" oninput="convertLength()"></td></tr>
-            <tr><td>厘米 Centimeter (cm)</td><td><input type="number" class="len-input" data-unit="cm" oninput="convertLength()"></td></tr>
-            <tr><td>毫米 Millimeter (mm)</td><td><input type="number" class="len-input" data-unit="mm" oninput="convertLength()"></td></tr>
+                    <tr><th colspan="2">美制 US</th></tr>
+                    <tr><td>美制加仑 US gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制夸脱 US quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制品脱 US pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制液盎司 US fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
 
-            <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
-            <tr><td>英寸 Inch (in)</td><td><input type="number" class="len-input" data-unit="in" oninput="convertLength()"></td></tr>
-            <tr><td>英尺 Foot (ft)</td><td><input type="number" class="len-input" data-unit="ft" oninput="convertLength()"></td></tr>
-            <tr><td>码 Yard (yd)</td><td><input type="number" class="len-input" data-unit="yd" oninput="convertLength()"></td></tr>
-            <tr><td>英里 Mile (mi)</td><td><input type="number" class="len-input" data-unit="mi" oninput="convertLength()"></td></tr>
-            <tr><td>海里 Nautical mile (nmi)</td><td><input type="number" class="len-input" data-unit="nmi" oninput="convertLength()"></td></tr>
-        </table>
+                    <tr><th colspan="2">英制 Imperial</th></tr>
+                    <tr><td>英制加仑 Imperial gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制夸脱 Imperial quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制品脱 Imperial pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制液盎司 Imperial fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
+                </table>
+            </div>
 
-        <div class="section-title">温度 Temperature</div>
-        <table class="conversion-table">
-            <tr><td>摄氏 Celsius (C)</td><td><input type="number" class="temp-input" data-unit="c" oninput="convertTemperature()"></td></tr>
-            <tr><td>华氏 Fahrenheit (F)</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
-            <tr><td>开尔文 Kelvin (K)</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
-        </table>
+            <div class="converter-panel">
+                <div class="section-title">温度 Temperature</div>
+                <table class="conversion-table">
+                    <tr><td>摄氏 Celsius (C)</td><td><input type="number" class="temp-input" data-unit="c" oninput="convertTemperature()"></td></tr>
+                    <tr><td>华氏 Fahrenheit (F)</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
+                    <tr><td>开尔文 Kelvin (K)</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- 格式转换 -->
@@ -394,7 +421,7 @@
         document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('module-' + name).classList.add('active');
-        const index = ['pdf','converter','image','removebg','chat','currency'].indexOf(name);
+        const index = ['converter','pdf','image','removebg','chat','currency'].indexOf(name);
         if(index >= 0) document.querySelectorAll('.nav-btn')[index].classList.add('active');
         if(name === 'currency' && Object.keys(liveRates).length === 0) fetchRates();
         if(name === 'removebg' && window.preloadRemoveBgModel) window.preloadRemoveBgModel();
@@ -507,15 +534,12 @@
     }
 
     const MASS = {
-        t: 1000,
         kg: 1,
         g: 0.001,
         mg: 0.000001,
         lb: 0.45359237,
         oz: 0.028349523125,
-        st: 6.35029318,
-        ton_us: 907.18474,
-        ton_uk: 1016.0469088
+        st: 6.35029318
     };
 
     const VOL = {
