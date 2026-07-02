@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import vm from 'node:vm';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
@@ -45,4 +46,58 @@ test('converter layout uses a wide responsive grid instead of a narrow single co
   assert.match(html, /grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(260px,\s*1fr\)\)/);
   assert.match(html, /max-width:\s*min\(1400px,\s*100%\)/);
   assert.doesNotMatch(html, /footer\s*\{[^}]*position:\s*fixed/s);
+});
+
+function extractFunctionSource(name) {
+  const start = html.indexOf(`function ${name}`);
+  assert.notEqual(start, -1, `Missing function ${name}`);
+
+  const openBrace = html.indexOf('{', start);
+  let depth = 0;
+  for (let i = openBrace; i < html.length; i += 1) {
+    const char = html[i];
+    if (char === '{') depth += 1;
+    if (char === '}') depth -= 1;
+    if (depth === 0) return html.slice(start, i + 1);
+  }
+
+  assert.fail(`Could not extract function ${name}`);
+}
+
+function loadDimensionHelpers() {
+  const code = [
+    extractFunctionSource('fmtNumber'),
+    extractFunctionSource('parseDimensionInput'),
+    extractFunctionSource('convertDimensionValue'),
+    '({ parseDimensionInput, convertDimensionValue })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
+test('dimension inputs accept multi-part text values', () => {
+  const lengthInputs = html.match(/<input[^>]+class="len-input"[^>]+>/g) ?? [];
+  assert.equal(lengthInputs.length, 9);
+
+  for (const input of lengthInputs) {
+    assert.match(input, /type="text"/);
+    assert.match(input, /inputmode="decimal"/);
+    assert.match(input, /placeholder="11x11x11"/);
+  }
+});
+
+test('dimension conversion handles x and star separated values', () => {
+  const { parseDimensionInput, convertDimensionValue } = loadDimensionHelpers();
+  const normalize = value => JSON.parse(JSON.stringify(value));
+
+  assert.deepEqual(normalize(parseDimensionInput('11x11x11')), {
+    values: [11, 11, 11],
+    separator: 'x',
+  });
+  assert.deepEqual(normalize(parseDimensionInput('11 * 12 * 13')), {
+    values: [11, 12, 13],
+    separator: '*',
+  });
+  assert.equal(convertDimensionValue('11x11x11', 0.0254, 0.01), '27.94x27.94x27.94');
+  assert.equal(convertDimensionValue('11*12*13', 0.0254, 0.01), '27.94*30.48*33.02');
+  assert.equal(convertDimensionValue('11', 0.0254, 0.01), '27.94');
 });

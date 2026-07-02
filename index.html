@@ -229,17 +229,17 @@
                 <div class="section-title">尺寸 Dimension</div>
                 <table class="conversion-table">
                     <tr><th colspan="2">公制 Metric</th></tr>
-                    <tr><td>千米 Kilometer (km)</td><td><input type="number" class="len-input" data-unit="km" oninput="convertLength()"></td></tr>
-                    <tr><td>米 Meter (m)</td><td><input type="number" class="len-input" data-unit="m" oninput="convertLength()"></td></tr>
-                    <tr><td>厘米 Centimeter (cm)</td><td><input type="number" class="len-input" data-unit="cm" oninput="convertLength()"></td></tr>
-                    <tr><td>毫米 Millimeter (mm)</td><td><input type="number" class="len-input" data-unit="mm" oninput="convertLength()"></td></tr>
+                    <tr><td>千米 Kilometer (km)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>米 Meter (m)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="m" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>厘米 Centimeter (cm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="cm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>毫米 Millimeter (mm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
 
                     <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
-                    <tr><td>英寸 Inch (in)</td><td><input type="number" class="len-input" data-unit="in" oninput="convertLength()"></td></tr>
-                    <tr><td>英尺 Foot (ft)</td><td><input type="number" class="len-input" data-unit="ft" oninput="convertLength()"></td></tr>
-                    <tr><td>码 Yard (yd)</td><td><input type="number" class="len-input" data-unit="yd" oninput="convertLength()"></td></tr>
-                    <tr><td>英里 Mile (mi)</td><td><input type="number" class="len-input" data-unit="mi" oninput="convertLength()"></td></tr>
-                    <tr><td>海里 Nautical mile (nmi)</td><td><input type="number" class="len-input" data-unit="nmi" oninput="convertLength()"></td></tr>
+                    <tr><td>英寸 Inch (in)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="in" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>英尺 Foot (ft)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="ft" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>码 Yard (yd)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>英里 Mile (mi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>海里 Nautical mile (nmi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                 </table>
             </div>
 
@@ -533,6 +533,48 @@
         });
     }
 
+    function parseDimensionInput(value) {
+        const trimmed = value.trim();
+        if (!trimmed) return null;
+
+        const separatorMatch = trimmed.match(/[xX×*]/);
+        const separator = separatorMatch ? separatorMatch[0] : "";
+        const parts = trimmed.split(/\s*[xX×*]\s*/);
+        if (parts.some(part => part.trim() === "")) return null;
+
+        const values = parts.map(part => Number(part.trim()));
+        if (values.some(number => !Number.isFinite(number))) return null;
+
+        return {
+            values,
+            separator: separator === "X" || separator === "×" ? "x" : separator
+        };
+    }
+
+    function convertDimensionValue(value, sourceFactor, targetFactor) {
+        const parsed = parseDimensionInput(value);
+        if (!parsed) return "";
+
+        return parsed.values
+            .map(part => fmtNumber((part * sourceFactor) / targetFactor))
+            .join(parsed.separator);
+    }
+
+    function convertLengthValues() {
+        const inputs = Array.from(document.querySelectorAll('.len-input'));
+        const activeEl = document.activeElement;
+        const sourceEl = inputs.find(el => el === activeEl && parseDimensionInput(el.value)) ||
+            inputs.find(el => parseDimensionInput(el.value));
+        if (!sourceEl) return;
+
+        const sourceUnit = sourceEl.dataset.unit;
+        inputs.forEach(input => {
+            if (input === activeEl) return;
+            const unit = input.dataset.unit;
+            input.value = convertDimensionValue(sourceEl.value, LEN[sourceUnit], LEN[unit]);
+        });
+    }
+
     const MASS = {
         kg: 1,
         g: 0.001,
@@ -570,7 +612,7 @@
 
     window.convertMass = () => convertByFactor('.mass-input', MASS);
     window.convertVolume = () => convertByFactor('.vol-input', VOL);
-    window.convertLength = () => convertByFactor('.len-input', LEN);
+    window.convertLength = convertLengthValues;
 
     window.convertTemperature = () => {
         const inputs = Array.from(document.querySelectorAll('.temp-input'));
