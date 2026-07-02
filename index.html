@@ -255,8 +255,6 @@
                     <tr><td>磅 Pound (lb)</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
                     <tr><td>盎司 Ounce (oz)</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
 
-                    <tr><th colspan="2">英制 Imperial</th></tr>
-                    <tr><td>英石 Stone (st)</td><td><input type="number" class="mass-input" data-unit="st" oninput="convertMass()"></td></tr>
                 </table>
             </div>
 
@@ -510,8 +508,8 @@
     /* --- 量子换算 --- */
     function fmtNumber(n) {
         if (!Number.isFinite(n)) return "";
-        let s = n.toFixed(8);
-        s = s.replace(/\.?0+$/g, "");
+        let s = n.toFixed(2);
+        s = s.replace(/\.00$/g, "");
         return s;
     }
 
@@ -580,8 +578,7 @@
         g: 0.001,
         mg: 0.000001,
         lb: 0.45359237,
-        oz: 0.028349523125,
-        st: 6.35029318
+        oz: 0.028349523125
     };
 
     const VOL = {

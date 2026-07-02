@@ -39,6 +39,12 @@ test('ton-level mass units are removed from visible inputs and conversion data',
   }
 });
 
+test('stone mass unit is removed from visible inputs and conversion data', () => {
+  for (const forbidden of ['data-unit="st"', '英石', 'Stone (st)', 'st:']) {
+    assert.doesNotMatch(html, new RegExp(forbidden.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});
+
 test('converter layout uses a wide responsive grid instead of a narrow single column', () => {
   assert.match(html, /\.container\.active\s*\{\s*display:\s*block;\s*\}/);
   assert.match(html, /#module-converter\.active\s*\{\s*display:\s*flex;\s*\}/);
@@ -74,6 +80,14 @@ function loadDimensionHelpers() {
   return vm.runInNewContext(code);
 }
 
+function loadNumberFormatter() {
+  const code = [
+    extractFunctionSource('fmtNumber'),
+    '({ fmtNumber })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
 test('dimension inputs accept multi-part text values', () => {
   const lengthInputs = html.match(/<input[^>]+class="len-input"[^>]+>/g) ?? [];
   assert.equal(lengthInputs.length, 9);
@@ -100,4 +114,12 @@ test('dimension conversion handles x and star separated values', () => {
   assert.equal(convertDimensionValue('11x11x11', 0.0254, 0.01), '27.94x27.94x27.94');
   assert.equal(convertDimensionValue('11*12*13', 0.0254, 0.01), '27.94*30.48*33.02');
   assert.equal(convertDimensionValue('11', 0.0254, 0.01), '27.94');
+});
+
+test('converter numbers keep at most two decimal places', () => {
+  const { fmtNumber } = loadNumberFormatter();
+
+  assert.equal(fmtNumber(1 / 3), '0.33');
+  assert.equal(fmtNumber(2), '2');
+  assert.equal(fmtNumber(2.1), '2.10');
 });
