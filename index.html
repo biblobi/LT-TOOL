@@ -176,6 +176,59 @@
         .conversion-table th { color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 6px; width: 100%; }
 
+        .cargo-check {
+            margin-top: 16px;
+            border: 1px solid #222;
+            background: #0b0b0b;
+            padding: 12px;
+        }
+        .cargo-title { margin-bottom: 12px; }
+        .cargo-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .cargo-fields label {
+            display: grid;
+            gap: 6px;
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+        .cargo-fields input {
+            border: 1px solid #333;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            width: 100%;
+        }
+        .cargo-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 12px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+        .cargo-summary div {
+            border-bottom: 1px solid #1f1f1f;
+            padding-bottom: 6px;
+        }
+        .cargo-summary span {
+            color: var(--neon-cyan);
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .cargo-note {
+            margin: 10px 0 0 0;
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 520px) {
+            .cargo-fields,
+            .cargo-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .currency-display {
             background: #000; border: 1px solid var(--neon-green);
             padding: 15px; margin-top: 15px; text-align: center;
@@ -241,6 +294,27 @@
                     <tr><td>英里 Mile (mi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>海里 Nautical mile (nmi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                 </table>
+
+                <div class="cargo-check">
+                    <div class="section-title cargo-title">重货/抛货判断</div>
+                    <div class="cargo-fields">
+                        <label>
+                            尺寸 cm
+                            <input id="cargoDimensionInput" type="text" inputmode="decimal" placeholder="11*11*11cm" oninput="updateCargoCheck()">
+                        </label>
+                        <label>
+                            实重 kg
+                            <input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="updateCargoCheck()">
+                        </label>
+                    </div>
+                    <div class="cargo-summary">
+                        <div>体积 cm3：<span id="cargoVolumeValue">-</span></div>
+                        <div>体积重 kg：<span id="cargoVolumeWeightValue">-</span></div>
+                        <div>计费重 kg：<span id="cargoChargeableWeightValue">-</span></div>
+                        <div>判断：<span id="cargoTypeValue">-</span></div>
+                    </div>
+                    <p class="cargo-note">体积系数 5000</p>
+                </div>
             </div>
 
             <div class="converter-panel">
@@ -529,6 +603,8 @@
             const unit = input.dataset.unit;
             input.value = fmtNumber(baseVal / factorToBase[unit]);
         });
+
+        if (selector === '.mass-input') syncCargoWeightFromKg(baseVal);
     }
 
     function parseDimensionInput(value) {
@@ -558,6 +634,101 @@
             .join(parsed.separator);
     }
 
+    function parseBoxDimensions(value) {
+        const trimmed = String(value || "").trim();
+        if (!trimmed) return null;
+
+        const parts = trimmed.split(/\s*[xX×*]\s*/);
+        if (parts.length !== 3 || parts.some(part => part.trim() === "")) return null;
+
+        const values = parts.map(part => {
+            const cleaned = part.trim().replace(/\s*(?:cm|厘米)\s*$/i, "");
+            return Number(cleaned);
+        });
+        if (values.some(number => !Number.isFinite(number) || number <= 0)) return null;
+
+        return values;
+    }
+
+    function calculateCargoMetrics(dimensionValue, weightValue) {
+        const dimensions = parseBoxDimensions(dimensionValue);
+        const actualWeightRaw = Number(weightValue);
+        if (!dimensions || !Number.isFinite(actualWeightRaw) || actualWeightRaw <= 0) return null;
+
+        const roundToNumber = number => Number(fmtNumber(number));
+        const volumeRaw = dimensions.reduce((total, part) => total * part, 1);
+        const volumeCm3 = roundToNumber(volumeRaw);
+        const volumeWeightKg = roundToNumber(volumeRaw / 5000);
+        const actualWeightKg = roundToNumber(actualWeightRaw);
+        const chargeableWeightKg = roundToNumber(Math.max(actualWeightKg, volumeWeightKg));
+
+        return {
+            dimensions,
+            volumeCm3,
+            volumeWeightKg,
+            actualWeightKg,
+            chargeableWeightKg,
+            cargoType: volumeWeightKg > actualWeightKg ? '抛货' : '重货'
+        };
+    }
+
+    function setCargoText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+
+    function resetCargoCheck() {
+        setCargoText('cargoVolumeValue', '-');
+        setCargoText('cargoVolumeWeightValue', '-');
+        setCargoText('cargoChargeableWeightValue', '-');
+        setCargoText('cargoTypeValue', '-');
+    }
+
+    function updateCargoCheck() {
+        const dimensionEl = document.getElementById('cargoDimensionInput');
+        const weightEl = document.getElementById('cargoWeightInput');
+        if (!dimensionEl || !weightEl) return;
+
+        const dimensions = parseBoxDimensions(dimensionEl.value);
+        if (!dimensions) {
+            resetCargoCheck();
+            return;
+        }
+
+        const volumeRaw = dimensions.reduce((total, part) => total * part, 1);
+        setCargoText('cargoVolumeValue', fmtNumber(volumeRaw));
+        setCargoText('cargoVolumeWeightValue', fmtNumber(volumeRaw / 5000));
+
+        const metrics = calculateCargoMetrics(dimensionEl.value, weightEl.value);
+        if (!metrics) {
+            setCargoText('cargoChargeableWeightValue', '-');
+            setCargoText('cargoTypeValue', '-');
+            return;
+        }
+
+        setCargoText('cargoChargeableWeightValue', fmtNumber(metrics.chargeableWeightKg));
+        setCargoText('cargoTypeValue', metrics.cargoType);
+    }
+
+    function syncCargoDimensionFromLength(value, sourceUnit) {
+        const dimensionEl = document.getElementById('cargoDimensionInput');
+        if (!dimensionEl) return;
+
+        const cmValue = convertDimensionValue(value, LEN[sourceUnit], LEN.cm);
+        if (!parseBoxDimensions(cmValue)) return;
+
+        dimensionEl.value = cmValue;
+        updateCargoCheck();
+    }
+
+    function syncCargoWeightFromKg(weightKg) {
+        const weightEl = document.getElementById('cargoWeightInput');
+        if (!weightEl || !Number.isFinite(weightKg)) return;
+
+        weightEl.value = fmtNumber(weightKg);
+        updateCargoCheck();
+    }
+
     function convertLengthValues() {
         const inputs = Array.from(document.querySelectorAll('.len-input'));
         const activeEl = document.activeElement;
@@ -571,6 +742,8 @@
             const unit = input.dataset.unit;
             input.value = convertDimensionValue(sourceEl.value, LEN[sourceUnit], LEN[unit]);
         });
+
+        syncCargoDimensionFromLength(sourceEl.value, sourceUnit);
     }
 
     const MASS = {
@@ -610,6 +783,7 @@
     window.convertMass = () => convertByFactor('.mass-input', MASS);
     window.convertVolume = () => convertByFactor('.vol-input', VOL);
     window.convertLength = convertLengthValues;
+    window.updateCargoCheck = updateCargoCheck;
 
     window.convertTemperature = () => {
         const inputs = Array.from(document.querySelectorAll('.temp-input'));

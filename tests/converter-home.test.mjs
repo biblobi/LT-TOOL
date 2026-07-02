@@ -80,6 +80,17 @@ function loadDimensionHelpers() {
   return vm.runInNewContext(code);
 }
 
+function loadCargoHelpers() {
+  const code = [
+    extractFunctionSource('fmtNumber'),
+    extractFunctionSource('parseDimensionInput'),
+    extractFunctionSource('parseBoxDimensions'),
+    extractFunctionSource('calculateCargoMetrics'),
+    '({ parseBoxDimensions, calculateCargoMetrics })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
 function loadNumberFormatter() {
   const code = [
     extractFunctionSource('fmtNumber'),
@@ -122,4 +133,47 @@ test('converter numbers keep at most two decimal places', () => {
   assert.equal(fmtNumber(1 / 3), '0.33');
   assert.equal(fmtNumber(2), '2');
   assert.equal(fmtNumber(2.1), '2.10');
+});
+
+test('cargo checker UI accepts dimensions and actual weight', () => {
+  for (const required of [
+    '重货/抛货判断',
+    'id="cargoDimensionInput"',
+    'id="cargoWeightInput"',
+    'id="cargoVolumeValue"',
+    'id="cargoVolumeWeightValue"',
+    'id="cargoTypeValue"',
+    '体积系数 5000',
+  ]) {
+    assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});
+
+test('cargo checker calculates volume weight and cargo type from cm dimensions', () => {
+  const { parseBoxDimensions, calculateCargoMetrics } = loadCargoHelpers();
+  const normalize = value => JSON.parse(JSON.stringify(value));
+
+  assert.deepEqual(normalize(parseBoxDimensions('11*11*11')), [11, 11, 11]);
+  assert.deepEqual(normalize(parseBoxDimensions('11*11*11cm')), [11, 11, 11]);
+  assert.deepEqual(normalize(parseBoxDimensions('11cm*12cm*13cm')), [11, 12, 13]);
+  assert.deepEqual(normalize(parseBoxDimensions('11 x 12 x 13')), [11, 12, 13]);
+  assert.equal(parseBoxDimensions('11x11'), null);
+
+  assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '0.10')), {
+    dimensions: [11, 11, 11],
+    volumeCm3: 1331,
+    volumeWeightKg: 0.27,
+    actualWeightKg: 0.1,
+    chargeableWeightKg: 0.27,
+    cargoType: '抛货',
+  });
+
+  assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '1')), {
+    dimensions: [11, 11, 11],
+    volumeCm3: 1331,
+    volumeWeightKg: 0.27,
+    actualWeightKg: 1,
+    chargeableWeightKg: 1,
+    cargoType: '重货',
+  });
 });
