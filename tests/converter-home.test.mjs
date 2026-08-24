@@ -73,6 +73,7 @@ function extractFunctionSource(name) {
 function loadDimensionHelpers() {
   const code = [
     extractFunctionSource('fmtNumber'),
+    extractFunctionSource('parseFractionNumber'),
     extractFunctionSource('parseDimensionInput'),
     extractFunctionSource('convertDimensionValue'),
     '({ parseDimensionInput, convertDimensionValue })',
@@ -83,10 +84,21 @@ function loadDimensionHelpers() {
 function loadCargoHelpers() {
   const code = [
     extractFunctionSource('fmtNumber'),
+    extractFunctionSource('parseFractionNumber'),
     extractFunctionSource('parseDimensionInput'),
     extractFunctionSource('parseBoxDimensions'),
     extractFunctionSource('calculateCargoMetrics'),
     '({ parseBoxDimensions, calculateCargoMetrics })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
+function loadFbaHelpers() {
+  const code = [
+    extractFunctionSource('getFbaSizeTier'),
+    extractFunctionSource('estimateFbaFee'),
+    extractFunctionSource('calculateFbaMetrics'),
+    '({ getFbaSizeTier, estimateFbaFee, calculateFbaMetrics })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -125,6 +137,8 @@ test('dimension conversion handles x and star separated values', () => {
   assert.equal(convertDimensionValue('11x11x11', 0.0254, 0.01), '27.94x27.94x27.94');
   assert.equal(convertDimensionValue('11*12*13', 0.0254, 0.01), '27.94*30.48*33.02');
   assert.equal(convertDimensionValue('11', 0.0254, 0.01), '27.94');
+  assert.equal(convertDimensionValue('1/3', 0.0254, 0.01), '0.85');
+  assert.equal(convertDimensionValue('1 1/2x2/3x3', 0.0254, 0.01), '3.81x1.69x7.62');
 });
 
 test('converter numbers keep at most two decimal places', () => {
@@ -143,7 +157,11 @@ test('cargo checker UI accepts dimensions and actual weight', () => {
     'id="cargoVolumeValue"',
     'id="cargoVolumeWeightValue"',
     'id="cargoTypeValue"',
-    '体积系数 5000',
+    'id="cargoDivisorInput"',
+    'value="6000"',
+    'Amazon FBA · 2026 美国站估算',
+    'id="fbaTierValue"',
+    'id="fbaFeeValue"',
   ]) {
     assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -162,18 +180,46 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
   assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '0.10')), {
     dimensions: [11, 11, 11],
     volumeCm3: 1331,
-    volumeWeightKg: 0.27,
+    volumeWeightKg: 0.22,
     actualWeightKg: 0.1,
-    chargeableWeightKg: 0.27,
+    chargeableWeightKg: 0.22,
     cargoType: '抛货',
   });
 
   assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '1')), {
     dimensions: [11, 11, 11],
     volumeCm3: 1331,
-    volumeWeightKg: 0.27,
+    volumeWeightKg: 0.22,
     actualWeightKg: 1,
     chargeableWeightKg: 1,
     cargoType: '重货',
   });
+
+  assert.equal(calculateCargoMetrics('11*11*11', '0.10', '5000').volumeWeightKg, 0.27);
+});
+
+test('low-frequency distance units are grouped in a collapsible section', () => {
+  assert.match(html, /<details class="optional-units">/);
+  assert.match(html, /展开低频单位：千米 \/ 码 \/ 英里 \/ 海里/);
+});
+
+test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () => {
+  const { getFbaSizeTier, estimateFbaFee, calculateFbaMetrics } = loadFbaHelpers();
+
+  assert.equal(getFbaSizeTier([18, 14, 8], 20), '标准件');
+  assert.equal(getFbaSizeTier([19, 14, 8], 20), '大号大件');
+  assert.equal(getFbaSizeTier([59, 33, 33], 50), '超大件'); // length + girth exceeds 130 in
+  assert.equal(getFbaSizeTier([50, 20, 15], 50), '大号大件');
+  assert.equal(getFbaSizeTier([50, 20, 15], 51), '超大件');
+
+  assert.equal(estimateFbaFee('标准件', 0.25), 3.68);
+  assert.equal(estimateFbaFee('标准件', 3), 6.28);
+  assert.equal(estimateFbaFee('标准件', 3.1), 6.96);
+  assert.equal(estimateFbaFee('大号大件', 2), 9.99);
+  assert.equal(estimateFbaFee('超大件', 51), 40.12);
+
+  const fba = calculateFbaMetrics([45.72, 35.56, 20.32], 9.0718474);
+  assert.equal(fba.tier, '标准件');
+  assert.equal(Math.round(fba.weightLb), 20);
+  assert.equal(fba.fee, 19.5);
 });

@@ -175,6 +175,15 @@
         .conversion-table th, .conversion-table td { text-align: left; padding: 8px; border-bottom: 1px solid #222; }
         .conversion-table th { color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 6px; width: 100%; }
+        .optional-units summary {
+            cursor: pointer;
+            color: #777;
+            font-size: 0.78rem;
+            padding: 9px 8px;
+            border-bottom: 1px solid #222;
+        }
+        .optional-units summary:hover { color: var(--neon-cyan); }
+        .optional-units table { margin: 0; }
 
         .cargo-check {
             margin-top: 16px;
@@ -185,7 +194,7 @@
         .cargo-title { margin-bottom: 12px; }
         .cargo-fields {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
         }
         .cargo-fields label {
@@ -220,6 +229,17 @@
             margin: 10px 0 0 0;
             color: #666;
             font-size: 0.75rem;
+        }
+        .fba-summary {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #292929;
+        }
+        .fba-heading {
+            color: #aaa;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 9px;
         }
 
         @media (max-width: 520px) {
@@ -282,7 +302,6 @@
                 <div class="section-title">尺寸 Dimension</div>
                 <table class="conversion-table">
                     <tr><th colspan="2">公制 Metric</th></tr>
-                    <tr><td>千米 Kilometer (km)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>米 Meter (m)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="m" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>厘米 Centimeter (cm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="cm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>毫米 Millimeter (mm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
@@ -290,10 +309,16 @@
                     <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
                     <tr><td>英寸 Inch (in)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="in" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>英尺 Foot (ft)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="ft" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>码 Yard (yd)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>英里 Mile (mi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>海里 Nautical mile (nmi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                 </table>
+                <details class="optional-units">
+                    <summary>展开低频单位：千米 / 码 / 英里 / 海里</summary>
+                    <table class="conversion-table">
+                        <tr><td>千米 Kilometer (km)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>码 Yard (yd)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>英里 Mile (mi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>海里 Nautical mile (nmi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    </table>
+                </details>
 
                 <div class="cargo-check">
                     <div class="section-title cargo-title">重货/抛货判断</div>
@@ -306,6 +331,10 @@
                             实重 kg
                             <input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="updateCargoCheck()">
                         </label>
+                        <label>
+                            体积系数
+                            <input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()">
+                        </label>
                     </div>
                     <div class="cargo-summary">
                         <div>体积 cm3：<span id="cargoVolumeValue">-</span></div>
@@ -313,7 +342,16 @@
                         <div>计费重 kg：<span id="cargoChargeableWeightValue">-</span></div>
                         <div>判断：<span id="cargoTypeValue">-</span></div>
                     </div>
-                    <p class="cargo-note">体积系数 5000</p>
+                    <div class="fba-summary">
+                        <div class="fba-heading">Amazon FBA · 2026 美国站估算</div>
+                        <div class="cargo-summary">
+                            <div>包装尺寸 in：<span id="fbaDimensionsValue">-</span></div>
+                            <div>实重 lb：<span id="fbaWeightValue">-</span></div>
+                            <div>尺寸等级：<span id="fbaTierValue">-</span></div>
+                            <div>配送费：<span id="fbaFeeValue">-</span></div>
+                        </div>
+                    </div>
+                    <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
                 </div>
             </div>
 
@@ -616,13 +654,34 @@
         const parts = trimmed.split(/\s*[xX×*]\s*/);
         if (parts.some(part => part.trim() === "")) return null;
 
-        const values = parts.map(part => Number(part.trim()));
+        const values = parts.map(part => parseFractionNumber(part));
         if (values.some(number => !Number.isFinite(number))) return null;
 
         return {
             values,
             separator: separator === "X" || separator === "×" ? "x" : separator
         };
+    }
+
+    function parseFractionNumber(value) {
+        const normalized = String(value || "").trim();
+        if (!normalized) return NaN;
+
+        const mixed = normalized.match(/^([+-]?\d+)\s+(\d+)\s*\/\s*(\d+)$/);
+        if (mixed) {
+            const whole = Number(mixed[1]);
+            const numerator = Number(mixed[2]);
+            const denominator = Number(mixed[3]);
+            if (denominator === 0) return NaN;
+            return whole < 0 ? whole - numerator / denominator : whole + numerator / denominator;
+        }
+
+        const fraction = normalized.match(/^([+-]?\d+)\s*\/\s*(\d+)$/);
+        if (fraction) {
+            const denominator = Number(fraction[2]);
+            return denominator === 0 ? NaN : Number(fraction[1]) / denominator;
+        }
+        return Number(normalized);
     }
 
     function convertDimensionValue(value, sourceFactor, targetFactor) {
@@ -650,15 +709,16 @@
         return values;
     }
 
-    function calculateCargoMetrics(dimensionValue, weightValue) {
+    function calculateCargoMetrics(dimensionValue, weightValue, divisorValue = 6000) {
         const dimensions = parseBoxDimensions(dimensionValue);
         const actualWeightRaw = Number(weightValue);
-        if (!dimensions || !Number.isFinite(actualWeightRaw) || actualWeightRaw <= 0) return null;
+        const divisor = Number(divisorValue);
+        if (!dimensions || !Number.isFinite(actualWeightRaw) || actualWeightRaw <= 0 || !Number.isFinite(divisor) || divisor <= 0) return null;
 
         const roundToNumber = number => Number(fmtNumber(number));
         const volumeRaw = dimensions.reduce((total, part) => total * part, 1);
         const volumeCm3 = roundToNumber(volumeRaw);
-        const volumeWeightKg = roundToNumber(volumeRaw / 5000);
+        const volumeWeightKg = roundToNumber(volumeRaw / divisor);
         const actualWeightKg = roundToNumber(actualWeightRaw);
         const chargeableWeightKg = roundToNumber(Math.max(actualWeightKg, volumeWeightKg));
 
@@ -672,6 +732,38 @@
         };
     }
 
+    function getFbaSizeTier(dimensionsIn, weightLb) {
+        if (!dimensionsIn || dimensionsIn.length !== 3) return '未知';
+        const [longest, median, shortest] = [...dimensionsIn].sort((a, b) => b - a);
+        const lengthGirth = longest + 2 * (median + shortest);
+        if (longest <= 18 && median <= 14 && shortest <= 8 && weightLb <= 20) return '标准件';
+        if (longest <= 59 && median <= 33 && shortest <= 33 && lengthGirth <= 130 && weightLb <= 50) return '大号大件';
+        return '超大件';
+    }
+
+    function estimateFbaFee(tier, weightLb) {
+        if (!Number.isFinite(weightLb) || weightLb <= 0) return null;
+        if (tier === '标准件') {
+            const brackets = [[0.25, 3.68], [0.5, 3.98], [0.75, 4.28], [1, 4.75], [1.5, 5.37], [2, 5.68], [2.5, 5.98], [3, 6.28]];
+            const bracket = brackets.find(([maxWeight]) => weightLb <= maxWeight);
+            if (bracket) return bracket[1];
+            return 6.58 + Math.ceil((weightLb - 3) * 2) * 0.38;
+        }
+        if (tier === '大号大件') return 9.61 + Math.ceil(Math.max(0, weightLb - 1)) * 0.38;
+        if (weightLb <= 50) return 26.33 + Math.ceil(Math.max(0, weightLb - 1)) * 0.38;
+        if (weightLb <= 70) return 40.12 + Math.ceil(Math.max(0, weightLb - 51)) * 0.75;
+        if (weightLb <= 150) return 54.81 + Math.ceil(Math.max(0, weightLb - 71)) * 0.75;
+        return 194.45 + Math.ceil(Math.max(0, weightLb - 151)) * 0.19;
+    }
+
+    function calculateFbaMetrics(dimensionsCm, weightKg) {
+        if (!dimensionsCm || dimensionsCm.length !== 3 || !Number.isFinite(weightKg) || weightKg <= 0) return null;
+        const dimensionsIn = dimensionsCm.map(value => value / 2.54);
+        const weightLb = weightKg / 0.45359237;
+        const tier = getFbaSizeTier(dimensionsIn, weightLb);
+        return { dimensionsIn, weightLb, tier, fee: estimateFbaFee(tier, weightLb) };
+    }
+
     function setCargoText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -682,12 +774,17 @@
         setCargoText('cargoVolumeWeightValue', '-');
         setCargoText('cargoChargeableWeightValue', '-');
         setCargoText('cargoTypeValue', '-');
+        setCargoText('fbaDimensionsValue', '-');
+        setCargoText('fbaWeightValue', '-');
+        setCargoText('fbaTierValue', '-');
+        setCargoText('fbaFeeValue', '-');
     }
 
     function updateCargoCheck() {
         const dimensionEl = document.getElementById('cargoDimensionInput');
         const weightEl = document.getElementById('cargoWeightInput');
-        if (!dimensionEl || !weightEl) return;
+        const divisorEl = document.getElementById('cargoDivisorInput');
+        if (!dimensionEl || !weightEl || !divisorEl) return;
 
         const dimensions = parseBoxDimensions(dimensionEl.value);
         if (!dimensions) {
@@ -697,17 +794,29 @@
 
         const volumeRaw = dimensions.reduce((total, part) => total * part, 1);
         setCargoText('cargoVolumeValue', fmtNumber(volumeRaw));
-        setCargoText('cargoVolumeWeightValue', fmtNumber(volumeRaw / 5000));
+        const divisor = Number(divisorEl.value);
+        setCargoText('cargoVolumeWeightValue', Number.isFinite(divisor) && divisor > 0 ? fmtNumber(volumeRaw / divisor) : '-');
 
-        const metrics = calculateCargoMetrics(dimensionEl.value, weightEl.value);
+        const metrics = calculateCargoMetrics(dimensionEl.value, weightEl.value, divisorEl.value);
         if (!metrics) {
             setCargoText('cargoChargeableWeightValue', '-');
             setCargoText('cargoTypeValue', '-');
+            setCargoText('fbaDimensionsValue', '-');
+            setCargoText('fbaWeightValue', '-');
+            setCargoText('fbaTierValue', '-');
+            setCargoText('fbaFeeValue', '-');
             return;
         }
 
         setCargoText('cargoChargeableWeightValue', fmtNumber(metrics.chargeableWeightKg));
         setCargoText('cargoTypeValue', metrics.cargoType);
+        const fba = calculateFbaMetrics(dimensions, metrics.actualWeightKg);
+        if (fba) {
+            setCargoText('fbaDimensionsValue', fba.dimensionsIn.map(fmtNumber).join(' x '));
+            setCargoText('fbaWeightValue', fmtNumber(fba.weightLb));
+            setCargoText('fbaTierValue', fba.tier);
+            setCargoText('fbaFeeValue', '$' + fba.fee.toFixed(2));
+        }
     }
 
     function syncCargoDimensionFromLength(value, sourceUnit) {
