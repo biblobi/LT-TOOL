@@ -254,6 +254,19 @@
             font-family: 'Share Tech Mono', monospace;
             margin-bottom: 4px;
         }
+        .fba-rule-list {
+            display: grid;
+            gap: 4px;
+        }
+        .fba-rule-row {
+            display: grid;
+            grid-template-columns: 62px minmax(0, 1fr);
+            gap: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #222;
+        }
+        .fba-rule-label { color: #aaa; }
+        .fba-rule-value { color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; }
         .fba-trigger {
             color: var(--neon-pink);
             margin-top: 5px;
@@ -826,7 +839,20 @@
     }
 
     function formatFbaChecks(checks) {
-        return checks.map(check => `${check.label} ${fmtNumber(check.actual)} / ${check.limit}`).join(' | ');
+        return `<div class="fba-rule-list">${checks.map(check => {
+            const isWeight = check.label === '重量';
+            const actualCm = check.actual * 2.54;
+            const limitCm = check.limit * 2.54;
+            const value = isWeight
+                ? `${fmtNumber(check.actual)} / ${check.limit} lb (${fmtNumber(check.actual * 0.45359237)} / ${fmtNumber(check.limit * 0.45359237)} kg)`
+                : `${fmtNumber(check.actual)} / ${check.limit} in (${fmtNumber(actualCm)} / ${fmtNumber(limitCm)} cm)`;
+            return `<div class="fba-rule-row"><span class="fba-rule-label">${check.label}</span><span class="fba-rule-value">${value}</span></div>`;
+        }).join('')}</div>`;
+    }
+
+    function setFbaRuleSummary(html) {
+        const el = document.getElementById('fbaRuleSummary');
+        if (el) el.innerHTML = html;
     }
 
     function formatFbaBlockers(blockers) {
@@ -842,7 +868,7 @@
         setCargoText('fbaWeightValue', '-');
         setCargoText('fbaTierValue', '-');
         setCargoText('fbaFeeValue', '-');
-        setCargoText('fbaRuleSummary', '-');
+        setFbaRuleSummary('-');
         setFbaTrigger('-', false);
     }
 
@@ -871,7 +897,7 @@
             setCargoText('fbaWeightValue', '-');
             setCargoText('fbaTierValue', '-');
             setCargoText('fbaFeeValue', '-');
-            setCargoText('fbaRuleSummary', '-');
+            setFbaRuleSummary('-');
             setFbaTrigger('-', false);
             return;
         }
@@ -887,7 +913,7 @@
             const { analysis } = fba;
             const activeChecks = fba.tier === '标准件' ? analysis.standardChecks : analysis.bulkyChecks;
             const tierName = fba.tier === '标准件' ? '标准件' : '大号大件';
-            setCargoText('fbaRuleSummary', `${tierName}：${formatFbaChecks(activeChecks)}`);
+            setFbaRuleSummary(`<div class="fba-basis-heading">${tierName}限制</div>${formatFbaChecks(activeChecks)}`);
             if (fba.tier === '标准件') {
                 setFbaTrigger('升档触发：无，全部标准件限制均满足。', true);
             } else if (fba.tier === '大号大件') {
