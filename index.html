@@ -190,6 +190,13 @@
             border: 1px solid #222;
             background: #0b0b0b;
             padding: 12px;
+            grid-column: 1 / -1;
+        }
+        .cargo-layout {
+            display: grid;
+            grid-template-columns: minmax(300px, 1fr) minmax(340px, 1.25fr);
+            gap: 18px;
+            align-items: start;
         }
         .cargo-title { margin-bottom: 12px; }
         .cargo-fields {
@@ -242,9 +249,9 @@
             margin-bottom: 9px;
         }
         .fba-basis {
-            margin-top: 12px;
-            border-top: 1px solid #1f1f1f;
-            padding-top: 10px;
+            margin: 0;
+            border-left: 1px solid #292929;
+            padding-left: 18px;
             font-size: 0.76rem;
             line-height: 1.55;
             color: #999;
@@ -278,6 +285,10 @@
             .cargo-summary {
                 grid-template-columns: 1fr;
             }
+        }
+        @media (max-width: 720px) {
+            .cargo-layout { grid-template-columns: 1fr; }
+            .fba-basis { border-left: 0; border-top: 1px solid #292929; padding: 12px 0 0; }
         }
 
         .currency-display {
@@ -351,44 +362,6 @@
                     </table>
                 </details>
 
-                <div class="cargo-check">
-                    <div class="section-title cargo-title">重货/抛货判断</div>
-                    <div class="cargo-fields">
-                        <label>
-                            尺寸 cm
-                            <input id="cargoDimensionInput" type="text" inputmode="decimal" placeholder="11*11*11cm" oninput="updateCargoCheck()">
-                        </label>
-                        <label>
-                            实重 kg
-                            <input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="updateCargoCheck()">
-                        </label>
-                        <label>
-                            体积系数
-                            <input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()">
-                        </label>
-                    </div>
-                    <div class="cargo-summary">
-                        <div>体积 cm3：<span id="cargoVolumeValue">-</span></div>
-                        <div>体积重 kg：<span id="cargoVolumeWeightValue">-</span></div>
-                        <div>计费重 kg：<span id="cargoChargeableWeightValue">-</span></div>
-                        <div>判断：<span id="cargoTypeValue">-</span></div>
-                    </div>
-                    <div class="fba-summary">
-                        <div class="fba-heading">Amazon FBA · 2026 美国站估算</div>
-                        <div class="cargo-summary">
-                            <div>包装尺寸 in：<span id="fbaDimensionsValue">-</span></div>
-                            <div>实重 lb：<span id="fbaWeightValue">-</span></div>
-                            <div>尺寸等级：<span id="fbaTierValue">-</span></div>
-                            <div>配送费：<span id="fbaFeeValue">-</span></div>
-                        </div>
-                        <div class="fba-basis">
-                            <div class="fba-basis-heading">尺寸分级依据（实际 / 上限）</div>
-                            <div id="fbaRuleSummary">-</div>
-                            <div id="fbaTriggerValue" class="fba-trigger">-</div>
-                        </div>
-                    </div>
-                    <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
-                </div>
             </div>
 
             <div class="converter-panel">
@@ -435,6 +408,48 @@
                     <tr><td>华氏 Fahrenheit (F)</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
                     <tr><td>开尔文 Kelvin (K)</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
                 </table>
+            </div>
+            <div class="cargo-check">
+                <div class="cargo-layout">
+                    <div>
+                        <div class="section-title cargo-title">重货/抛货判断</div>
+                        <div class="cargo-fields">
+                            <label>
+                                尺寸 cm
+                                <input id="cargoDimensionInput" type="text" inputmode="decimal" placeholder="11*11*11cm" oninput="updateCargoCheck()">
+                            </label>
+                            <label>
+                                实重 kg
+                                <input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="updateCargoCheck()">
+                            </label>
+                            <label>
+                                体积系数
+                                <input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()">
+                            </label>
+                        </div>
+                        <div class="cargo-summary">
+                            <div>体积 cm3：<span id="cargoVolumeValue">-</span></div>
+                            <div>体积重 kg：<span id="cargoVolumeWeightValue">-</span></div>
+                            <div>计费重 kg：<span id="cargoChargeableWeightValue">-</span></div>
+                            <div>判断：<span id="cargoTypeValue">-</span></div>
+                        </div>
+                        <div class="fba-summary">
+                            <div class="fba-heading">Amazon FBA · 2026 美国站估算</div>
+                            <div class="cargo-summary">
+                                <div>包装尺寸 in：<span id="fbaDimensionsValue">-</span></div>
+                                <div>实重 lb：<span id="fbaWeightValue">-</span></div>
+                                <div>尺寸等级：<span id="fbaTierValue">-</span></div>
+                                <div>配送费：<span id="fbaFeeValue">-</span></div>
+                            </div>
+                        </div>
+                        <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
+                    </div>
+                    <div class="fba-basis">
+                        <div class="fba-basis-heading">尺寸分级依据（实际 / 上限）</div>
+                        <div id="fbaRuleSummary">-</div>
+                        <div id="fbaTriggerValue" class="fba-trigger">-</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -856,7 +871,12 @@
     }
 
     function formatFbaBlockers(blockers) {
-        return blockers.map(check => `${check.label} ${fmtNumber(check.actual)} > ${check.limit}`).join('；');
+        return blockers.map(check => {
+            if (check.label === '重量') {
+                return `${check.label} ${fmtNumber(check.actual)} lb (${fmtNumber(check.actual * 0.45359237)} kg) > ${check.limit} lb (${fmtNumber(check.limit * 0.45359237)} kg)`;
+            }
+            return `${check.label} ${fmtNumber(check.actual)} in (${fmtNumber(check.actual * 2.54)} cm) > ${check.limit} in (${fmtNumber(check.limit * 2.54)} cm)`;
+        }).join('；');
     }
 
     function resetCargoCheck() {

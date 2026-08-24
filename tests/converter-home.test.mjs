@@ -95,11 +95,13 @@ function loadCargoHelpers() {
 
 function loadFbaHelpers() {
   const code = [
+    extractFunctionSource('fmtNumber'),
     extractFunctionSource('getFbaTierAnalysis'),
     extractFunctionSource('getFbaSizeTier'),
     extractFunctionSource('estimateFbaFee'),
     extractFunctionSource('calculateFbaMetrics'),
-    '({ getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics })',
+    extractFunctionSource('formatFbaBlockers'),
+    '({ getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics, formatFbaBlockers })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -207,7 +209,7 @@ test('low-frequency distance units are grouped in a collapsible section', () => 
 });
 
 test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () => {
-  const { getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics } = loadFbaHelpers();
+  const { getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics, formatFbaBlockers } = loadFbaHelpers();
 
   assert.equal(getFbaSizeTier([18, 14, 8], 20), '标准件');
   assert.equal(getFbaSizeTier([19, 14, 8], 20), '大号大件');
@@ -223,6 +225,10 @@ test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () 
   const extraLargeAnalysis = getFbaTierAnalysis([59, 33, 33], 50);
   assert.equal(extraLargeAnalysis.tier, '超大件');
   assert.deepEqual(JSON.parse(JSON.stringify(extraLargeAnalysis.bulkyBlockers.map(item => item.label))), ['长+围']);
+  assert.equal(formatFbaBlockers(bulkyAnalysis.standardBlockers), '最长边 19 in (48.26 cm) > 18 in (45.72 cm)');
+
+  const weightAnalysis = getFbaTierAnalysis([18, 14, 8], 21);
+  assert.equal(formatFbaBlockers(weightAnalysis.standardBlockers), '重量 21 lb (9.53 kg) > 20 lb (9.07 kg)');
 
   assert.equal(estimateFbaFee('标准件', 0.25), 3.68);
   assert.equal(estimateFbaFee('标准件', 3), 6.28);
