@@ -95,10 +95,11 @@ function loadCargoHelpers() {
 
 function loadFbaHelpers() {
   const code = [
+    extractFunctionSource('getFbaTierAnalysis'),
     extractFunctionSource('getFbaSizeTier'),
     extractFunctionSource('estimateFbaFee'),
     extractFunctionSource('calculateFbaMetrics'),
-    '({ getFbaSizeTier, estimateFbaFee, calculateFbaMetrics })',
+    '({ getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -162,6 +163,8 @@ test('cargo checker UI accepts dimensions and actual weight', () => {
     'Amazon FBA · 2026 美国站估算',
     'id="fbaTierValue"',
     'id="fbaFeeValue"',
+    'id="fbaRuleSummary"',
+    'id="fbaTriggerValue"',
   ]) {
     assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -204,13 +207,22 @@ test('low-frequency distance units are grouped in a collapsible section', () => 
 });
 
 test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () => {
-  const { getFbaSizeTier, estimateFbaFee, calculateFbaMetrics } = loadFbaHelpers();
+  const { getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics } = loadFbaHelpers();
 
   assert.equal(getFbaSizeTier([18, 14, 8], 20), '标准件');
   assert.equal(getFbaSizeTier([19, 14, 8], 20), '大号大件');
   assert.equal(getFbaSizeTier([59, 33, 33], 50), '超大件'); // length + girth exceeds 130 in
   assert.equal(getFbaSizeTier([50, 20, 15], 50), '大号大件');
   assert.equal(getFbaSizeTier([50, 20, 15], 51), '超大件');
+
+  const bulkyAnalysis = getFbaTierAnalysis([19, 14, 8], 20);
+  assert.equal(bulkyAnalysis.tier, '大号大件');
+  assert.deepEqual(JSON.parse(JSON.stringify(bulkyAnalysis.standardBlockers.map(item => item.label))), ['最长边']);
+  assert.deepEqual(JSON.parse(JSON.stringify(bulkyAnalysis.bulkyBlockers)), []);
+
+  const extraLargeAnalysis = getFbaTierAnalysis([59, 33, 33], 50);
+  assert.equal(extraLargeAnalysis.tier, '超大件');
+  assert.deepEqual(JSON.parse(JSON.stringify(extraLargeAnalysis.bulkyBlockers.map(item => item.label))), ['长+围']);
 
   assert.equal(estimateFbaFee('标准件', 0.25), 3.68);
   assert.equal(estimateFbaFee('标准件', 3), 6.28);

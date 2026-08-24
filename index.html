@@ -241,6 +241,24 @@
             font-size: 0.8rem;
             margin-bottom: 9px;
         }
+        .fba-basis {
+            margin-top: 12px;
+            border-top: 1px solid #1f1f1f;
+            padding-top: 10px;
+            font-size: 0.76rem;
+            line-height: 1.55;
+            color: #999;
+        }
+        .fba-basis-heading {
+            color: #aaa;
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 4px;
+        }
+        .fba-trigger {
+            color: var(--neon-pink);
+            margin-top: 5px;
+        }
+        .fba-trigger.is-clear { color: var(--neon-green); }
 
         @media (max-width: 520px) {
             .cargo-fields,
@@ -349,6 +367,11 @@
                             <div>实重 lb：<span id="fbaWeightValue">-</span></div>
                             <div>尺寸等级：<span id="fbaTierValue">-</span></div>
                             <div>配送费：<span id="fbaFeeValue">-</span></div>
+                        </div>
+                        <div class="fba-basis">
+                            <div class="fba-basis-heading">尺寸分级依据（实际 / 上限）</div>
+                            <div id="fbaRuleSummary">-</div>
+                            <div id="fbaTriggerValue" class="fba-trigger">-</div>
                         </div>
                     </div>
                     <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
@@ -732,13 +755,38 @@
         };
     }
 
-    function getFbaSizeTier(dimensionsIn, weightLb) {
+    function getFbaTierAnalysis(dimensionsIn, weightLb) {
         if (!dimensionsIn || dimensionsIn.length !== 3) return '未知';
         const [longest, median, shortest] = [...dimensionsIn].sort((a, b) => b - a);
         const lengthGirth = longest + 2 * (median + shortest);
-        if (longest <= 18 && median <= 14 && shortest <= 8 && weightLb <= 20) return '标准件';
-        if (longest <= 59 && median <= 33 && shortest <= 33 && lengthGirth <= 130 && weightLb <= 50) return '大号大件';
-        return '超大件';
+        const compare = (label, actual, limit) => ({ label, actual, limit, exceeded: actual > limit });
+        const standardChecks = [
+            compare('最长边', longest, 18),
+            compare('次长边', median, 14),
+            compare('最短边', shortest, 8),
+            compare('重量', weightLb, 20),
+        ];
+        const bulkyChecks = [
+            compare('最长边', longest, 59),
+            compare('次长边', median, 33),
+            compare('最短边', shortest, 33),
+            compare('长+围', lengthGirth, 130),
+            compare('重量', weightLb, 50),
+        ];
+        const standardBlockers = standardChecks.filter(check => check.exceeded);
+        const bulkyBlockers = bulkyChecks.filter(check => check.exceeded);
+        const tier = standardBlockers.length === 0
+            ? '标准件'
+            : bulkyBlockers.length === 0
+                ? '大号大件'
+                : '超大件';
+
+        return { tier, longest, median, shortest, lengthGirth, standardChecks, bulkyChecks, standardBlockers, bulkyBlockers };
+    }
+
+    function getFbaSizeTier(dimensionsIn, weightLb) {
+        const analysis = getFbaTierAnalysis(dimensionsIn, weightLb);
+        return typeof analysis === 'string' ? analysis : analysis.tier;
     }
 
     function estimateFbaFee(tier, weightLb) {
@@ -760,13 +808,29 @@
         if (!dimensionsCm || dimensionsCm.length !== 3 || !Number.isFinite(weightKg) || weightKg <= 0) return null;
         const dimensionsIn = dimensionsCm.map(value => value / 2.54);
         const weightLb = weightKg / 0.45359237;
-        const tier = getFbaSizeTier(dimensionsIn, weightLb);
-        return { dimensionsIn, weightLb, tier, fee: estimateFbaFee(tier, weightLb) };
+        const analysis = getFbaTierAnalysis(dimensionsIn, weightLb);
+        const tier = analysis.tier;
+        return { dimensionsIn, weightLb, tier, fee: estimateFbaFee(tier, weightLb), analysis };
     }
 
     function setCargoText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
+    }
+
+    function setFbaTrigger(text, isClear) {
+        const el = document.getElementById('fbaTriggerValue');
+        if (!el) return;
+        el.textContent = text;
+        el.classList.toggle('is-clear', isClear);
+    }
+
+    function formatFbaChecks(checks) {
+        return checks.map(check => `${check.label} ${fmtNumber(check.actual)} / ${check.limit}`).join(' | ');
+    }
+
+    function formatFbaBlockers(blockers) {
+        return blockers.map(check => `${check.label} ${fmtNumber(check.actual)} > ${check.limit}`).join('；');
     }
 
     function resetCargoCheck() {
@@ -778,6 +842,8 @@
         setCargoText('fbaWeightValue', '-');
         setCargoText('fbaTierValue', '-');
         setCargoText('fbaFeeValue', '-');
+        setCargoText('fbaRuleSummary', '-');
+        setFbaTrigger('-', false);
     }
 
     function updateCargoCheck() {
@@ -805,6 +871,8 @@
             setCargoText('fbaWeightValue', '-');
             setCargoText('fbaTierValue', '-');
             setCargoText('fbaFeeValue', '-');
+            setCargoText('fbaRuleSummary', '-');
+            setFbaTrigger('-', false);
             return;
         }
 
@@ -816,6 +884,17 @@
             setCargoText('fbaWeightValue', fmtNumber(fba.weightLb));
             setCargoText('fbaTierValue', fba.tier);
             setCargoText('fbaFeeValue', '$' + fba.fee.toFixed(2));
+            const { analysis } = fba;
+            const activeChecks = fba.tier === '标准件' ? analysis.standardChecks : analysis.bulkyChecks;
+            const tierName = fba.tier === '标准件' ? '标准件' : '大号大件';
+            setCargoText('fbaRuleSummary', `${tierName}：${formatFbaChecks(activeChecks)}`);
+            if (fba.tier === '标准件') {
+                setFbaTrigger('升档触发：无，全部标准件限制均满足。', true);
+            } else if (fba.tier === '大号大件') {
+                setFbaTrigger(`由标准件升档：${formatFbaBlockers(analysis.standardBlockers)}。`, false);
+            } else {
+                setFbaTrigger(`由大号大件升档：${formatFbaBlockers(analysis.bulkyBlockers)}。`, false);
+            }
         }
     }
 
