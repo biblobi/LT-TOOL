@@ -283,10 +283,11 @@ test('profit calculator uses chargeable weight, cubic-foot storage, linked ads, 
   assert.ok(Math.abs(result.maxCpc - 1.1356666666666666) < 1e-10);
 });
 
-test('profit and ad modules expose linked and manual cost controls with source notes', () => {
+test('profit and ad calculators are embedded in the converter home with linked and manual cost controls', () => {
   for (const required of [
-    "switchTab('adcalc')", "switchTab('profit')", 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
+    'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', '#module-converter.active ~ .embedded-calculator', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
     'id="profitLinkAds"', 'id="profitLinkFba"', 'id="profitLinkCargo"', 'id="profitStorageRate"', '取消联动后使用手动广告费 %',
     'Amazon Ads 报表', '卖家精灵与 SIF 的公开数据', 'Paid Order Share',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.doesNotMatch(html, /switchTab\('adcalc'\)|switchTab\('profit'\)/);
 });

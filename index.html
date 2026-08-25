@@ -80,6 +80,7 @@
         #module-converter {
             flex-direction: column;
         }
+        #module-converter.active ~ .embedded-calculator { display: block; }
         .converter-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -291,11 +292,13 @@
             .fba-basis { border-left: 0; border-top: 1px solid #292929; padding: 12px 0 0; }
         }
 
-        .calculator-home { max-width: min(1120px, 100%); }
-        .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
-        .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 14px; min-width: 0; }
+        .calculator-home { max-width: min(1400px, 100%); }
+        .embedded-calculator { margin-top: 0; border-top: 0; padding-top: 0; }
+        .calculator-home h1 { font-size: 1rem; margin: 0; padding: 12px 16px 8px; border: 1px solid var(--border-color); border-bottom: 0; background: #0d0d0d; }
+        .calculator-grid { display: grid; grid-template-columns: minmax(360px, .92fr) minmax(420px, 1.08fr); gap: 12px; align-items: start; border: 1px solid var(--border-color); padding: 12px; }
+        .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 11px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
-        .calculator-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .calculator-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         .calculator-fields label { display: grid; gap: 6px; color: #aaa; font-size: 0.8rem; }
         .calculator-fields input, .calculator-fields select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 8px; font: inherit; }
         .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
@@ -304,13 +307,13 @@
         .link-control { display: flex; align-items: center; gap: 8px; color: #bbb; font-size: 0.82rem; padding: 7px 0; }
         .link-control input { width: auto; accent-color: var(--neon-cyan); }
         .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-        .metric { border: 1px solid #222; padding: 9px; min-height: 62px; color: #888; font-size: 0.78rem; }
+        .metric { border: 1px solid #222; padding: 7px; min-height: 54px; color: #888; font-size: 0.76rem; }
         .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 1rem; margin-top: 5px; overflow-wrap: anywhere; }
         .metric.negative strong { color: var(--neon-pink); }
-        .formula-note { color: #777; font-size: 0.76rem; line-height: 1.55; margin: 12px 0 0; }
+        .formula-note { color: #777; font-size: 0.73rem; line-height: 1.45; margin: 9px 0 0; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.5; margin: 10px 0 0; border-top: 1px solid #202020; padding-top: 9px; }
         .profit-breakdown { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-        @media (max-width: 760px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 520px) { .calculator-fields, .metric-grid { grid-template-columns: 1fr; } }
 
         .currency-display {
@@ -341,8 +344,6 @@
         <button class="nav-btn" onclick="switchTab('removebg')">背景移除</button>
         <button class="nav-btn" onclick="switchTab('chat')">AI 对话</button>
         <button class="nav-btn" onclick="switchTab('currency')">实时汇率</button>
-        <button class="nav-btn" onclick="switchTab('adcalc')">广告费换算</button>
-        <button class="nav-btn" onclick="switchTab('profit')">利润测算</button>
     </div>
 
     <!-- PDF 模块 -->
@@ -591,7 +592,7 @@
         </div>
     </div>
 
-    <div id="module-adcalc" class="container calculator-home">
+    <div id="module-adcalc" class="container calculator-home embedded-calculator">
         <h1>广告费换算</h1>
         <div class="calculator-grid">
             <section class="calculator-panel">
@@ -623,7 +624,7 @@
         </div>
     </div>
 
-    <div id="module-profit" class="container calculator-home">
+    <div id="module-profit" class="container calculator-home embedded-calculator">
         <h1>单 SKU 利润测算</h1>
         <div class="calculator-grid">
             <section class="calculator-panel">
@@ -685,7 +686,7 @@
         document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('module-' + name).classList.add('active');
-        const index = ['converter','pdf','image','removebg','chat','currency','adcalc','profit'].indexOf(name);
+        const index = ['converter','pdf','image','removebg','chat','currency'].indexOf(name);
         if(index >= 0) document.querySelectorAll('.nav-btn')[index].classList.add('active');
         if(name === 'currency' && Object.keys(liveRates).length === 0) fetchRates();
         if(name === 'removebg' && window.preloadRemoveBgModel) window.preloadRemoveBgModel();
