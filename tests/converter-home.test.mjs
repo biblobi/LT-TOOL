@@ -45,11 +45,12 @@ test('stone mass unit is removed from visible inputs and conversion data', () =>
   }
 });
 
-test('converter layout uses a wide responsive grid instead of a narrow single column', () => {
+test('converter layout uses a six-column responsive grid instead of a narrow single column', () => {
   assert.match(html, /\.container\.active\s*\{\s*display:\s*block;\s*\}/);
   assert.match(html, /#module-converter\.active\s*\{\s*display:\s*flex;\s*\}/);
   assert.match(html, /\.converter-grid\s*\{/);
-  assert.match(html, /grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(260px,\s*1fr\)\)/);
+  assert.match(html, /\.converter-grid[\s\S]*?grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.conversion-table tbody[\s\S]*?grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(html, /max-width:\s*min\(1400px,\s*100%\)/);
   assert.doesNotMatch(html, /footer\s*\{[^}]*position:\s*fixed/s);
 });
@@ -256,6 +257,15 @@ test('FBA basis stays side-by-side until a phone-width breakpoint', () => {
   assert.match(html, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.cargo-layout\s*\{\s*grid-template-columns:\s*1fr/s);
 });
 
+test('FBA and cargo inputs are statically located in the profit calculator', () => {
+  const cargoStart = html.indexOf('id="cargo-check"');
+  const profitStart = html.indexOf('id="module-profit"');
+  const profitEnd = html.indexOf('</div>\n        </div>\n        </div>\n    </div>', profitStart);
+  assert.equal((html.match(/id="cargo-check"/g) ?? []).length, 1);
+  assert.ok(cargoStart > profitStart && cargoStart < profitEnd);
+  assert.doesNotMatch(html, /function moveCargoCheckIntoProfit/);
+});
+
 test('advertising calculator derives CVR, POS, CPA, ACOS, ROAS and blended cost from clicks and monthly sales', () => {
   const { calculateAdMetrics } = loadProfitHelpers();
   const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 1000, orders: 100, cvr: 0, monthlyUnits: 400, paidOrderShare: 100, price: 20 });
@@ -287,7 +297,7 @@ test('profit and ad calculators are embedded in the converter home with linked a
   for (const required of [
     'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
     'id="profitLinkAds"', 'id="profitLinkFba"', 'id="profitLinkCargo"', 'id="profitStorageRate"', '取消联动后使用手动广告费 %',
-    'Amazon Ads 报表', '卖家精灵与 SIF 的公开数据', 'Paid Order Share',
+    'Amazon Ads 报表', '卖家精灵与 SIF 的公开数据', '广告订单占比', 'id="adManualCvr"', 'id="adPaidOrderShare"',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(html, /switchTab\('adcalc'\)|switchTab\('profit'\)/);
 });
@@ -302,7 +312,9 @@ test('currency converter supports CAD and renders a historical trend curve', () 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
   for (const required of [
     'grid-template-columns: repeat(3, minmax(0, 1fr))', 'grid-template-columns: repeat(6, minmax(0, 1fr))',
-    'abbr[title]:hover::after', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
+    '.term-tip::after', 'data-tip="广告转化率：广告订单量 ÷ 广告点击量。"', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
     'function updateMarketCountry', 'CA: { name: \'加拿大站\'', 'currencyManualToggle', 'currencyManualRate',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.doesNotMatch(html, /title="(?:每次点击成本|广告转化率|汇率)：/);
+  assert.doesNotMatch(html, /id="adManualPos"/);
 });
