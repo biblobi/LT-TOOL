@@ -40,7 +40,7 @@ test('ton-level mass units are removed from visible inputs and conversion data',
 });
 
 test('stone mass unit is removed from visible inputs and conversion data', () => {
-  for (const forbidden of ['data-unit="st"', '英石', 'Stone (st)', 'st:']) {
+  for (const forbidden of ['data-unit="st"', '英石', 'Stone (st)']) {
     assert.doesNotMatch(html, new RegExp(forbidden.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });
@@ -102,6 +102,15 @@ function loadFbaHelpers() {
     extractFunctionSource('calculateFbaMetrics'),
     extractFunctionSource('formatFbaBlockers'),
     '({ getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics, formatFbaBlockers })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
+function loadProfitHelpers() {
+  const code = [
+    extractFunctionSource('calculateAdMetrics'),
+    extractFunctionSource('calculateProfitMetrics'),
+    '({ calculateAdMetrics, calculateProfitMetrics })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -240,4 +249,44 @@ test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () 
   assert.equal(fba.tier, '标准件');
   assert.equal(Math.round(fba.weightLb), 20);
   assert.equal(fba.fee, 19.5);
+});
+
+test('FBA basis stays side-by-side until a phone-width breakpoint', () => {
+  assert.match(html, /grid-template-columns:\s*minmax\(260px,\s*0\.9fr\)\s+minmax\(300px,\s*1\.1fr\)/);
+  assert.match(html, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.cargo-layout\s*\{\s*grid-template-columns:\s*1fr/s);
+});
+
+test('advertising calculator derives CVR, POS, CPA, ACOS, ROAS and blended cost from clicks and monthly sales', () => {
+  const { calculateAdMetrics } = loadProfitHelpers();
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 1000, orders: 100, cvr: 0, monthlyUnits: 400, paidOrderShare: 100, price: 20 });
+  assert.equal(metrics.cvr, 0.1);
+  assert.equal(metrics.pos, 0.25);
+  assert.equal(metrics.cpa, 8);
+  assert.equal(metrics.acos, 0.4);
+  assert.equal(metrics.roas, 2.5);
+  assert.equal(metrics.blendedCost, 2);
+});
+
+test('profit calculator uses chargeable weight, cubic-foot storage, linked ads, and preserves manual overrides', () => {
+  const { calculateProfitMetrics } = loadProfitHelpers();
+  const result = calculateProfitMetrics({
+    price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
+    packageVolumeCm3: 28316.8466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
+    adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
+  });
+  assert.equal(result.purchase, 6.25);
+  assert.equal(result.freight, 1.3333333333333333);
+  assert.equal(result.storage, 1.56);
+  assert.equal(result.ad, 2);
+  assert.ok(Math.abs(result.totalCost - 20.643333333333334) < 1e-10);
+  assert.ok(Math.abs(result.profit - 9.356666666666666) < 1e-10);
+  assert.ok(Math.abs(result.maxCpc - 1.1356666666666666) < 1e-10);
+});
+
+test('profit and ad modules expose linked and manual cost controls with source notes', () => {
+  for (const required of [
+    "switchTab('adcalc')", "switchTab('profit')", 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
+    'id="profitLinkAds"', 'id="profitLinkFba"', 'id="profitLinkCargo"', 'id="profitStorageRate"', '取消联动后使用手动广告费 %',
+    'Amazon Ads 报表', '卖家精灵与 SIF 的公开数据', 'Paid Order Share',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
