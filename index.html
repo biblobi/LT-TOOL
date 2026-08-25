@@ -301,17 +301,18 @@
         .calculator-grid { display: grid; grid-template-columns: minmax(360px, .92fr) minmax(420px, 1.08fr); gap: 12px; align-items: start; border: 1px solid var(--border-color); padding: 12px; }
         .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 11px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
-        .calculator-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-        .calculator-fields label { display: grid; gap: 6px; color: #aaa; font-size: 0.8rem; }
-        .calculator-fields input, .calculator-fields select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 8px; font: inherit; }
+        .calculator-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 8px; }
+        .calculator-fields label { display: grid; grid-template-columns: max-content minmax(72px, 1fr); align-items: center; gap: 6px; color: #aaa; font-size: 0.76rem; min-width: 0; }
+        .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: inherit; }
         .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
         .field-hint { color: #666; font-size: 0.72rem; }
-        abbr[title] { color: var(--neon-cyan); text-decoration: underline dotted; cursor: help; }
+        abbr[title], .term-tip { position: relative; color: var(--neon-cyan); text-decoration: underline dotted; cursor: help; }
+        abbr[title]:hover::after, .term-tip:hover::after { content: attr(title) attr(data-tip); position: absolute; z-index: 20; left: 0; top: calc(100% + 7px); width: max-content; max-width: 280px; padding: 8px 10px; background: #050505; border: 1px solid var(--neon-cyan); color: #ddd; font: 12px/1.45 Roboto, sans-serif; text-decoration: none; white-space: normal; box-shadow: 0 5px 16px #000; }
         .link-control { display: flex; align-items: center; gap: 8px; color: #bbb; font-size: 0.82rem; padding: 7px 0; }
         .link-control input { width: auto; accent-color: var(--neon-cyan); }
-        .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-        .metric { border: 1px solid #222; padding: 7px; min-height: 54px; color: #888; font-size: 0.76rem; }
-        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 1rem; margin-top: 5px; overflow-wrap: anywhere; }
+        .metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+        .metric { border: 1px solid #222; padding: 6px; min-height: 46px; color: #888; font-size: 0.7rem; }
+        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; margin-top: 3px; overflow-wrap: anywhere; }
         .metric.negative strong { color: var(--neon-pink); }
         .formula-note { color: #777; font-size: 0.73rem; line-height: 1.45; margin: 9px 0 0; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.5; margin: 10px 0 0; border-top: 1px solid #202020; padding-top: 9px; }
@@ -320,8 +321,14 @@
         .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 0.75rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
         .currency-chart canvas { width: 100%; height: 150px; display: block; }
         .currency-chart-status { color: #666; font-size: 0.72rem; margin: 7px 0 0; }
+        .currency-manual-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; color: #aaa; font-size: 0.76rem; }
+        .currency-manual-row .link-control { padding: 0; }
+        .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
+        .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
+        .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
+        @media (max-width: 1050px) { .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
         @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 520px) { .calculator-fields, .metric-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 520px) { .calculator-fields, .metric-grid { grid-template-columns: 1fr; } .calculator-fields label { grid-template-columns: 1fr; } }
 
         .currency-display {
             background: #000; border: 1px solid var(--neon-green);
@@ -452,6 +459,13 @@
                         <div class="section-title cargo-title">重货/抛货判断</div>
                         <div class="cargo-fields">
                             <label>
+                                国家/站点
+                                <select id="marketCountry" onchange="updateMarketCountry()">
+                                    <option value="US" selected>美国 / US</option>
+                                    <option value="CA">加拿大 / CA</option>
+                                </select>
+                            </label>
+                            <label>
                                 尺寸 cm
                                 <input id="cargoDimensionInput" type="text" inputmode="decimal" placeholder="11*11*11cm" oninput="updateCargoCheck()">
                             </label>
@@ -471,12 +485,12 @@
                             <div>判断：<span id="cargoTypeValue">-</span></div>
                         </div>
                         <div class="fba-summary">
-                            <div class="fba-heading">Amazon FBA · 2026 美国站估算</div>
+                            <div class="fba-heading" id="fbaHeading">Amazon FBA · 2026 美国站估算</div>
                             <div class="cargo-summary">
                                 <div>包装尺寸 in：<span id="fbaDimensionsValue">-</span></div>
                                 <div>实重 lb：<span id="fbaWeightValue">-</span></div>
                                 <div>尺寸等级：<span id="fbaTierValue">-</span></div>
-                                <div>配送费：<span id="fbaFeeValue">-</span></div>
+                            <div>配送费：<span id="fbaFeeValue">-</span></div>
                             </div>
                         </div>
                         <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
@@ -516,7 +530,7 @@
             </div>
         </div>
         <div id="module-profit" class="calculator-home embedded-calculator">
-            <h1>单 SKU 利润测算</h1>
+            <h1>单 SKU 利润测算 <span id="profitMarketBadge" class="market-badge">US / USD</span></h1>
             <div class="calculator-grid">
                 <section class="calculator-panel"><div class="section-title">收入与采购</div><div class="calculator-fields">
                     <label>售价 USD<input id="profitPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateProfitCalculator()"></label><label>汇率 RMB / USD<input id="profitFx" type="number" min="0" step="0.01" value="7.20" oninput="updateProfitCalculator()"></label><label>含税采购成本 RMB<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label><label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label><label>佣金 %<input id="profitReferralRate" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label><label>上架/配置费 USD<input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
@@ -638,6 +652,7 @@
         </div>
 
         <button class="btn-action" onclick="fetchRates()">>>> 刷新汇率数据</button>
+        <div class="currency-manual-row"><label class="link-control"><input id="currencyManualToggle" type="checkbox" onchange="updateCurrencyDisplay()">手动汇率</label><label class="field-label">1 <span id="currencyManualSource">CNY</span> = <input id="currencyManualRate" type="number" min="0" step="0.000001" placeholder="实时汇率" oninput="calcCurrency('amount')"></label></div>
 
         <div class="currency-display" id="currencyInfo">
             <div id="rateDisplay">点击刷新按钮获取实时汇率</div>
@@ -660,6 +675,13 @@
 
     let liveRates = {};
     let lastBase = "CNY";
+    let manualCurrencyRate = null;
+    const MARKET_CONFIG = {
+        US: { name: '美国站', currency: 'USD', fbaLabel: 'Amazon FBA · 2026 美国站估算', fx: 7.2, storage: 0.78, referral: 15 },
+        CA: { name: '加拿大站', currency: 'CAD', fbaLabel: 'Amazon FBA · 加拿大站估算', fx: 5.1, storage: 0.95, referral: 15 }
+    };
+
+    function currentMarket() { return MARKET_CONFIG[document.getElementById('marketCountry')?.value || 'US']; }
 
     function switchTab(name) {
         document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
@@ -915,13 +937,22 @@
         return 194.45 + Math.ceil(Math.max(0, weightLb - 151)) * 0.19;
     }
 
+    function estimateMarketFbaFee(tier, weightLb) {
+        const fee = estimateFbaFee(tier, weightLb);
+        if (fee === null) return null;
+        const country = typeof document !== 'undefined' ? document.getElementById('marketCountry')?.value : 'US';
+        return country === 'CA' ? fee * 1.34 : fee;
+    }
+
     function calculateFbaMetrics(dimensionsCm, weightKg) {
         if (!dimensionsCm || dimensionsCm.length !== 3 || !Number.isFinite(weightKg) || weightKg <= 0) return null;
         const dimensionsIn = dimensionsCm.map(value => value / 2.54);
         const weightLb = weightKg / 0.45359237;
         const analysis = getFbaTierAnalysis(dimensionsIn, weightLb);
         const tier = analysis.tier;
-        return { dimensionsIn, weightLb, tier, fee: estimateFbaFee(tier, weightLb), analysis };
+        const marketFee = estimateFbaFee(tier, weightLb);
+        const country = typeof document !== 'undefined' ? document.getElementById('marketCountry')?.value : 'US';
+        return { dimensionsIn, weightLb, tier, fee: country === 'CA' && marketFee !== null ? marketFee * 1.34 : marketFee, analysis };
     }
 
     function setCargoText(id, value) {
@@ -982,6 +1013,9 @@
         if (!dimensionEl || !weightEl || !divisorEl) return;
 
         const dimensions = parseBoxDimensions(dimensionEl.value);
+        const market = currentMarket();
+        const heading = document.getElementById('fbaHeading');
+        if (heading) heading.textContent = market.fbaLabel;
         if (!dimensions) {
             resetCargoCheck();
             return;
@@ -1012,7 +1046,8 @@
             setCargoText('fbaDimensionsValue', fba.dimensionsIn.map(fmtNumber).join(' x '));
             setCargoText('fbaWeightValue', fmtNumber(fba.weightLb));
             setCargoText('fbaTierValue', fba.tier);
-            setCargoText('fbaFeeValue', '$' + fba.fee.toFixed(2));
+            const marketCurrency = currentMarket().currency;
+            setCargoText('fbaFeeValue', marketCurrency + ' ' + fba.fee.toFixed(2));
             const { analysis } = fba;
             const activeChecks = fba.tier === '标准件' ? analysis.standardChecks : analysis.bulkyChecks;
             const tierName = fba.tier === '标准件' ? '标准件' : '大号大件';
@@ -1119,10 +1154,11 @@
         const linkFba = document.getElementById('profitLinkFba').checked;
         const linkAds = document.getElementById('profitLinkAds').checked;
         document.getElementById('profitManualAdFields').style.opacity = linkAds ? '0.55' : '1';
+        const market = currentMarket();
         const result = calculateProfitMetrics({
-            price: inputNumber('profitPrice'), fx: inputNumber('profitFx'), purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
+            price: inputNumber('profitPrice'), fx: inputNumber('profitFx') || market.fx, purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
             chargeableWeightKg: linkCargo && cargo ? cargo.chargeableWeightKg : inputNumber('profitManualWeight'), packageVolumeCm3: linkCargo && cargo ? cargo.volumeCm3 : 0,
-            referralRate: inputNumber('profitReferralRate'), fbaFee: linkFba && fba ? fba.fee : inputNumber('profitManualFba'), storageRate: inputNumber('profitStorageRate'), inventoryMonths: inputNumber('profitInventoryMonths'),
+            referralRate: inputNumber('profitReferralRate') || market.referral, fbaFee: linkFba && fba ? fba.fee : inputNumber('profitManualFba'), storageRate: inputNumber('profitStorageRate') || market.storage, inventoryMonths: inputNumber('profitInventoryMonths'),
             adCost: linkAds ? ad.blendedCost : inputNumber('profitPrice') * inputNumber('profitManualAdRate') / 100, promoRate: inputNumber('profitPromoRate'), returnRate: inputNumber('profitReturnRate'), returnHandling: inputNumber('profitReturnHandling'), placementFee: inputNumber('profitPlacementFee'), targetMargin: inputNumber('profitTargetMargin'), cvr: ad.cvr,
         });
         document.getElementById('profitChargeableWeightValue').textContent = (linkCargo && cargo) ? fmtNumber(cargo.chargeableWeightKg) + ' kg' : fmtNumber(inputNumber('profitManualWeight')) + ' kg';
@@ -1138,6 +1174,24 @@
         document.getElementById('profitMaxCpcValue').textContent = money(result.maxCpc);
         document.getElementById('profitMaxPurchaseValue').textContent = result.maxPurchaseRmb === null ? '-' : '¥' + result.maxPurchaseRmb.toFixed(2);
         document.getElementById('profitMetric').classList.toggle('negative', result.profit < 0);
+    }
+
+    function updateMarketCountry() {
+        const market = currentMarket();
+        const fx = document.getElementById('profitFx');
+        const storage = document.getElementById('profitStorageRate');
+        const referral = document.getElementById('profitReferralRate');
+        if (fx && (!fx.value || fx.dataset.marketDefault === '1')) { fx.value = market.fx; fx.dataset.marketDefault = '1'; }
+        if (storage && (!storage.value || storage.dataset.marketDefault === '1')) { storage.value = market.storage; storage.dataset.marketDefault = '1'; }
+        if (referral && (!referral.value || referral.dataset.marketDefault === '1')) { referral.value = market.referral; referral.dataset.marketDefault = '1'; }
+        const source = document.getElementById('currencyManualSource');
+        if (source) source.textContent = market.currency;
+        const badge = document.getElementById('profitMarketBadge');
+        if (badge) badge.textContent = `${document.getElementById('marketCountry')?.value || 'US'} / ${market.currency}`;
+        const fbaHeading = document.getElementById('fbaHeading');
+        if (fbaHeading) fbaHeading.textContent = market.fbaLabel;
+        updateCargoCheck();
+        updateProfitCalculator();
     }
 
     function syncCargoDimensionFromLength(value, sourceUnit) {
@@ -1366,6 +1420,17 @@
                 document.getElementById('updateTime').innerText = "更新时间: " + new Date().toLocaleTimeString();
                 document.getElementById('currencyInfo').style.borderColor = "var(--neon-green)";
                 document.getElementById('rateDisplay').innerText = `数据源: ExchangeRate-API`;
+                const source = document.getElementById('sourceCurrency').value;
+                const target = document.getElementById('targetCurrency').value;
+                const manualRate = document.getElementById('currencyManualRate');
+                if (manualRate && liveRates[source] && liveRates[target]) manualRate.value = (liveRates[target] / liveRates[source]).toFixed(6);
+                const market = currentMarket();
+                const profitFx = document.getElementById('profitFx');
+                if (profitFx && !document.getElementById('currencyManualToggle')?.checked && liveRates.CNY && liveRates[market.currency]) {
+                    profitFx.value = (liveRates.CNY / liveRates[market.currency]).toFixed(4);
+                    profitFx.dataset.marketDefault = '1';
+                    updateProfitCalculator();
+                }
                 calcCurrency('amount');
                 updateCurrencyTrend();
             } else {
@@ -1387,8 +1452,14 @@
     window.calcCurrency = (sourceInputId) => {
         const source = document.getElementById('sourceCurrency').value;
         const target = document.getElementById('targetCurrency').value;
-        const rateTarget = liveRates[target];
-        const rateSource = liveRates[source];
+        let rateTarget = liveRates[target];
+        let rateSource = liveRates[source];
+        const manualToggle = document.getElementById('currencyManualToggle');
+        const manualRate = Number(document.getElementById('currencyManualRate')?.value);
+        if (manualToggle?.checked && Number.isFinite(manualRate) && manualRate > 0) {
+            rateSource = 1;
+            rateTarget = manualRate;
+        }
 
         if(!rateTarget || !rateSource) return;
 

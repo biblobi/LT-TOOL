@@ -298,3 +298,11 @@ test('currency converter supports CAD and renders a historical trend curve', () 
     'api.frankfurter.dev/v1/', '最近 30 个工作日', 'id="cargo-check"', 'scrollConverterSection',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
+
+test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
+  for (const required of [
+    'grid-template-columns: repeat(3, minmax(0, 1fr))', 'grid-template-columns: repeat(6, minmax(0, 1fr))',
+    'abbr[title]:hover::after', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
+    'function updateMarketCountry', 'CA: { name: \'加拿大站\'', 'currencyManualToggle', 'currencyManualRate',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
