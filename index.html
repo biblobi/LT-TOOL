@@ -1580,10 +1580,9 @@
     }
 
     async function updateCurrencyTrend() {
-        const selected = document.getElementById('targetCurrency').value === 'CNY'
-            ? document.getElementById('sourceCurrency').value
-            : document.getElementById('targetCurrency').value;
-        const source = selected === 'CNY' ? 'USD' : selected;
+        const sourceValue = document.getElementById('sourceCurrency').value;
+        const targetValue = document.getElementById('targetCurrency').value;
+        const source = sourceValue !== 'CNY' ? sourceValue : (targetValue !== 'CNY' ? targetValue : 'USD');
         const target = 'CNY';
         const title = document.getElementById('currencyChartTitle');
         const status = document.getElementById('currencyChartStatus');
