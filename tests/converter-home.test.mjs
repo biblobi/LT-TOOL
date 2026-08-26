@@ -275,9 +275,18 @@ test('advertising calculator derives CVR, POS, CPA, ACOS, ROAS and blended cost 
   assert.equal(metrics.acos, 0.4);
   assert.equal(metrics.roas, 2.5);
   assert.equal(metrics.blendedCost, 2);
+  assert.equal(metrics.tacos, 0.1);
+  assert.equal(metrics.acoas, 0.1);
 });
 
-test('profit calculator uses chargeable weight, cubic-foot storage, linked ads, and preserves manual overrides', () => {
+test('advertising calculator does not accept a manual CVR fallback', () => {
+  const { calculateAdMetrics } = loadProfitHelpers();
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 0, orders: 2, cvr: 25, monthlyUnits: 20, paidOrderShare: 100, price: 20 });
+  assert.equal(metrics.cvr, 0);
+  assert.equal(metrics.cpa, null);
+});
+
+test('profit calculator supports chargeable weight, cubic-foot storage, and advertising cost inputs', () => {
   const { calculateProfitMetrics } = loadProfitHelpers();
   const result = calculateProfitMetrics({
     price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
@@ -293,12 +302,15 @@ test('profit calculator uses chargeable weight, cubic-foot storage, linked ads, 
   assert.ok(Math.abs(result.maxCpc - 1.1356666666666666) < 1e-10);
 });
 
-test('profit and ad calculators are embedded in the converter home with linked and manual cost controls', () => {
+test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
   for (const required of [
     'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
-    'id="profitLinkAds"', 'id="profitLinkFba"', 'id="profitLinkCargo"', 'id="profitStorageRate"', '取消联动后使用手动广告费 %',
-    'Amazon Ads 报表', '卖家精灵与 SIF 的公开数据', '广告订单占比', 'id="adManualCvr"', 'id="adPaidOrderShare"',
+    'id="profitStorageRate"', '广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
+    'Amazon Ads 报表', '广告订单占比', 'id="adAcoasValue"', 'id="adTacosValue"', '混合广告费/件是把广告订单成本按广告订单占比摊到全部销量后的平均值', 'id="adPaidOrderShare"',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const removed of ['profitLinkAds', 'profitLinkFba', 'profitLinkCargo', 'profitManualAdRate', 'profitManualWeight', 'profitManualFba', '收入与采购', '广告与利润结果']) {
+    assert.doesNotMatch(html, new RegExp(removed));
+  }
   assert.doesNotMatch(html, /switchTab\('adcalc'\)|switchTab\('profit'\)/);
 });
 
@@ -316,5 +328,21 @@ test('calculator workspace is compact, tooltip explanations are rendered, and ma
     'function updateMarketCountry', 'CA: { name: \'加拿大站\'', 'currencyManualToggle', 'currencyManualRate',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(html, /title="(?:每次点击成本|广告转化率|汇率)：/);
-  assert.doesNotMatch(html, /id="adManualPos"/);
+  assert.doesNotMatch(html, /id="adManualPos"|id="adManualCvr"|function toggleAdManual/);
+});
+
+test('profit test title owns the market selector and uses flat section headings', () => {
+  assert.match(html, /<h1><span>利润测试<\/span><span class="profit-heading-meta">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
+  assert.equal((html.match(/id="marketCountry"/g) ?? []).length, 1);
+  assert.equal((html.match(/id="profitFx"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /单 SKU 利润测算/);
+  assert.match(html, /<div class="section-title fba-basis-heading">尺寸分级依据（实际 \/ 上限）<\/div>/);
+  assert.match(html, /\.profit-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
+});
+
+test('profit exchange-rate update fetches the selected market rate and recalculates profit', () => {
+  assert.match(html, /async function updateProfitExchangeRate\(\)/);
+  assert.match(html, /fetch\('https:\/\/open\.er-api\.com\/v6\/latest\/CNY'\)/);
+  assert.match(html, /fx\.value = \(1 \/ marketRate\)\.toFixed\(4\)/);
+  assert.match(html, /updateProfitCalculator\(\);/);
 });
