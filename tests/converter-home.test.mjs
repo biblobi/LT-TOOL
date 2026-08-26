@@ -45,12 +45,13 @@ test('stone mass unit is removed from visible inputs and conversion data', () =>
   }
 });
 
-test('converter layout uses a six-column responsive grid instead of a narrow single column', () => {
+test('converter layout uses a twelve-column desktop grid and compact responsive fallbacks', () => {
   assert.match(html, /\.container\.active\s*\{\s*display:\s*block;\s*\}/);
   assert.match(html, /#module-converter\.active\s*\{\s*display:\s*flex;\s*\}/);
   assert.match(html, /\.converter-grid\s*\{/);
-  assert.match(html, /\.converter-grid[\s\S]*?grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/);
-  assert.match(html, /\.conversion-table tbody[\s\S]*?grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.converter-grid[\s\S]*?grid-template-columns:\s*repeat\(12,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.conversion-table tbody[\s\S]*?grid-template-columns:\s*repeat\(12,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /@media\s*\(max-width:\s*1200px\)\s*\{[\s\S]*?\.converter-grid\s*\{\s*grid-template-columns:\s*repeat\(6,/);
   assert.match(html, /max-width:\s*min\(1400px,\s*100%\)/);
   assert.doesNotMatch(html, /footer\s*\{[^}]*position:\s*fixed/s);
 });
@@ -258,12 +259,15 @@ test('FBA basis stays side-by-side until a phone-width breakpoint', () => {
   assert.match(html, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.cargo-layout\s*\{\s*grid-template-columns:\s*1fr/s);
 });
 
-test('FBA and cargo inputs are statically located in the profit calculator', () => {
+test('FBA and cargo inputs are statically located in the freight calculator before advertising', () => {
   const cargoStart = html.indexOf('id="cargo-check"');
+  const freightStart = html.indexOf('id="module-freight"');
+  const adStart = html.indexOf('id="module-adcalc"');
   const profitStart = html.indexOf('id="module-profit"');
-  const profitEnd = html.indexOf('</div>\n        </div>\n        </div>\n    </div>', profitStart);
+  const freightEnd = html.indexOf('<div id="module-adcalc"', freightStart);
   assert.equal((html.match(/id="cargo-check"/g) ?? []).length, 1);
-  assert.ok(cargoStart > profitStart && cargoStart < profitEnd);
+  assert.ok(cargoStart > freightStart && cargoStart < freightEnd);
+  assert.ok(freightStart < adStart && adStart < profitStart);
   assert.doesNotMatch(html, /function moveCargoCheckIntoProfit/);
 });
 
@@ -311,7 +315,7 @@ test('profit calculator supports chargeable weight, cubic-foot storage, and adve
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
   for (const required of [
-    'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPos"',
+    'id="module-freight"', 'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPos"',
     'id="profitStorageRate"', '广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
     '广告订单占比', 'id="adAcoasValue"', '运费与仓储计算',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -332,9 +336,30 @@ test('advertising and profit inputs use stacked labels and POS is an editable in
   assert.match(html, /\.calculator-fields label \{ display: flex; flex-direction: column;/);
   assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
   assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
-  assert.match(html, /data-tip="运费使用计费重/);
+  assert.match(html, /<h1>运费与仓储计算<\/h1>/);
   assert.match(html, /id="adPos"[^>]+oninput="updateAdCalculator\('pos'\)"/);
   assert.doesNotMatch(html, /id="adPosValue"|id="adTacosValue"|TACoS/);
+});
+
+test('PPC explanations use the complete field label as the hover and keyboard target', () => {
+  const adStart = html.indexOf('id="module-adcalc"');
+  const adEnd = html.indexOf('id="module-profit"', adStart);
+  const adMarkup = html.slice(adStart, adEnd);
+  const tooltipLabels = adMarkup.match(/class="field-label term-tip" tabindex="0" data-tip="[^"]+"/g) ?? [];
+
+  assert.equal(tooltipLabels.length, 7);
+  assert.match(html, /\.calculator-fields \.field-label\.term-tip\s*\{\s*display:\s*flex;\s*position:\s*relative;/);
+  assert.doesNotMatch(adMarkup, /class="field-label"><span class="term-tip"/);
+});
+
+test('advertising inputs and outputs share one calculation panel', () => {
+  const adStart = html.indexOf('id="module-adcalc"');
+  const adEnd = html.indexOf('id="module-profit"', adStart);
+  const adMarkup = html.slice(adStart, adEnd);
+
+  assert.equal((adMarkup.match(/<section class="calculator-panel">/g) ?? []).length, 1);
+  assert.ok(adMarkup.indexOf('id="adCpc"') < adMarkup.indexOf('id="adCpaValue"'));
+  assert.match(html, /\.ad-calculator-grid \.metric-grid\s*\{\s*margin-top:\s*8px;/);
 });
 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
@@ -366,7 +391,7 @@ test('profit calculation title owns the market selector and uses flat section he
   assert.match(html, /\.fba-rule-list\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,/);
   assert.match(html, /\.fba-rule-value \.metric-value\s*\{\s*color:\s*#aaa/);
   assert.doesNotMatch(html, /重货\/抛货判断|头程、仓储与 FBA|Amazon FBA · 2026 美国站估算/);
-  assert.match(html, /\.profit-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
+  assert.match(html, /\.freight-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
 });
 
 test('profit exchange-rate update fetches the selected market rate and recalculates profit', () => {

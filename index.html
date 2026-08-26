@@ -82,8 +82,8 @@
         }
         .converter-grid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 6px;
             align-items: start;
         }
         .converter-panel {
@@ -177,11 +177,11 @@
         .file-controls { display: inline-flex; gap: 6px; }
 
         .conversion-table { display: block; width: 100%; margin-bottom: 0; }
-        .conversion-table tbody { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-        .conversion-table tr { display: grid; gap: 5px; min-width: 0; padding: 6px; border: 1px solid #222; background: #0b0b0b; }
+        .conversion-table tbody { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 5px; }
+        .conversion-table tr { display: grid; gap: 4px; min-width: 0; padding: 5px; border: 1px solid #222; background: #0b0b0b; }
         .conversion-table tr:has(th) { display: none; }
         .conversion-table th { text-align: left; color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
-        .conversion-table td { min-width: 0; padding: 0; color: #aaa; font-size: 0.74rem; }
+        .conversion-table td { min-width: 0; padding: 0; color: #aaa; font-size: 0.68rem; }
         .conversion-table td:first-child { white-space: normal; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 5px; width: 100%; min-width: 0; font-size: 0.82rem; }
         .len-input { white-space: nowrap; }
@@ -293,6 +293,10 @@
         }
         .fba-trigger.is-clear { color: var(--neon-green); }
 
+        @media (max-width: 1200px) {
+            .converter-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+            .conversion-table tbody { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        }
         @media (max-width: 700px) {
             .converter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .conversion-table tbody { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -322,13 +326,14 @@
         .profit-rate-update:disabled { opacity: 0.55; cursor: wait; }
         .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; border: 1px solid var(--border-color); padding: 8px; }
         .profit-grid { grid-template-columns: 1fr; }
+        .freight-grid, .ad-calculator-grid { grid-template-columns: 1fr; }
         .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 9px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
         .calculator-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 8px; }
         .profit-grid .calculator-fields { grid-template-columns: repeat(6, minmax(0, 1fr)); }
         .calculator-fields label { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 4px; min-height: 54px; color: #aaa; font-size: 0.72rem; line-height: 1.25; min-width: 0; }
         .calculator-fields .field-label { white-space: nowrap; min-width: 0; }
-        .calculator-fields .field-label > .term-tip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .calculator-fields .field-label.term-tip { display: flex; position: relative; }
         .calculator-fields .term-tip, .cargo-fields .term-tip { color: inherit; white-space: nowrap; }
         .calculator-fields label > input, .calculator-fields label > select { align-self: stretch; }
         .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: inherit; }
@@ -340,6 +345,7 @@
         .link-control { display: flex; align-items: center; gap: 8px; color: #bbb; font-size: 0.82rem; padding: 7px 0; }
         .link-control input { width: auto; accent-color: var(--neon-cyan); }
         .metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+        .ad-calculator-grid .metric-grid { margin-top: 8px; }
         .metric { border: 1px solid #222; padding: 6px; min-height: 46px; color: #888; font-size: 0.7rem; }
         .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; margin-top: 3px; overflow-wrap: anywhere; }
         .metric > .term-tip { white-space: nowrap; }
@@ -349,13 +355,13 @@
         .calculator-panel > .source-note, .profit-grid .cargo-note { display: none; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.45; margin: 8px 0 0; border-top: 1px solid #202020; padding-top: 7px; }
         .profit-breakdown { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-        .profit-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
-        .profit-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
-        .profit-grid .cargo-title { margin-bottom: 7px; }
-        .profit-grid .cargo-fields { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-        .profit-grid .cargo-summary { margin-top: 6px; gap: 4px 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .profit-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
-        .profit-grid .fba-basis { padding-left: 12px; }
+        .freight-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
+        .freight-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
+        .freight-grid .cargo-title { margin-bottom: 7px; }
+        .freight-grid .cargo-fields { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+        .freight-grid .cargo-summary { margin-top: 6px; gap: 4px 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .freight-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
+        .freight-grid .fba-basis { padding-left: 12px; }
         .currency-chart { margin-top: 12px; border: 1px solid #222; padding: 10px; background: #080808; }
         .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 0.75rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
         .currency-range { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
@@ -368,8 +374,8 @@
         .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
         .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
         .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
-        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .freight-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-layout { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid { grid-template-columns: 1fr; }
             .calculator-fields label { min-height: 0; }
@@ -428,7 +434,7 @@
     <div id="module-converter" class="container converter-home active">
         <h1>量子换算系统</h1>
         <div class="converter-jumps">
-            <button class="converter-jump" onclick="scrollConverterSection('cargo-check')">FBA / 计费重</button>
+            <button class="converter-jump" onclick="scrollConverterSection('module-freight')">运费与仓储</button>
             <button class="converter-jump" onclick="scrollConverterSection('module-adcalc')">广告费换算</button>
             <button class="converter-jump" onclick="scrollConverterSection('module-profit')">利润测算</button>
         </div>
@@ -504,34 +510,10 @@
                 </table>
             </div>
         </div>
-        <div id="module-adcalc" class="calculator-home embedded-calculator">
-            <h1>广告费换算</h1>
-            <div class="calculator-grid">
+        <div id="module-freight" class="calculator-home embedded-calculator">
+            <h1>运费与仓储计算</h1>
+            <div class="calculator-grid freight-grid">
                 <section class="calculator-panel">
-                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">PPC 输入</span></div>
-                    <div class="calculator-fields">
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。">CPC</span> <span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="统计周期内的广告点击总数。">月点击量</span> <span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="由广告归因带来的订单数。">广告订单量</span> <span class="field-hint">Paid orders</span></span><input id="adOrders" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。">CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于计算广告订单占比 POS。">月销量</span> <span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；填写 POS 后，若月销量已填，会自动调整广告订单量。">POS</span></span><input id="adPos" type="number" min="0" max="100" step="0.01" value="100" oninput="updateAdCalculator('pos')"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="单件商品的销售价格。">售价</span> <span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator()"></label>
-                    </div>
-                </section>
-                <section class="calculator-panel">
-                    <div class="section-title">结果</div>
-                    <div class="metric-grid">
-                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><strong id="adCpaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><strong id="adAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><strong id="adAcoasValue">-</strong></div>
-                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><strong id="adRoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><strong id="adBlendedCostValue">-</strong></div>
-                    </div>
-                </section>
-            </div>
-        </div>
-        <div id="module-profit" class="calculator-home embedded-calculator">
-            <h1><span>利润测算</span><span class="profit-heading-meta"><label class="profit-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option></select></label><label class="profit-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.0001" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="profit-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
-            <div class="calculator-grid profit-grid">
-                <section class="calculator-panel"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="运费使用计费重，仓储按包装体积和库存月数估算，FBA 配送费按尺寸等级、重量和站点规则计算。">运费与仓储计算</span></div>
                     <div id="cargo-check" class="cargo-check">
                         <div class="cargo-layout">
                             <div>
@@ -548,8 +530,35 @@
                         </div>
                     </div>
                     <div class="calculator-fields">
-                    <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitStorageLabel" class="term-tip" tabindex="0" data-tip="仓储费标准：包装体积（cm3）÷ 28,316.8466 = 立方英尺；仓储/件 = 立方英尺 × 站点仓储单价（美元/立方英尺/月）× 平均库存月数。页面按 Amazon FBA 体积仓储公开规则估算。">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="平均库存月数用于估算仓储成本：仓储/件 = 包装体积（立方英尺）× 仓储单价 × 平均库存月数；也会直接影响总成本和利润。">平均库存月数</span><input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="退货率用于估算售价损失；退货处理费按每件退货额外计入成本。两者共同影响退货成本、总成本和利润。">退货率 %</span><input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel" class="term-tip" tabindex="0" data-tip="每件退货产生的处理费用，按退货率折算后计入利润结果中的退货成本。">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
-                </div></section>
+                        <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitStorageLabel" class="term-tip" tabindex="0" data-tip="仓储费标准：包装体积（cm3）÷ 28,316.8466 = 立方英尺；仓储/件 = 立方英尺 × 站点仓储单价（美元/立方英尺/月）× 平均库存月数。页面按 Amazon FBA 体积仓储公开规则估算。">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="平均库存月数用于估算仓储成本：仓储/件 = 包装体积（立方英尺）× 仓储单价 × 平均库存月数；也会直接影响总成本和利润。">平均库存月数</span><input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="退货率用于估算售价损失；退货处理费按每件退货额外计入成本。两者共同影响退货成本、总成本和利润。">退货率 %</span><input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel" class="term-tip" tabindex="0" data-tip="每件退货产生的处理费用，按退货率折算后计入利润结果中的退货成本。">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div id="module-adcalc" class="calculator-home embedded-calculator">
+            <h1>广告费换算</h1>
+            <div class="calculator-grid ad-calculator-grid">
+                <section class="calculator-panel">
+                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">PPC 广告费换算</span></div>
+                    <div class="calculator-fields">
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。"><span>CPC</span><span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数。"><span>月点击量</span><span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="由广告归因带来的订单数。"><span>广告订单量</span><span class="field-hint">Paid orders</span></span><input id="adOrders" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"><span>CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于计算广告订单占比 POS。"><span>月销量</span><span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；填写 POS 后，若月销量已填，会自动调整广告订单量。"><span>POS</span></span><input id="adPos" type="number" min="0" max="100" step="0.01" value="100" oninput="updateAdCalculator('pos')"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="单件商品的销售价格。"><span>售价</span><span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator()"></label>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><strong id="adCpaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><strong id="adAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><strong id="adAcoasValue">-</strong></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><strong id="adRoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><strong id="adBlendedCostValue">-</strong></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div id="module-profit" class="calculator-home embedded-calculator">
+            <h1><span>利润测算</span><span class="profit-heading-meta"><label class="profit-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option></select></label><label class="profit-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.0001" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="profit-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
+            <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA − 仓储 − 广告 − 佣金 − 促销 − 退货 − 配置费。仓储按体积、单价和库存月数估算。广告成本统一取自广告费换算模块。">利润结果</span></div><div class="calculator-fields"><label><span id="profitPriceLabel">售价（美元）</span><input id="profitPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateProfitCalculator()"></label><label>含税采购成本（人民币）<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label><label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label><label>佣金 %<input id="profitReferralRate" data-market-default="1" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label><label><span id="profitPlacementLabel">上架/配置费（美元）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label></div><div class="profit-breakdown" style="margin-top:8px"><div class="metric"><span class="term-tip" tabindex="0" data-tip="计费重 = 实重与体积重取大值；用于头程费用计算。">计费重</span><strong id="profitChargeableWeightValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="包装体积 = 长 × 宽 × 高（立方厘米）；用于仓储费计算。">包装体积</span><strong id="profitPackageVolumeValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/计费千克）× 计费重 ÷ 汇率。">头程/件</span><strong id="profitFreightValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和重量对应的配送费。">FBA/件</span><strong id="profitFbaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="仓储/件 = 包装体积（立方英尺）× 仓储单价 × 平均库存月数。">仓储/件</span><strong id="profitStorageValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件。">广告/件</span><strong id="profitAdValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA + 仓储 + 广告 + 促销 + 退货 + 配置费。">总成本/件</span><strong id="profitTotalCostValue">-</strong></div><div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件。">利润/件</span><strong id="profitValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价。">利润率</span><strong id="profitMarginValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="保本 ACOS = 扣除广告前的可用利润 ÷ 售价，是不亏损时可承受的广告成本占比。">保本 ACOS</span><strong id="profitBreakEvenAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="最大 CPC = 售价 × 保本 ACOS × CVR。">最大 CPC</span><strong id="profitMaxCpcValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="目标采购上限 = 在目标利润率下可承受的最高采购成本（人民币，已考虑退税/折扣）。">目标采购上限</span><strong id="profitMaxPurchaseValue">-</strong></div></div></section>
             </div>
         </div>
