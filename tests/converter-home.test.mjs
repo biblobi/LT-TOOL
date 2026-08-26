@@ -297,7 +297,7 @@ test('advertising calculator accepts manual POS when monthly orders are unavaila
   assert.equal(metrics.blendedCost, 2.8);
 });
 
-test('profit calculator supports chargeable weight, cubic-foot storage, and advertising cost inputs', () => {
+test('profit calculator supports chargeable weight, cubic-foot storage, advertising cost, and FBA placement inputs', () => {
   const { calculateProfitMetrics } = loadProfitHelpers();
   const result = calculateProfitMetrics({
     price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
@@ -311,6 +311,15 @@ test('profit calculator supports chargeable weight, cubic-foot storage, and adve
   assert.ok(Math.abs(result.totalCost - 20.643333333333334) < 1e-10);
   assert.ok(Math.abs(result.profit - 9.356666666666666) < 1e-10);
   assert.ok(Math.abs(result.maxCpc - 1.1356666666666666) < 1e-10);
+
+  const withPlacement = calculateProfitMetrics({
+    price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
+    packageVolumeCm3: 28316.8466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
+    adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 1.25, targetMargin: 20, cvr: 0.1,
+  });
+  assert.equal(withPlacement.placement, 1.25);
+  assert.equal(withPlacement.totalCost - result.totalCost, 1.25);
+  assert.equal(result.profit - withPlacement.profit, 1.25);
 });
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
@@ -392,6 +401,33 @@ test('profit calculation title owns the market selector and uses flat section he
   assert.match(html, /\.fba-rule-value \.metric-value\s*\{\s*color:\s*#aaa/);
   assert.doesNotMatch(html, /重货\/抛货判断|头程、仓储与 FBA|Amazon FBA · 2026 美国站估算/);
   assert.match(html, /\.freight-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
+});
+
+test('profit results display paired market-currency and CNY values without cargo detail cards', () => {
+  for (const required of [
+    'id="profitFreightCnyValue"', 'id="profitFbaCnyValue"', 'id="profitStorageCnyValue"', 'id="profitAdCnyValue"',
+    'id="profitTotalCostCnyValue"', 'id="profitCnyValue"', 'id="profitMaxCpcCnyValue"', 'id="profitMaxPurchaseCnyValue"',
+    'class="metric-money"', 'function rmbMoney', 'function setProfitMoneyMetric',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
+  assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);
+});
+
+test('automatic result values guide users to their dependent inputs and explain FBA placement fees', () => {
+  for (const required of [
+    'function guideCalculationInputs', 'data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx"',
+    'data-inputs="adCpc,adCvr,adPos,adPrice"', 'input-guided', 'FBA 入库配置费',
+    'Inventory Placement Service Fee', '该项会单独计入总成本',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.match(html, /scrollIntoView\(\{ behavior: 'smooth', block: 'center' \}\)/);
+  assert.match(html, /firstBlank\.focus\(\{ preventScroll: true \}\)/);
+});
+
+test('footer keeps contacts together on a second line', () => {
+  assert.match(html, /<footer>[\s\S]*?SYSTEM CORE DESIGNED BY CHE RUI[\s\S]*?class="footer-contacts"[\s\S]*?小红书：bibliobibule[\s\S]*?VX：bibliobibule[\s\S]*?<\/footer>/);
+  assert.match(html, /footer\s*\{[\s\S]*?flex-direction:\s*column/s);
 });
 
 test('profit exchange-rate update fetches the selected market rate and recalculates profit', () => {
