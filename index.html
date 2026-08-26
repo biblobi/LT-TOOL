@@ -322,10 +322,10 @@
         .calculator-panel.full { grid-column: 1 / -1; }
         .calculator-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 8px; }
         .profit-grid .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .calculator-fields label { display: grid; grid-template-columns: minmax(0, 1fr) minmax(84px, 1fr); align-items: center; gap: 7px; min-height: 32px; color: #aaa; font-size: 0.72rem; line-height: 1.25; min-width: 0; }
-        .calculator-fields label > input, .calculator-fields label > select { align-self: center; }
+        .calculator-fields label { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 4px; min-height: 54px; color: #aaa; font-size: 0.72rem; line-height: 1.25; min-width: 0; }
+        .calculator-fields label > input, .calculator-fields label > select { align-self: stretch; }
         .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: inherit; }
-        .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+        .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; min-height: 16px; }
         .field-hint { color: #666; font-size: 0.72rem; }
         .term-tip { position: relative; display: inline-block; color: var(--neon-cyan); text-decoration: underline dotted; cursor: help; }
         .term-tip::after { content: attr(data-tip); position: absolute; z-index: 20; display: none; left: 0; top: calc(100% + 7px); width: max-content; max-width: 280px; padding: 8px 10px; background: #050505; border: 1px solid var(--neon-cyan); color: #ddd; font: 12px/1.45 Roboto, sans-serif; text-decoration: none; white-space: normal; box-shadow: 0 5px 16px #000; }
@@ -337,6 +337,8 @@
         .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; margin-top: 3px; overflow-wrap: anywhere; }
         .metric.negative strong { color: var(--neon-pink); }
         .formula-note { color: #777; font-size: 0.73rem; line-height: 1.4; margin: 7px 0 0; }
+        .calculator-panel > .formula-note { display: none; }
+        .calculator-panel > .source-note, .profit-grid .cargo-note { display: none; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.45; margin: 8px 0 0; border-top: 1px solid #202020; padding-top: 7px; }
         .profit-breakdown { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
         .profit-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
@@ -348,6 +350,9 @@
         .profit-grid .fba-basis { padding-left: 12px; }
         .currency-chart { margin-top: 12px; border: 1px solid #222; padding: 10px; background: #080808; }
         .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 0.75rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
+        .currency-range { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
+        .currency-range button { border: 1px solid #333; background: #050505; color: #888; padding: 4px 8px; font: 0.7rem 'Share Tech Mono', monospace; cursor: pointer; }
+        .currency-range button:hover, .currency-range button.active { border-color: var(--neon-cyan); color: var(--neon-cyan); }
         .currency-chart canvas { width: 100%; height: 150px; display: block; }
         .currency-chart-status { color: #666; font-size: 0.72rem; margin: 7px 0 0; }
         .currency-manual-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; color: #aaa; font-size: 0.76rem; }
@@ -359,7 +364,7 @@
         @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-layout { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid { grid-template-columns: 1fr; }
-            .calculator-fields label { grid-template-columns: 1fr; align-items: stretch; gap: 4px; min-height: 0; }
+            .calculator-fields label { min-height: 0; }
             .calculator-home h1 { padding-inline: 10px; }
             .profit-heading-meta { width: 100%; justify-content: space-between; margin-top: 6px; }
             .profit-country, .profit-fx { width: 100%; justify-content: space-between; }
@@ -495,7 +500,7 @@
             <h1>广告费换算</h1>
             <div class="calculator-grid">
                 <section class="calculator-panel">
-                    <div class="section-title">PPC 输入</div>
+                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本。CVR、POS、ACOS、ACoAS 与 TACoS 均由输入数据自动计算。">PPC 输入</span></div>
                     <div class="calculator-fields">
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。">CPC</span> <span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label">月点击量 <span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
@@ -504,7 +509,6 @@
                         <label><span class="field-label">月销量 <span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label">售价 <span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator()"></label>
                     </div>
-                    <p class="formula-note"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；不等于广告流量占比。">POS</span> = 广告订单 ÷ 月销量。</p>
                     <input id="adPaidOrderShare" type="hidden" value="100">
                 </section>
                 <section class="calculator-panel">
@@ -512,16 +516,13 @@
                     <div class="metric-grid">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量。">CVR</span><strong id="adCvrValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><strong id="adCpaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><strong id="adAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><strong id="adAcoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="TACoS（总广告成本占比）：广告费 ÷ 总销售额，使用混合广告费/件估算。">TACoS</span><strong id="adTacosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><strong id="adRoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；不等于广告流量占比。">POS</span><strong id="adPosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><strong id="adBlendedCostValue">-</strong></div>
                     </div>
-                    <p class="formula-note">CPA = CPC ÷ CVR；ACOS = CPA ÷ 售价；TACoS / ACoAS = 混合广告费/件 ÷ 售价；ROAS = 售价 ÷ CPA；混合广告费/件 = CPA × POS。</p>
-                    <p class="formula-note">混合广告费/件是把广告订单成本按广告订单占比摊到全部销量后的平均值，不是单个广告订单的 CPA；因此可直接带入利润测试。</p>
-                    <p class="source-note">数据口径：CPC、点击、广告订单请以 Amazon Ads 报表为准；卖家精灵/SIF 的公开数据可用于市场预估，不替代实际广告归因。</p>
                 </section>
             </div>
         </div>
         <div id="module-profit" class="calculator-home embedded-calculator">
             <h1><span>利润测试</span><span class="profit-heading-meta"><label class="profit-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option></select></label><label class="profit-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.0001" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="profit-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
             <div class="calculator-grid profit-grid">
-                <section class="calculator-panel"><div class="section-title">头程、仓储与 FBA</div>
+                <section class="calculator-panel"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="头程、仓储与 FBA 成本按每件商品折算；运费使用计费重，FBA 使用尺寸、重量和站点规则。">头程、仓储与 FBA</span></div>
                     <div id="cargo-check" class="cargo-check">
                         <div class="cargo-layout">
                             <div>
@@ -533,7 +534,6 @@
                                 </div>
                                 <div class="cargo-summary"><div>体积（立方厘米）：<span id="cargoVolumeValue">-</span></div><div>体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div></div>
                                 <div class="fba-summary"><div class="fba-heading" id="fbaHeading">Amazon FBA · 2026 美国站估算</div><div class="cargo-summary"><div>包装尺寸（英寸）：<span id="fbaDimensionsValue">-</span></div><div>实重（磅）：<span id="fbaWeightValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div></div></div>
-                                <p class="cargo-note">体积系数可按承运商调整；FBA 费用不含仓储费、入库配置费及附加费。</p>
                             </div>
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
@@ -541,7 +541,7 @@
                     <div class="calculator-fields">
                     <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitStorageLabel">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="updateProfitCalculator()"></label><label>平均库存月数<input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label>退货率 %<input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                 </div></section>
-                <section class="calculator-panel full"><div class="section-title">利润结果</div><div class="calculator-fields"><label><span id="profitPriceLabel">售价（美元）</span><input id="profitPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateProfitCalculator()"></label><label>含税采购成本（人民币）<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label><label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label><label>佣金 %<input id="profitReferralRate" data-market-default="1" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label><label><span id="profitPlacementLabel">上架/配置费（美元）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label></div><div class="profit-breakdown" style="margin-top:8px"><div class="metric">计费重<strong id="profitChargeableWeightValue">-</strong></div><div class="metric">包装体积<strong id="profitPackageVolumeValue">-</strong></div><div class="metric">头程/件<strong id="profitFreightValue">-</strong></div><div class="metric">FBA/件<strong id="profitFbaValue">-</strong></div><div class="metric">仓储/件<strong id="profitStorageValue">-</strong></div><div class="metric">广告/件<strong id="profitAdValue">-</strong></div><div class="metric">总成本/件<strong id="profitTotalCostValue">-</strong></div><div class="metric" id="profitMetric">利润/件<strong id="profitValue">-</strong></div><div class="metric">利润率<strong id="profitMarginValue">-</strong></div><div class="metric">保本 ACOS<strong id="profitBreakEvenAcosValue">-</strong></div><div class="metric">最大 CPC<strong id="profitMaxCpcValue">-</strong></div><div class="metric">目标采购上限<strong id="profitMaxPurchaseValue">-</strong></div></div><p class="formula-note">仓储 = 包装体积（cm3 ÷ 28,316.8466）× 仓储单价（USD/ft3/月）× 平均库存月数。实际 Amazon 月仓储费会受淡旺季、危险品、库存位置与体积测量影响，页面单价请按官方费率表更新。</p><p class="source-note">依据：FBA 尺寸与配送费沿用页面中的 Amazon 2026 美国站分段；体积仓储使用 Amazon FBA 按立方英尺和月份计费的公开规则；广告成本统一取自广告费换算模块，最终以 Amazon 结算、广告和物流账单为准。</p></section>
+                <section class="calculator-panel full"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA − 仓储 − 广告 − 佣金 − 促销 − 退货 − 配置费。仓储按体积、单价和库存月数估算。广告成本统一取自广告费换算模块。">利润结果</span></div><div class="calculator-fields"><label><span id="profitPriceLabel">售价（美元）</span><input id="profitPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateProfitCalculator()"></label><label>含税采购成本（人民币）<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label><label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label><label>佣金 %<input id="profitReferralRate" data-market-default="1" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label><label><span id="profitPlacementLabel">上架/配置费（美元）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label></div><div class="profit-breakdown" style="margin-top:8px"><div class="metric">计费重<strong id="profitChargeableWeightValue">-</strong></div><div class="metric">包装体积<strong id="profitPackageVolumeValue">-</strong></div><div class="metric">头程/件<strong id="profitFreightValue">-</strong></div><div class="metric">FBA/件<strong id="profitFbaValue">-</strong></div><div class="metric">仓储/件<strong id="profitStorageValue">-</strong></div><div class="metric">广告/件<strong id="profitAdValue">-</strong></div><div class="metric">总成本/件<strong id="profitTotalCostValue">-</strong></div><div class="metric" id="profitMetric">利润/件<strong id="profitValue">-</strong></div><div class="metric">利润率<strong id="profitMarginValue">-</strong></div><div class="metric">保本 ACOS<strong id="profitBreakEvenAcosValue">-</strong></div><div class="metric">最大 CPC<strong id="profitMaxCpcValue">-</strong></div><div class="metric">目标采购上限<strong id="profitMaxPurchaseValue">-</strong></div></div></section>
             </div>
         </div>
         </div>
@@ -662,7 +662,8 @@
             <div id="updateTime" style="font-size:0.7rem; color:#666; margin-top:5px;"></div>
         </div>
         <div class="currency-chart">
-            <div class="currency-chart-header"><span id="currencyChartTitle">汇率变化曲线</span><span id="currencyChartRange">最近 30 个工作日</span></div>
+            <div class="currency-chart-header"><span id="currencyChartTitle">汇率变化曲线</span><span id="currencyChartRange">1 个月</span></div>
+            <div class="currency-range" role="group" aria-label="历史区间"><button type="button" data-range="1m" class="active" onclick="setCurrencyTrendRange('1m')">1个月</button><button type="button" data-range="1y" onclick="setCurrencyTrendRange('1y')">1年</button><button type="button" data-range="5y" onclick="setCurrencyTrendRange('5y')">5年</button></div>
             <canvas id="currencyTrendChart" aria-label="汇率变化曲线"></canvas>
             <p id="currencyChartStatus" class="currency-chart-status">选择货币后自动加载历史参考汇率。</p>
         </div>
@@ -1537,6 +1538,14 @@
         return date.toISOString().slice(0, 10);
     }
 
+    let currencyTrendRange = '1m';
+
+    function setCurrencyTrendRange(range) {
+        currencyTrendRange = range;
+        document.querySelectorAll('.currency-range button').forEach(button => button.classList.toggle('active', button.dataset.range === range));
+        updateCurrencyTrend();
+    }
+
     function drawCurrencyTrend(points, source, target) {
         const canvas = document.getElementById('currencyTrendChart');
         if (!canvas || !points.length) return;
@@ -1564,21 +1573,25 @@
         const latest = points[points.length - 1];
         ctx.fillStyle = '#00f3ff'; ctx.beginPath(); ctx.arc(x(points.length - 1), y(latest.value), 3, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#888'; ctx.font = '11px Share Tech Mono, monospace';
-        ctx.fillText(`${source}/${target} ${latest.value.toFixed(4)}`, pad.left, 11);
+        ctx.fillText(`1 ${source} = ${latest.value.toFixed(4)} ${target}`, pad.left, 11);
         ctx.fillText(points[0].date.slice(5), pad.left, height - 5);
         const finalLabel = points[points.length - 1].date.slice(5); const labelWidth = ctx.measureText(finalLabel).width;
         ctx.fillText(finalLabel, width - pad.right - labelWidth, height - 5);
     }
 
     async function updateCurrencyTrend() {
-        const source = document.getElementById('sourceCurrency').value;
-        const target = document.getElementById('targetCurrency').value;
+        const selected = document.getElementById('targetCurrency').value === 'CNY'
+            ? document.getElementById('sourceCurrency').value
+            : document.getElementById('targetCurrency').value;
+        const source = selected === 'CNY' ? 'USD' : selected;
+        const target = 'CNY';
         const title = document.getElementById('currencyChartTitle');
         const status = document.getElementById('currencyChartStatus');
-        if (source === target) { status.textContent = '请选择不同币种以查看变化曲线。'; return; }
-        title.textContent = `${source} / ${target} 变化曲线`;
-        status.textContent = '正在加载最近 30 个工作日参考汇率...';
-        const end = new Date(); const start = new Date(); start.setDate(end.getDate() - 45);
+        const rangeMeta = { '1m': { label: '1 个月', days: 31 }, '1y': { label: '1 年', days: 366 }, '5y': { label: '5 年', days: 1826 } }[currencyTrendRange] || { label: '1 个月', days: 31 };
+        title.textContent = `${source} → CNY 汇率曲线`;
+        document.getElementById('currencyChartRange').textContent = rangeMeta.label;
+        status.textContent = `正在加载 ${rangeMeta.label} 历史参考汇率...`;
+        const end = new Date(); const start = new Date(); start.setDate(end.getDate() - rangeMeta.days);
         try {
             const url = `https://api.frankfurter.dev/v1/${formatTrendDate(start)}..${formatTrendDate(end)}?from=${encodeURIComponent(source)}&to=${encodeURIComponent(target)}`;
             const response = await fetch(url);
@@ -1589,7 +1602,7 @@
             drawCurrencyTrend(points, source, target);
             const first = points[0].value, latest = points[points.length - 1].value;
             const change = first ? (latest / first - 1) * 100 : 0;
-            status.textContent = `${points.length} 个工作日参考汇率；区间变化 ${change >= 0 ? '+' : ''}${change.toFixed(2)}%。数据源：Frankfurter（欧洲央行参考汇率）。`;
+            status.textContent = `${points.length} 个工作日参考汇率；1 ${source} = ${latest.toFixed(4)} ${target}；区间变化 ${change >= 0 ? '+' : ''}${change.toFixed(2)}%。数据源：Frankfurter。`;
         } catch (error) {
             status.textContent = '历史汇率暂不可用；实时换算不受影响。';
             console.error(error);

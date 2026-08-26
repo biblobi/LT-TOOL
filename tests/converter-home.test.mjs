@@ -306,7 +306,7 @@ test('profit and ad calculators are embedded in the converter home with a single
   for (const required of [
     'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
     'id="profitStorageRate"', '广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
-    'Amazon Ads 报表', '广告订单占比', 'id="adAcoasValue"', 'id="adTacosValue"', '混合广告费/件是把广告订单成本按广告订单占比摊到全部销量后的平均值', 'id="adPaidOrderShare"',
+    '广告订单占比', 'id="adAcoasValue"', 'id="adTacosValue"', 'id="adPaidOrderShare"',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   for (const removed of ['profitLinkAds', 'profitLinkFba', 'profitLinkCargo', 'profitManualAdRate', 'profitManualWeight', 'profitManualFba', '收入与采购', '广告与利润结果']) {
     assert.doesNotMatch(html, new RegExp(removed));
@@ -317,8 +317,15 @@ test('profit and ad calculators are embedded in the converter home with a single
 test('currency converter supports CAD and renders a historical trend curve', () => {
   for (const required of [
     'CAD 加元', 'id="currencyTrendChart"', 'function updateCurrencyTrend', 'function drawCurrencyTrend',
-    'api.frankfurter.dev/v1/', '最近 30 个工作日', 'id="cargo-check"', 'scrollConverterSection',
+    'api.frankfurter.dev/v1/', 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
+
+test('advertising and profit inputs use stacked labels and POS is only shown as a result metric', () => {
+  assert.match(html, /\.calculator-fields label \{ display: flex; flex-direction: column;/);
+  assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
+  assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
+  assert.match(html, /data-tip="头程、仓储与 FBA 成本按每件商品折算/);
 });
 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
