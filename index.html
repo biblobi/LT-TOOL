@@ -320,11 +320,13 @@
         .profit-grid { grid-template-columns: 1fr; }
         .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 9px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
-        .calculator-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 8px; }
-        .profit-grid .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .calculator-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 8px; }
+        .profit-grid .calculator-fields { grid-template-columns: repeat(6, minmax(0, 1fr)); }
         .calculator-fields label { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 4px; min-height: 54px; color: #aaa; font-size: 0.72rem; line-height: 1.25; min-width: 0; }
         .calculator-fields label > input, .calculator-fields label > select { align-self: stretch; }
         .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: inherit; }
+        .calculator-fields label.linked-field { color: var(--neon-cyan); }
+        .calculator-fields input.linked-input, .calculator-fields select.linked-input { color: var(--neon-cyan); border-color: #17636a; }
         .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; min-height: 16px; }
         .field-hint { color: #666; font-size: 0.72rem; }
         .term-tip { position: relative; display: inline-block; color: var(--neon-cyan); text-decoration: underline dotted; cursor: help; }
@@ -360,8 +362,8 @@
         .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
         .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
         .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
-        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-layout { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid { grid-template-columns: 1fr; }
             .calculator-fields label { min-height: 0; }
@@ -505,7 +507,7 @@
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。">CPC</span> <span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label">月点击量 <span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label">广告订单量 <span class="field-hint">Paid orders</span></span><input id="adOrders" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；没有点击数据时不估算。">CVR <span class="field-hint">自动</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="0" readonly aria-readonly="true"></label>
+                        <label class="linked-field"><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；没有点击数据时不估算。">CVR</span><input id="adCvr" class="linked-input" type="number" min="0" max="100" step="0.01" value="0" readonly aria-readonly="true"></label>
                         <label><span class="field-label">月销量 <span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label">售价 <span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator()"></label>
                     </div>
@@ -539,7 +541,7 @@
                         </div>
                     </div>
                     <div class="calculator-fields">
-                    <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitStorageLabel">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="updateProfitCalculator()"></label><label>平均库存月数<input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label>退货率 %<input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
+                    <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label class="linked-field"><span id="profitStorageLabel">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" class="linked-input" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="updateProfitCalculator()"></label><label>平均库存月数<input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label>退货率 %<input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                 </div></section>
                 <section class="calculator-panel full"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA − 仓储 − 广告 − 佣金 − 促销 − 退货 − 配置费。仓储按体积、单价和库存月数估算。广告成本统一取自广告费换算模块。">利润结果</span></div><div class="calculator-fields"><label><span id="profitPriceLabel">售价（美元）</span><input id="profitPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateProfitCalculator()"></label><label>含税采购成本（人民币）<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label><label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label><label>佣金 %<input id="profitReferralRate" data-market-default="1" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label><label><span id="profitPlacementLabel">上架/配置费（美元）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label></div><div class="profit-breakdown" style="margin-top:8px"><div class="metric">计费重<strong id="profitChargeableWeightValue">-</strong></div><div class="metric">包装体积<strong id="profitPackageVolumeValue">-</strong></div><div class="metric">头程/件<strong id="profitFreightValue">-</strong></div><div class="metric">FBA/件<strong id="profitFbaValue">-</strong></div><div class="metric">仓储/件<strong id="profitStorageValue">-</strong></div><div class="metric">广告/件<strong id="profitAdValue">-</strong></div><div class="metric">总成本/件<strong id="profitTotalCostValue">-</strong></div><div class="metric" id="profitMetric">利润/件<strong id="profitValue">-</strong></div><div class="metric">利润率<strong id="profitMarginValue">-</strong></div><div class="metric">保本 ACOS<strong id="profitBreakEvenAcosValue">-</strong></div><div class="metric">最大 CPC<strong id="profitMaxCpcValue">-</strong></div><div class="metric">目标采购上限<strong id="profitMaxPurchaseValue">-</strong></div></div></section>
             </div>
@@ -1627,6 +1629,7 @@
     installTermTips();
     updateMarketCountry();
     updateAdCalculator();
+    fetchRates();
 </script>
 
 <!-- 背景移除：IMG.LY（质量更好，支持批量队列） -->
