@@ -290,11 +290,11 @@ test('advertising calculator accepts a manual CVR when clicks are unavailable', 
   assert.equal(metrics.cpa, 3.2);
 });
 
-test('advertising calculator accepts manual POS when monthly orders are unavailable', () => {
+test('advertising calculator leaves POS unavailable until monthly sales are provided', () => {
   const { calculateAdMetrics } = loadProfitHelpers();
-  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 100, orders: 0, cvr: 10, monthlyUnits: 0, pos: 35, price: 20 });
-  assert.equal(metrics.pos, 0.35);
-  assert.equal(metrics.blendedCost, 2.8);
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 100, orders: 0, cvr: 10, monthlyUnits: 0, price: 20 });
+  assert.equal(metrics.pos, null);
+  assert.equal(metrics.blendedCost, null);
 });
 
 test('profit calculator supports chargeable weight, cubic-foot storage, advertising cost, and FBA placement inputs', () => {
@@ -324,8 +324,8 @@ test('profit calculator supports chargeable weight, cubic-foot storage, advertis
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
   for (const required of [
-    'id="module-freight"', 'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPos"',
-    'id="profitStorageRate"', '广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
+    'id="module-freight"', 'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPosMetricValue"',
+    'id="profitStorageRate"', '售价与广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
     '广告订单占比', 'id="adAcoasValue"', '运费与仓储计算',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   for (const removed of ['profitLinkAds', 'profitLinkFba', 'profitLinkCargo', 'profitManualAdRate', 'profitManualWeight', 'profitManualFba', '收入与采购', '广告与利润结果']) {
@@ -334,20 +334,23 @@ test('profit and ad calculators are embedded in the converter home with a single
   assert.doesNotMatch(html, /switchTab\('adcalc'\)|switchTab\('profit'\)/);
 });
 
-test('currency converter supports CAD and renders a historical trend curve', () => {
+test('currency converter covers Amazon and TikTok Shop market currencies and renders a historical trend curve', () => {
   for (const required of [
-    'CAD 加元', 'id="currencyTrendChart"', 'function updateCurrencyTrend', 'function drawCurrencyTrend',
-    'api.frankfurter.dev/v1/', 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection',
+    'CAD 加拿大', 'VND 越南', 'THB 泰国', 'BRL 巴西', 'MXN 墨西哥', 'IDR 印尼', 'MYR 马来西亚', 'PHP 菲律宾',
+    'AED 阿联酋', 'SAR 沙特', 'ZAR 南非', 'id="currencyTrendChart"', 'function updateCurrencyTrend', 'function drawCurrencyTrend',
+    'api.frankfurter.dev/v1/', 'FRANKFURTER_HISTORICAL_CURRENCIES', "!FRANKFURTER_HISTORICAL_CURRENCIES.has(source)", 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /window\.updateCurrencyDisplay\s*=\s*\(\)\s*=>\s*\{[\s\S]*?currencyManualSource[\s\S]*?currencyManualRate/);
 });
 
-test('advertising and profit inputs use stacked labels and POS is an editable input', () => {
+test('advertising and profit inputs use stacked labels and POS is calculated below the inputs', () => {
   assert.match(html, /\.calculator-fields label \{ display: flex; flex-direction: column;/);
   assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
   assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
-  assert.match(html, /<h1>运费与仓储计算<\/h1>/);
-  assert.match(html, /id="adPos"[^>]+oninput="updateAdCalculator\('pos'\)"/);
-  assert.doesNotMatch(html, /id="adPosValue"|id="adTacosValue"|TACoS/);
+  assert.match(html, /<h1><span>运费与仓储计算<\/span>[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"/);
+  assert.match(html, /id="adPosMetricValue"/);
+  assert.doesNotMatch(html, /id="adPos"[^A-Za-z]/);
+  assert.doesNotMatch(html, /id="adTacosValue"|TACoS/);
 });
 
 test('PPC explanations use the complete field label as the hover and keyboard target', () => {
@@ -356,7 +359,7 @@ test('PPC explanations use the complete field label as the hover and keyboard ta
   const adMarkup = html.slice(adStart, adEnd);
   const tooltipLabels = adMarkup.match(/class="field-label term-tip" tabindex="0" data-tip="[^"]+"/g) ?? [];
 
-  assert.equal(tooltipLabels.length, 7);
+  assert.equal(tooltipLabels.length, 6);
   assert.match(html, /\.calculator-fields \.field-label\.term-tip\s*\{\s*display:\s*flex;\s*position:\s*relative;/);
   assert.doesNotMatch(adMarkup, /class="field-label"><span class="term-tip"/);
 });
@@ -391,8 +394,8 @@ test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () =
   assert.doesNotMatch(html, /setLabel\('profitFbaLabel'/);
 });
 
-test('profit calculation title owns the market selector and uses flat section headings', () => {
-  assert.match(html, /<h1><span>利润测算<\/span><span class="profit-heading-meta">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
+test('freight heading owns the market selector and uses flat section headings', () => {
+  assert.match(html, /<h1><span>运费与仓储计算<\/span><span class="heading-controls">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
   assert.equal((html.match(/id="marketCountry"/g) ?? []).length, 1);
   assert.equal((html.match(/id="profitFx"/g) ?? []).length, 1);
   assert.doesNotMatch(html, /单 SKU 利润测算/);
@@ -417,7 +420,7 @@ test('profit results display paired market-currency and CNY values without cargo
 test('automatic result values guide users to their dependent inputs and explain FBA placement fees', () => {
   for (const required of [
     'function guideCalculationInputs', 'data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx"',
-    'data-inputs="adCpc,adCvr,adPos,adPrice"', 'input-guided', 'FBA 入库配置费',
+    'data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice"', 'input-guided', 'FBA 入库配置费',
     'Inventory Placement Service Fee', '该项会单独计入总成本',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
@@ -447,4 +450,23 @@ test('profit exchange-rate update fetches the selected market rate and recalcula
   assert.match(html, /fetch\('https:\/\/open\.er-api\.com\/v6\/latest\/CNY'\)/);
   assert.match(html, /fx\.value = \(1 \/ marketRate\)\.toFixed\(4\)/);
   assert.match(html, /updateProfitCalculator\(\);/);
+  assert.match(html, /updateMarketCountry\(\)[\s\S]*?updateProfitExchangeRate\(\);/);
+});
+
+test('site navigation and converter jumps are consolidated into a desktop sidebar', () => {
+  assert.match(html, /body\s*\{[\s\S]*?grid-template-columns:\s*minmax\(132px,\s*150px\)\s+minmax\(0,\s*1fr\)/);
+  assert.match(html, /\.nav-deck\s*\{[\s\S]*?position:\s*sticky/);
+  const navStart = html.indexOf('<div class="nav-deck">');
+  const converterStart = html.indexOf('<div id="module-converter"');
+  const navMarkup = html.slice(navStart, converterStart);
+  for (const label of ['运费与仓储', '广告费换算', '利润测算', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
+  assert.match(navMarkup, /量子换算[\s\S]*?<div class="converter-subnav">[\s\S]*?运费与仓储/);
+  assert.doesNotMatch(html.slice(converterStart, html.indexOf('<div class="converter-workspace">', converterStart)), /converter-jump/);
+});
+
+test('AI chat and dotted tooltip underlines are removed', () => {
+  for (const removed of ['module-chat', 'AI 对话', 'OPENROUTER_BASE_URL', 'sendMessage', 'toggleChatKey', 'text-decoration: underline dotted']) {
+    assert.doesNotMatch(html, new RegExp(removed));
+  }
+  assert.doesNotMatch(html, /\.fba-rule-row\s*\{[^}]*dashed/);
 });
