@@ -5,16 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMNI-MATRIX V6 | 智能核心</title>
     <link rel="icon" href="data:,">
+    <script>
+        try { document.documentElement.dataset.theme = localStorage.getItem('lt_tool_theme') || 'light'; } catch { document.documentElement.dataset.theme = 'light'; }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
-            --neon-cyan: #00f3ff;
-            --neon-pink: #ff0055;
-            --neon-green: #00ff66;
-            --bg-dark: #0a0a0a;
-            --panel-bg: #111;
-            --border-color: #333;
+            color-scheme: light;
+            --canvas: #f7f1e6;
+            --surface: #fffcf5;
+            --surface-raised: #f0eadf;
+            --surface-muted: #e7dfd2;
+            --input-bg: #ffffff;
+            --text-primary: #1f2421;
+            --text-muted: #5e625c;
+            --text-subtle: #766f66;
+            --border-color: #d8d0c2;
+            --border-strong: #b7ae9f;
+            --accent: #0f766e;
+            --accent-hover: #115e59;
+            --accent-soft: #dceee8;
+            --accent-contrast: #ffffff;
+            --danger: #b42318;
+            --danger-soft: #fce6e2;
+            --success: #217a45;
+            --focus-bg: #eaf5f1;
+            --tooltip-bg: #fffcf5;
+            --tooltip-text: #1f2421;
+            --tooltip-shadow: rgba(31, 36, 33, 0.15);
+            --chart-grid: #d8d0c2;
+            --scroll-track: #eee7db;
+            --scroll-thumb: #9b9285;
+            --checker-pattern: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23e1d9cc"/><rect x="5" y="5" width="5" height="5" fill="%23e1d9cc"/></svg>');
+            --neon-cyan: var(--accent);
+            --neon-pink: var(--danger);
+            --neon-green: var(--success);
+            --bg-dark: var(--canvas);
+            --panel-bg: var(--surface);
+        }
+
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --canvas: #0a0a0a;
+            --surface: #111111;
+            --surface-raised: #0b0b0b;
+            --surface-muted: #151515;
+            --input-bg: #000000;
+            --text-primary: #dddddd;
+            --text-muted: #aaaaaa;
+            --text-subtle: #888888;
+            --border-color: #333333;
+            --border-strong: #444444;
+            --accent: #00f3ff;
+            --accent-hover: #00f3ff;
+            --accent-soft: #073438;
+            --accent-contrast: #000000;
+            --danger: #ff0055;
+            --danger-soft: #3b0b1e;
+            --success: #00ff66;
+            --focus-bg: #071619;
+            --tooltip-bg: #050505;
+            --tooltip-text: #dddddd;
+            --tooltip-shadow: #000000;
+            --chart-grid: #222222;
+            --scroll-track: #111111;
+            --scroll-thumb: #555555;
+            --checker-pattern: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23222"/><rect x="5" y="5" width="5" height="5" fill="%23222"/></svg>');
         }
 
         * { box-sizing: border-box; outline: none; }
@@ -28,10 +85,16 @@
             align-items: center;
             min-height: 100vh;
             width: 100%;
-            color: #ddd;
+            color: var(--text-primary);
             padding: 16px;
             padding-bottom: 16px;
         }
+        ::selection { background: var(--accent-soft); color: var(--text-primary); }
+        *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        * { scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--scroll-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border: 2px solid var(--scroll-track); }
 
         .nav-deck {
             display: flex;
@@ -46,7 +109,7 @@
         .nav-btn {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
-            color: #888;
+            color: var(--text-muted);
             padding: 10px 15px;
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.85rem;
@@ -56,11 +119,12 @@
         }
 
         .nav-btn:hover, .nav-btn.active {
-            background: var(--neon-cyan);
-            color: #000;
-            border-color: var(--neon-cyan);
+            background: var(--accent);
+            color: var(--accent-contrast);
+            border-color: var(--accent);
             font-weight: bold;
         }
+        .theme-toggle { border-color: var(--accent); color: var(--accent-hover); }
 
         .container {
             background-color: var(--panel-bg);
@@ -416,6 +480,103 @@
             flex-direction: column; gap: 4px;
         }
         .footer-contacts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+
+        /* Theme surface map: all operational components draw from the active semantic palette. */
+        :root[data-theme] .container,
+        :root[data-theme] footer { background: var(--surface); border-color: var(--border-color); color: var(--text-muted); }
+        :root[data-theme] .converter-jump,
+        :root[data-theme] .conversion-table tr,
+        :root[data-theme] .optional-units,
+        :root[data-theme] .cargo-check,
+        :root[data-theme] .calculator-panel,
+        :root[data-theme] .currency-chart { background: var(--surface-raised); border-color: var(--border-color); }
+        :root[data-theme] .calculator-home h1 { background: var(--surface-muted); }
+        :root[data-theme] .upload-area { background: var(--surface-raised); border-color: var(--border-strong); }
+        :root[data-theme] .upload-area:hover { background: var(--surface-muted); border-color: var(--accent); }
+        :root[data-theme] .nav-btn { background: var(--surface); border-color: var(--border-color); color: var(--text-muted); }
+        :root[data-theme] .nav-btn:hover,
+        :root[data-theme] .nav-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+        :root[data-theme] .theme-toggle { border-color: var(--accent); color: var(--accent-hover); }
+        :root[data-theme] .theme-toggle:hover { color: var(--accent-contrast); }
+        :root[data-theme] .converter-jump:hover,
+        :root[data-theme] .btn-action { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+        :root[data-theme] .btn-secondary { background: transparent; border-color: var(--danger); color: var(--danger); }
+        :root[data-theme] .btn-secondary:hover { background: var(--danger); color: var(--accent-contrast); }
+        :root[data-theme] h1,
+        :root[data-theme] .control-btn,
+        :root[data-theme] .cargo-summary span,
+        :root[data-theme] .term-tip,
+        :root[data-theme] .metric strong,
+        :root[data-theme] .market-badge { color: var(--accent); }
+        :root[data-theme] .section-title,
+        :root[data-theme] .conversion-table th,
+        :root[data-theme] .file-item,
+        :root[data-theme] .currency-chart-header,
+        :root[data-theme] .metric,
+        :root[data-theme] .nav-btn,
+        :root[data-theme] .fba-basis,
+        :root[data-theme] .fba-rule-value,
+        :root[data-theme] .profit-country,
+        :root[data-theme] .profit-fx,
+        :root[data-theme] .calculator-fields label,
+        :root[data-theme] .currency-manual-row,
+        :root[data-theme] .metric-rmb { color: var(--text-muted); }
+        :root[data-theme] .conversion-table td,
+        :root[data-theme] .cargo-fields label,
+        :root[data-theme] .fba-heading,
+        :root[data-theme] .fba-rule-label,
+        :root[data-theme] .fba-rule-value .metric-value,
+        :root[data-theme] .link-control { color: var(--text-muted); }
+        :root[data-theme] .optional-units summary,
+        :root[data-theme] .field-hint,
+        :root[data-theme] .currency-chart-status,
+        :root[data-theme] .cargo-note,
+        :root[data-theme] .formula-note,
+        :root[data-theme] .source-note,
+        :root[data-theme] .hf-token-edit { color: var(--text-subtle); }
+        :root[data-theme] .optional-units summary:hover,
+        :root[data-theme] .hf-token-edit:hover,
+        :root[data-theme] .currency-range button:hover,
+        :root[data-theme] .currency-range button.active { color: var(--accent); }
+        :root[data-theme] .cyber-input,
+        :root[data-theme] .conversion-table td input,
+        :root[data-theme] .cargo-fields input,
+        :root[data-theme] .cargo-fields select,
+        :root[data-theme] select,
+        :root[data-theme] .profit-country select,
+        :root[data-theme] .profit-fx input,
+        :root[data-theme] .calculator-fields input,
+        :root[data-theme] .calculator-fields select,
+        :root[data-theme] .currency-manual-row input[type="number"] { background: var(--input-bg); border-color: var(--border-strong); color: var(--text-primary); }
+        :root[data-theme] .cyber-input:focus,
+        :root[data-theme] .calculator-fields input:focus,
+        :root[data-theme] .calculator-fields select:focus,
+        :root[data-theme] .cargo-fields input:focus,
+        :root[data-theme] .cargo-fields select:focus { border-color: var(--accent); }
+        :root[data-theme] .cargo-summary div,
+        :root[data-theme] .file-list,
+        :root[data-theme] .file-item,
+        :root[data-theme] .fba-summary,
+        :root[data-theme] .fba-basis,
+        :root[data-theme] .fba-rule-row,
+        :root[data-theme] .metric,
+        :root[data-theme] .currency-chart,
+        :root[data-theme] .currency-range button,
+        :root[data-theme] .source-note { border-color: var(--border-color); }
+        :root[data-theme] .fba-trigger { color: var(--danger); }
+        :root[data-theme] .fba-trigger.is-clear,
+        :root[data-theme] .currency-display { color: var(--success); border-color: var(--success); }
+        :root[data-theme] .fba-rule-value .imperial-value { color: var(--accent); }
+        :root[data-theme] .metric.negative strong,
+        :root[data-theme] .metric.negative .metric-rmb { color: var(--danger); }
+        :root[data-theme] .metric-action:hover strong,
+        :root[data-theme] .metric-action:focus-visible strong { color: var(--text-primary); }
+        :root[data-theme] .input-guided { border-color: var(--accent) !important; background: var(--focus-bg) !important; }
+        :root[data-theme] .input-guided-field { color: var(--accent) !important; }
+        :root[data-theme] .term-tip::after { background: var(--tooltip-bg); border-color: var(--accent); color: var(--tooltip-text); box-shadow: 0 5px 16px var(--tooltip-shadow); }
+        :root[data-theme] .currency-range button { background: var(--input-bg); border-color: var(--border-strong); color: var(--text-muted); }
+        :root[data-theme] .currency-display { background: var(--input-bg); }
+        :root[data-theme] #bgOutput { border-color: var(--border-strong); background: var(--checker-pattern); }
     </style>
 </head>
 <body>
@@ -427,6 +588,7 @@
         <button class="nav-btn" onclick="switchTab('removebg')">背景移除</button>
         <button class="nav-btn" onclick="switchTab('chat')">AI 对话</button>
         <button class="nav-btn" onclick="switchTab('currency')">实时汇率</button>
+        <button id="themeToggle" class="nav-btn theme-toggle" type="button" onclick="toggleTheme()" aria-pressed="false">切换深色</button>
     </div>
 
     <!-- PDF 模块 -->
@@ -710,6 +872,8 @@
     const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
     const DEFAULT_OPENROUTER_KEY = '';
     let currentOpenRouterKey = localStorage.getItem('openrouter_key') || DEFAULT_OPENROUTER_KEY;
+    const THEME_STORAGE_KEY = 'lt_tool_theme';
+    let currencyTrendSnapshot = null;
 
     let liveRates = {};
     let lastBase = "CNY";
@@ -718,6 +882,36 @@
         US: { name: '美国站', currency: 'USD', fx: 7.2, storage: 0.78, referral: 15 },
         CA: { name: '加拿大站', currency: 'CAD', fx: 5.1, storage: 0.95, referral: 15 }
     };
+
+    function currentTheme() {
+        return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    }
+
+    function themeColor(token) {
+        return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+    }
+
+    function updateThemeToggle() {
+        const button = document.getElementById('themeToggle');
+        if (!button) return;
+        const dark = currentTheme() === 'dark';
+        button.textContent = dark ? '切换浅色' : '切换深色';
+        button.setAttribute('aria-pressed', String(dark));
+        button.setAttribute('aria-label', dark ? '当前为深色主题，切换到浅色主题' : '当前为浅色主题，切换到深色主题');
+    }
+
+    function applyTheme(theme, persist = true) {
+        document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+        if (persist) {
+            try { localStorage.setItem(THEME_STORAGE_KEY, currentTheme()); } catch {}
+        }
+        updateThemeToggle();
+        if (currencyTrendSnapshot) drawCurrencyTrend(currencyTrendSnapshot.points, currencyTrendSnapshot.source, currencyTrendSnapshot.target);
+    }
+
+    function toggleTheme() {
+        applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    }
 
     function currentMarket() { return MARKET_CONFIG[document.getElementById('marketCountry')?.value || 'US']; }
 
@@ -1666,14 +1860,14 @@
         const x = index => pad.left + (points.length === 1 ? chartWidth / 2 : index / (points.length - 1) * chartWidth);
         const y = value => pad.top + (max - value) / spread * chartHeight;
         ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+        ctx.strokeStyle = themeColor('--chart-grid'); ctx.lineWidth = 1;
         [0, .5, 1].forEach(level => { const py = pad.top + chartHeight * level; ctx.beginPath(); ctx.moveTo(pad.left, py); ctx.lineTo(width - pad.right, py); ctx.stroke(); });
         ctx.beginPath();
         points.forEach((point, index) => index ? ctx.lineTo(x(index), y(point.value)) : ctx.moveTo(x(index), y(point.value)));
-        ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = themeColor('--accent'); ctx.lineWidth = 2; ctx.stroke();
         const latest = points[points.length - 1];
-        ctx.fillStyle = '#00f3ff'; ctx.beginPath(); ctx.arc(x(points.length - 1), y(latest.value), 3, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#888'; ctx.font = '11px Share Tech Mono, monospace';
+        ctx.fillStyle = themeColor('--accent'); ctx.beginPath(); ctx.arc(x(points.length - 1), y(latest.value), 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = themeColor('--text-subtle'); ctx.font = '11px Share Tech Mono, monospace';
         ctx.fillText(`1 ${source} = ${latest.value.toFixed(4)} ${target}`, pad.left, 11);
         ctx.fillText(points[0].date.slice(5), pad.left, height - 5);
         const finalLabel = points[points.length - 1].date.slice(5); const labelWidth = ctx.measureText(finalLabel).width;
@@ -1699,6 +1893,7 @@
             const data = await response.json();
             const points = Object.entries(data.rates || {}).map(([date, rates]) => ({ date, value: Number(rates[target]) })).filter(point => Number.isFinite(point.value));
             if (!points.length) throw new Error('empty history');
+            currencyTrendSnapshot = { points, source, target };
             drawCurrencyTrend(points, source, target);
             const first = points[0].value, latest = points[points.length - 1].value;
             const change = first ? (latest / first - 1) * 100 : 0;
@@ -1725,6 +1920,7 @@
         setTimeout(() => URL.revokeObjectURL(url), 1500);
     }
 
+    applyTheme(currentTheme(), false);
     installTermTips();
     updateMarketCountry();
     updateAdCalculator();

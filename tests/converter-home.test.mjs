@@ -430,6 +430,18 @@ test('footer keeps contacts together on a second line', () => {
   assert.match(html, /footer\s*\{[\s\S]*?flex-direction:\s*column/s);
 });
 
+test('theme switch defaults to light, persists the choice, and redraws chart colors', () => {
+  for (const required of [
+    "localStorage.getItem('lt_tool_theme') || 'light'", 'data-theme="dark"', '--canvas: #f7f1e6',
+    '--accent: #0f766e', '--text-primary: #1f2421', 'id="themeToggle"', '切换深色',
+    "const THEME_STORAGE_KEY = 'lt_tool_theme'", 'function applyTheme', 'function toggleTheme',
+    'currencyTrendSnapshot', "themeColor('--chart-grid')", "themeColor('--accent')",
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.match(html, /button\.setAttribute\('aria-pressed', String\(dark\)\)/);
+  assert.match(html, /localStorage\.setItem\(THEME_STORAGE_KEY, currentTheme\(\)\)/);
+});
+
 test('profit exchange-rate update fetches the selected market rate and recalculates profit', () => {
   assert.match(html, /async function updateProfitExchangeRate\(\)/);
   assert.match(html, /fetch\('https:\/\/open\.er-api\.com\/v6\/latest\/CNY'\)/);
