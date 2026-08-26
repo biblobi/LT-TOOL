@@ -197,6 +197,7 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
   assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '0.10')), {
     dimensions: [11, 11, 11],
     volumeCm3: 1331,
+    volumeM3: 0.001331,
     volumeWeightKg: 0.22,
     actualWeightKg: 0.1,
     chargeableWeightKg: 0.22,
@@ -206,6 +207,7 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
   assert.deepEqual(normalize(calculateCargoMetrics('11*11*11', '1')), {
     dimensions: [11, 11, 11],
     volumeCm3: 1331,
+    volumeM3: 0.001331,
     volumeWeightKg: 0.22,
     actualWeightKg: 1,
     chargeableWeightKg: 1,
@@ -218,6 +220,13 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
 test('low-frequency distance units are grouped in a collapsible section', () => {
   assert.match(html, /<details class="optional-units">/);
   assert.match(html, /展开低频单位：千米 \/ 码 \/ 英里 \/ 海里/);
+});
+
+test('volume conversion includes cubic centimetres and cubic feet', () => {
+  for (const required of [
+    'data-unit="cm3"', '立方厘米 Cubic centimeter (cm3)', 'data-unit="ft3"', '立方英尺 Cubic foot (ft3)',
+    'cm3: 0.001', 'ft3: 28.316846592', '体积（立方米）', 'function fmtVolumeM3',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
 
 test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () => {
@@ -301,7 +310,7 @@ test('profit calculator supports chargeable weight, cubic-foot storage, advertis
   const { calculateProfitMetrics } = loadProfitHelpers();
   const result = calculateProfitMetrics({
     price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
-    packageVolumeCm3: 28316.8466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
+    packageVolumeM3: 0.0283168466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
     adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
   });
   assert.equal(result.purchase, 6.25);
@@ -314,7 +323,7 @@ test('profit calculator supports chargeable weight, cubic-foot storage, advertis
 
   const withPlacement = calculateProfitMetrics({
     price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
-    packageVolumeCm3: 28316.8466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
+    packageVolumeM3: 0.0283168466, referralRate: 15, fbaFee: 5, storageRate: 0.78, inventoryMonths: 2,
     adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 1.25, targetMargin: 20, cvr: 0.1,
   });
   assert.equal(withPlacement.placement, 1.25);
@@ -334,13 +343,14 @@ test('profit and ad calculators are embedded in the converter home with a single
   assert.doesNotMatch(html, /switchTab\('adcalc'\)|switchTab\('profit'\)/);
 });
 
-test('currency converter covers Amazon and TikTok Shop market currencies and renders a historical trend curve', () => {
+test('currency converter covers requested market currencies and renders a stable historical trend curve', () => {
   for (const required of [
     'CAD 加拿大', 'VND 越南', 'THB 泰国', 'BRL 巴西', 'MXN 墨西哥', 'IDR 印尼', 'MYR 马来西亚', 'PHP 菲律宾',
     'AED 阿联酋', 'SAR 沙特', 'ZAR 南非', 'id="currencyTrendChart"', 'function updateCurrencyTrend', 'function drawCurrencyTrend',
-    'api.frankfurter.dev/v1/', 'FRANKFURTER_HISTORICAL_CURRENCIES', "!FRANKFURTER_HISTORICAL_CURRENCIES.has(source)", 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection',
+    'api.frankfurter.dev/v1/', 'FRANKFURTER_HISTORICAL_CURRENCIES', "!FRANKFURTER_HISTORICAL_CURRENCIES.has(source)", 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection', 'aspect-ratio: 4 / 1', 'canvas.clientHeight || width / 4',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(html, /window\.updateCurrencyDisplay\s*=\s*\(\)\s*=>\s*\{[\s\S]*?currencyManualSource[\s\S]*?currencyManualRate/);
+  assert.match(html, /<option value="USD">USD 美国<\/option>/);
 });
 
 test('advertising and profit inputs use stacked labels and POS is calculated below the inputs', () => {
@@ -406,11 +416,12 @@ test('freight heading owns the market selector and uses flat section headings', 
   assert.match(html, /\.freight-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
 });
 
-test('profit results display paired market-currency and CNY values without cargo detail cards', () => {
+test('profit results display per-unit and monthly totals in market-currency and CNY without cargo detail cards', () => {
   for (const required of [
     'id="profitFreightCnyValue"', 'id="profitFbaCnyValue"', 'id="profitStorageCnyValue"', 'id="profitAdCnyValue"',
     'id="profitTotalCostCnyValue"', 'id="profitCnyValue"', 'id="profitMaxCpcCnyValue"', 'id="profitMaxPurchaseCnyValue"',
-    'class="metric-money"', 'function rmbMoney', 'function setProfitMoneyMetric',
+    'id="profitFreightTotalValue"', 'id="profitFbaTotalValue"', 'id="profitStorageTotalValue"', 'id="profitAdTotalValue"', 'id="profitTotalCostTotalValue"', 'id="profitTotalValue"',
+    'class="metric-money"', 'class="metric-total"', 'function rmbMoney', 'function setProfitMoneyMetric', 'function setProfitTotalMetric',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
@@ -419,13 +430,13 @@ test('profit results display paired market-currency and CNY values without cargo
 
 test('automatic result values guide users to their dependent inputs and explain FBA placement fees', () => {
   for (const required of [
-    'function guideCalculationInputs', 'data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx"',
-    'data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice"', 'input-guided', 'FBA 入库配置费',
+    'function guideCalculationInputs', 'data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits"',
+    'data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice"', 'missingFields', 'guidedFields', 'input-guided', 'FBA 入库配置费',
     'Inventory Placement Service Fee', '该项会单独计入总成本',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   assert.match(html, /scrollIntoView\(\{ behavior: 'smooth', block: 'center' \}\)/);
-  assert.match(html, /firstBlank\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(html, /targetField\.focus\(\{ preventScroll: true \}\)/);
 });
 
 test('footer keeps contacts together on a second line', () => {
@@ -454,13 +465,13 @@ test('profit exchange-rate update fetches the selected market rate and recalcula
 });
 
 test('site navigation and converter jumps are consolidated into a desktop sidebar', () => {
-  assert.match(html, /body\s*\{[\s\S]*?grid-template-columns:\s*minmax\(132px,\s*150px\)\s+minmax\(0,\s*1fr\)/);
+  assert.match(html, /body\s*\{[\s\S]*?grid-template-columns:\s*82px\s+minmax\(0,\s*1fr\)/);
   assert.match(html, /\.nav-deck\s*\{[\s\S]*?position:\s*sticky/);
   const navStart = html.indexOf('<div class="nav-deck">');
   const converterStart = html.indexOf('<div id="module-converter"');
   const navMarkup = html.slice(navStart, converterStart);
-  for (const label of ['运费与仓储', '广告费换算', '利润测算', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
-  assert.match(navMarkup, /量子换算[\s\S]*?<div class="converter-subnav">[\s\S]*?运费与仓储/);
+  for (const label of ['运费仓储', '广告换算', '利润测算', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
+  assert.match(navMarkup, /量子换算[\s\S]*?<div class="converter-subnav">[\s\S]*?运费仓储/);
   assert.doesNotMatch(html.slice(converterStart, html.indexOf('<div class="converter-workspace">', converterStart)), /converter-jump/);
 });
 
