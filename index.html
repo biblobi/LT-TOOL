@@ -272,17 +272,21 @@
         .fba-basis-heading { margin: 0 0 6px; }
         .fba-rule-list {
             display: grid;
-            gap: 4px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
         }
         .fba-rule-row {
-            display: grid;
-            grid-template-columns: 62px minmax(0, 1fr);
-            gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
             padding-bottom: 4px;
             border-bottom: 1px dashed #222;
         }
         .fba-rule-label { color: #aaa; }
-        .fba-rule-value { color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; }
+        .fba-rule-value { color: #aaa; font-family: 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
+        .fba-rule-value .imperial-value { color: var(--neon-cyan); }
+        .fba-rule-value .metric-value { color: #aaa; }
         .fba-trigger {
             color: var(--neon-pink);
             margin-top: 5px;
@@ -323,13 +327,14 @@
         .calculator-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 8px; }
         .profit-grid .calculator-fields { grid-template-columns: repeat(6, minmax(0, 1fr)); }
         .calculator-fields label { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 4px; min-height: 54px; color: #aaa; font-size: 0.72rem; line-height: 1.25; min-width: 0; }
-        .calculator-fields .field-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .calculator-fields .field-label { white-space: nowrap; min-width: 0; }
+        .calculator-fields .field-label > .term-tip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
         .calculator-fields .term-tip, .cargo-fields .term-tip { color: inherit; white-space: nowrap; }
         .calculator-fields label > input, .calculator-fields label > select { align-self: stretch; }
         .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: inherit; }
         .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; min-height: 16px; }
         .field-hint { color: #666; font-size: 0.72rem; }
-        .term-tip { position: relative; display: inline-block; color: var(--neon-cyan); text-decoration: underline dotted; cursor: help; }
+        .term-tip { position: relative; display: inline-block; color: var(--neon-cyan); text-decoration: underline dotted; cursor: pointer; }
         .term-tip::after { content: attr(data-tip); position: absolute; z-index: 20; display: none; left: 0; top: calc(100% + 7px); width: max-content; max-width: 280px; padding: 8px 10px; background: #050505; border: 1px solid var(--neon-cyan); color: #ddd; font: 12px/1.45 Roboto, sans-serif; text-decoration: none; white-space: normal; box-shadow: 0 5px 16px #000; }
         .term-tip:hover::after, .term-tip:focus::after, .term-tip.is-open::after { display: block; }
         .link-control { display: flex; align-items: center; gap: 8px; color: #bbb; font-size: 0.82rem; padding: 7px 0; }
@@ -348,7 +353,7 @@
         .profit-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
         .profit-grid .cargo-title { margin-bottom: 7px; }
         .profit-grid .cargo-fields { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-        .profit-grid .cargo-summary { margin-top: 6px; gap: 4px 10px; }
+        .profit-grid .cargo-summary { margin-top: 6px; gap: 4px 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .profit-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
         .profit-grid .fba-basis { padding-left: 12px; }
         .currency-chart { margin-top: 12px; border: 1px solid #222; padding: 10px; background: #080808; }
@@ -363,7 +368,7 @@
         .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
         .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
         .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
-        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-grid .cargo-layout { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid { grid-template-columns: 1fr; }
@@ -503,33 +508,33 @@
             <h1>广告费换算</h1>
             <div class="calculator-grid">
                 <section class="calculator-panel">
-                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS、ACoAS 与 TACoS 由输入数据计算。">PPC 输入</span></div>
+                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">PPC 输入</span></div>
                     <div class="calculator-fields">
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。">CPC</span> <span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="统计周期内的广告点击总数。">月点击量</span> <span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="由广告归因带来的订单数。">广告订单量</span> <span class="field-hint">Paid orders</span></span><input id="adOrders" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。">CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于计算广告订单占比 POS。">月销量</span> <span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；填写 POS 后，若月销量已填，会自动调整广告订单量。">POS</span></span><input id="adPos" type="number" min="0" max="100" step="0.01" value="100" oninput="updateAdCalculator('pos')"></label>
                         <label><span class="field-label"><span class="term-tip" tabindex="0" data-tip="单件商品的销售价格。">售价</span> <span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator()"></label>
                     </div>
-                    <input id="adPaidOrderShare" type="hidden" value="100">
                 </section>
                 <section class="calculator-panel">
                     <div class="section-title">结果</div>
                     <div class="metric-grid">
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><strong id="adCpaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><strong id="adAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><strong id="adAcoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="TACoS（总广告成本占比）：广告费 ÷ 总销售额，使用混合广告费/件估算。">TACoS</span><strong id="adTacosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><strong id="adRoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 总订单量；不等于广告流量占比。">POS</span><strong id="adPosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><strong id="adBlendedCostValue">-</strong></div>
+                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><strong id="adCpaValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><strong id="adAcosValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><strong id="adAcoasValue">-</strong></div>
+                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><strong id="adRoasValue">-</strong></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><strong id="adBlendedCostValue">-</strong></div>
                     </div>
                 </section>
             </div>
         </div>
         <div id="module-profit" class="calculator-home embedded-calculator">
-            <h1><span>利润测试</span><span class="profit-heading-meta"><label class="profit-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option></select></label><label class="profit-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.0001" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="profit-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
+            <h1><span>利润测算</span><span class="profit-heading-meta"><label class="profit-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option></select></label><label class="profit-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.0001" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="profit-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
             <div class="calculator-grid profit-grid">
-                <section class="calculator-panel"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="头程、仓储与 FBA 成本按每件商品折算；运费使用计费重，FBA 使用尺寸、重量和站点规则。">头程、仓储与 FBA</span></div>
+                <section class="calculator-panel"><div class="section-title"><span class="term-tip" tabindex="0" data-tip="运费使用计费重，仓储按包装体积和库存月数估算，FBA 配送费按尺寸等级、重量和站点规则计算。">运费与仓储计算</span></div>
                     <div id="cargo-check" class="cargo-check">
                         <div class="cargo-layout">
                             <div>
-                                <div class="section-title cargo-title">重货/抛货判断</div>
                                 <div class="cargo-fields">
                                     <label><span class="term-tip" tabindex="0" data-tip="输入包装长宽高，单位厘米；会同步换算到英寸。">尺寸（厘米）</span><input id="cargoDimensionInput" type="text" inputmode="decimal" placeholder="11*11*11cm" oninput="syncCargoDimensionPair('cm')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="可直接修改英寸尺寸，支持 in 后缀；会同步回厘米。">尺寸（英寸）</span><input id="cargoDimensionInInput" type="text" inputmode="decimal" placeholder="4.33*4.33*4.33in" oninput="syncCargoDimensionPair('in')"></label>
@@ -537,8 +542,7 @@
                                     <label><span class="term-tip" tabindex="0" data-tip="可直接修改磅数；会同步回千克。">实重（磅）</span><input id="cargoWeightLbInput" type="number" min="0" step="0.01" placeholder="0.22" oninput="syncCargoWeightPair('lb')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="体积重 = 体积 ÷ 体积系数；可按承运商规则修改。">体积系数</span><input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()"></label>
                                 </div>
-                                <div class="cargo-summary"><div>体积（立方厘米）：<span id="cargoVolumeValue">-</span></div><div>体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div></div>
-                                <div class="fba-summary"><div class="fba-heading" id="fbaHeading">Amazon FBA · 2026 美国站估算</div><div class="cargo-summary"><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div></div></div>
+                                <div class="cargo-summary"><div>体积（立方厘米）：<span id="cargoVolumeValue">-</span></div><div>体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div></div>
                             </div>
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
@@ -686,8 +690,8 @@
     let lastBase = "CNY";
     let manualCurrencyRate = null;
     const MARKET_CONFIG = {
-        US: { name: '美国站', currency: 'USD', fbaLabel: 'Amazon FBA · 2026 美国站估算', fx: 7.2, storage: 0.78, referral: 15 },
-        CA: { name: '加拿大站', currency: 'CAD', fbaLabel: 'Amazon FBA · 加拿大站估算', fx: 5.1, storage: 0.95, referral: 15 }
+        US: { name: '美国站', currency: 'USD', fx: 7.2, storage: 0.78, referral: 15 },
+        CA: { name: '加拿大站', currency: 'CAD', fx: 5.1, storage: 0.95, referral: 15 }
     };
 
     function currentMarket() { return MARKET_CONFIG[document.getElementById('marketCountry')?.value || 'US']; }
@@ -982,8 +986,8 @@
             const actualCm = check.actual * 2.54;
             const limitCm = check.limit * 2.54;
             const value = isWeight
-                ? `${fmtNumber(check.actual)} / ${check.limit} lb (${fmtNumber(check.actual * 0.45359237)} / ${fmtNumber(check.limit * 0.45359237)} kg)`
-                : `${fmtNumber(check.actual)} / ${check.limit} in (${fmtNumber(actualCm)} / ${fmtNumber(limitCm)} cm)`;
+                ? `<span class="imperial-value">${fmtNumber(check.actual)} / ${check.limit} lb</span> <span class="metric-value">(${fmtNumber(check.actual * 0.45359237)} / ${fmtNumber(check.limit * 0.45359237)} kg)</span>`
+                : `<span class="imperial-value">${fmtNumber(check.actual)} / ${check.limit} in</span> <span class="metric-value">(${fmtNumber(actualCm)} / ${fmtNumber(limitCm)} cm)</span>`;
             return `<div class="fba-rule-row"><span class="fba-rule-label">${check.label}</span><span class="fba-rule-value">${value}</span></div>`;
         }).join('')}</div>`;
     }
@@ -1020,9 +1024,6 @@
         if (!dimensionEl || !weightEl || !divisorEl) return;
 
         const dimensions = parseBoxDimensions(dimensionEl.value);
-        const market = currentMarket();
-        const heading = document.getElementById('fbaHeading');
-        if (heading) heading.textContent = market.fbaLabel;
         if (!dimensions) {
             resetCargoCheck();
             return;
@@ -1082,7 +1083,7 @@
     }
 
     function calculateAdMetrics(values) {
-        const { cpc, clicks, orders, cvr, monthlyUnits, paidOrderShare, price } = values;
+        const { cpc, clicks, orders, cvr, monthlyUnits, paidOrderShare, pos, price } = values;
         const validClicks = Number(clicks) > 0 ? Number(clicks) : 0;
         const validOrders = Number(orders) >= 0 ? Number(orders) : 0;
         const manualCvr = Math.max(0, Number(cvr) || 0) / 100;
@@ -1091,9 +1092,10 @@
             : validClicks > 0 && validOrders >= 0
                 ? Math.min(1, validOrders / validClicks)
                 : 0;
+        const manualPos = Math.min(100, Math.max(0, Number(pos ?? paidOrderShare) || 0)) / 100;
         const resolvedPos = Number(monthlyUnits) > 0 && Number(orders) >= 0
             ? Math.min(1, validOrders / Number(monthlyUnits))
-            : Math.min(1, Math.max(0, Number(paidOrderShare) || 0) / 100);
+            : manualPos;
         const resolvedCpc = Math.max(0, Number(cpc) || 0);
         const resolvedPrice = Math.max(0, Number(price) || 0);
         const cpa = resolvedCvr > 0 ? resolvedCpc / resolvedCvr : null;
@@ -1104,7 +1106,6 @@
             acos: cpa !== null && resolvedPrice > 0 ? cpa / resolvedPrice : null,
             roas: cpa !== null && cpa > 0 ? resolvedPrice / cpa : null,
             blendedCost: cpa !== null ? cpa * resolvedPos : null,
-            tacos: cpa !== null && resolvedPrice > 0 ? (cpa * resolvedPos) / resolvedPrice : null,
             acoas: cpa !== null && resolvedPrice > 0 ? (cpa * resolvedPos) / resolvedPrice : null,
         };
     }
@@ -1132,22 +1133,35 @@
         return { purchase, freight, referral, fba, volumeFt3, storage, ad, promo, returns, placement, totalCost, profit, margin: price > 0 ? profit / price : null, breakEvenAcos, maxCpc: breakEvenAcos !== null ? price * breakEvenAcos * cvr : null, maxPurchaseRmb };
     }
 
-    function updateAdCalculator() {
+    function updateAdCalculator(source = '') {
         const clicks = inputNumber('adClicks');
-        const orders = inputNumber('adOrders');
         const monthlyUnits = inputNumber('adMonthlyUnits');
+        const posEl = document.getElementById('adPos');
+        const ordersEl = document.getElementById('adOrders');
+        let orders = inputNumber('adOrders');
+        const editingPos = source === 'pos' || document.activeElement?.id === 'adPos';
+        const ordersProvided = Boolean(ordersEl?.value.trim());
+        if (editingPos) {
+            const pos = Math.min(100, Math.max(0, inputNumber('adPos')));
+            if (monthlyUnits > 0 && ordersEl) {
+                orders = Math.round(monthlyUnits * pos / 100);
+                ordersEl.value = String(orders);
+            }
+        } else if (monthlyUnits > 0 && !ordersProvided && posEl && ordersEl) {
+            orders = Math.round(monthlyUnits * Math.min(100, Math.max(0, inputNumber('adPos'))) / 100);
+            ordersEl.value = String(orders);
+        } else if (monthlyUnits > 0 && orders >= 0 && posEl) {
+            posEl.value = (Math.min(100, orders / monthlyUnits * 100)).toFixed(2);
+        }
         if (clicks > 0 && orders >= 0 && inputNumber('adCvr') <= 0 && document.activeElement?.id !== 'adCvr') document.getElementById('adCvr').value = (Math.min(1, orders / clicks) * 100).toFixed(2);
-        if (monthlyUnits > 0 && orders >= 0) document.getElementById('adPaidOrderShare').value = Math.min(100, orders / monthlyUnits * 100).toFixed(2);
         const ad = calculateAdMetrics({
             cpc: inputNumber('adCpc'), clicks, orders, cvr: inputNumber('adCvr'), monthlyUnits,
-            paidOrderShare: inputNumber('adPaidOrderShare'), price: inputNumber('adPrice'),
+            pos: inputNumber('adPos'), price: inputNumber('adPrice'),
         });
         document.getElementById('adCpaValue').textContent = money(ad.cpa);
         document.getElementById('adAcosValue').textContent = percent(ad.acos);
         document.getElementById('adAcoasValue').textContent = percent(ad.acoas);
-        document.getElementById('adTacosValue').textContent = percent(ad.tacos);
         document.getElementById('adRoasValue').textContent = ad.roas === null ? '-' : ad.roas.toFixed(2) + 'x';
-        document.getElementById('adPosValue').textContent = percent(ad.pos);
         document.getElementById('adBlendedCostValue').textContent = money(ad.blendedCost);
         const profitPrice = document.getElementById('profitPrice');
         if (profitPrice) profitPrice.value = inputNumber('adPrice').toFixed(2);
@@ -1166,7 +1180,7 @@
         if (!priceEl) return;
         const cargo = calculateCargoMetrics(document.getElementById('cargoDimensionInput').value, document.getElementById('cargoWeightInput').value, document.getElementById('cargoDivisorInput').value);
         const fba = cargo ? calculateFbaMetrics(cargo.dimensions, cargo.actualWeightKg) : null;
-        const ad = calculateAdMetrics({ cpc: inputNumber('adCpc'), clicks: inputNumber('adClicks'), orders: inputNumber('adOrders'), cvr: inputNumber('adCvr'), monthlyUnits: inputNumber('adMonthlyUnits'), paidOrderShare: inputNumber('adPaidOrderShare'), price: inputNumber('adPrice') });
+        const ad = calculateAdMetrics({ cpc: inputNumber('adCpc'), clicks: inputNumber('adClicks'), orders: inputNumber('adOrders'), cvr: inputNumber('adCvr'), monthlyUnits: inputNumber('adMonthlyUnits'), pos: inputNumber('adPos'), price: inputNumber('adPrice') });
         const market = currentMarket();
         const result = calculateProfitMetrics({
             price: inputNumber('profitPrice'), fx: inputNumber('profitFx') || market.fx, purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
@@ -1210,8 +1224,6 @@
         if (source) source.textContent = market.currency;
         const badge = document.getElementById('profitMarketBadge');
         if (badge) badge.textContent = `${document.getElementById('marketCountry')?.value || 'US'} / ${market.currency}`;
-        const fbaHeading = document.getElementById('fbaHeading');
-        if (fbaHeading) fbaHeading.textContent = market.fbaLabel;
         updateCargoCheck();
         updateAdCalculator();
     }

@@ -164,7 +164,7 @@ test('converter numbers keep at most two decimal places', () => {
 
 test('cargo checker UI accepts dimensions and actual weight', () => {
   for (const required of [
-    '重货/抛货判断',
+    '运费与仓储计算',
     'id="cargoDimensionInput"',
     'id="cargoWeightInput"',
     'id="cargoVolumeValue"',
@@ -172,7 +172,7 @@ test('cargo checker UI accepts dimensions and actual weight', () => {
     'id="cargoTypeValue"',
     'id="cargoDivisorInput"',
     'value="6000"',
-    'Amazon FBA · 2026 美国站估算',
+    '尺寸等级', '配送费',
     'id="fbaTierValue"',
     'id="fbaFeeValue"',
     'id="fbaRuleSummary"',
@@ -269,22 +269,28 @@ test('FBA and cargo inputs are statically located in the profit calculator', () 
 
 test('advertising calculator derives CVR, POS, CPA, ACOS, ROAS and blended cost from clicks and monthly sales', () => {
   const { calculateAdMetrics } = loadProfitHelpers();
-  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 1000, orders: 100, cvr: 0, monthlyUnits: 400, paidOrderShare: 100, price: 20 });
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 1000, orders: 100, cvr: 0, monthlyUnits: 400, pos: 100, price: 20 });
   assert.equal(metrics.cvr, 0.1);
   assert.equal(metrics.pos, 0.25);
   assert.equal(metrics.cpa, 8);
   assert.equal(metrics.acos, 0.4);
   assert.equal(metrics.roas, 2.5);
   assert.equal(metrics.blendedCost, 2);
-  assert.equal(metrics.tacos, 0.1);
   assert.equal(metrics.acoas, 0.1);
 });
 
 test('advertising calculator accepts a manual CVR when clicks are unavailable', () => {
   const { calculateAdMetrics } = loadProfitHelpers();
-  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 0, orders: 2, cvr: 25, monthlyUnits: 20, paidOrderShare: 100, price: 20 });
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 0, orders: 2, cvr: 25, monthlyUnits: 20, pos: 100, price: 20 });
   assert.equal(metrics.cvr, 0.25);
   assert.equal(metrics.cpa, 3.2);
+});
+
+test('advertising calculator accepts manual POS when monthly orders are unavailable', () => {
+  const { calculateAdMetrics } = loadProfitHelpers();
+  const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 100, orders: 0, cvr: 10, monthlyUnits: 0, pos: 35, price: 20 });
+  assert.equal(metrics.pos, 0.35);
+  assert.equal(metrics.blendedCost, 2.8);
 });
 
 test('profit calculator supports chargeable weight, cubic-foot storage, and advertising cost inputs', () => {
@@ -305,9 +311,9 @@ test('profit calculator supports chargeable weight, cubic-foot storage, and adve
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
   for (const required of [
-    'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPaidOrderShare"',
+    'id="module-adcalc"', 'id="module-profit"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPos"',
     'id="profitStorageRate"', '广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
-    '广告订单占比', 'id="adAcoasValue"', 'id="adTacosValue"', 'id="adPaidOrderShare"',
+    '广告订单占比', 'id="adAcoasValue"', '运费与仓储计算',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   for (const removed of ['profitLinkAds', 'profitLinkFba', 'profitLinkCargo', 'profitManualAdRate', 'profitManualWeight', 'profitManualFba', '收入与采购', '广告与利润结果']) {
     assert.doesNotMatch(html, new RegExp(removed));
@@ -322,21 +328,23 @@ test('currency converter supports CAD and renders a historical trend curve', () 
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
 
-test('advertising and profit inputs use stacked labels and POS is only shown as a result metric', () => {
+test('advertising and profit inputs use stacked labels and POS is an editable input', () => {
   assert.match(html, /\.calculator-fields label \{ display: flex; flex-direction: column;/);
   assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
   assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
-  assert.match(html, /data-tip="头程、仓储与 FBA 成本按每件商品折算/);
+  assert.match(html, /data-tip="运费使用计费重/);
+  assert.match(html, /id="adPos"[^>]+oninput="updateAdCalculator\('pos'\)"/);
+  assert.doesNotMatch(html, /id="adPosValue"|id="adTacosValue"|TACoS/);
 });
 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
   for (const required of [
     'grid-template-columns: repeat(3, minmax(0, 1fr))', 'grid-template-columns: repeat(6, minmax(0, 1fr))',
-    '.term-tip::after', 'data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
+    '.term-tip::after', 'cursor: pointer', 'data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
     'function updateMarketCountry', 'CA: { name: \'加拿大站\'', 'currencyManualToggle', 'currencyManualRate',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(html, /title="(?:每次点击成本|汇率|输入包装长宽高|可直接修改英寸尺寸)：/);
-  assert.doesNotMatch(html, /id="adCvrValue"|id="adManualPos"|id="adManualCvr"|function toggleAdManual/);
+  assert.doesNotMatch(html, /id="adCvrValue"|id="adManualPos"|id="adManualCvr"|id="adPaidOrderShare"|function toggleAdManual/);
 });
 
 test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () => {
@@ -349,12 +357,15 @@ test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () =
   assert.doesNotMatch(html, /setLabel\('profitFbaLabel'/);
 });
 
-test('profit test title owns the market selector and uses flat section headings', () => {
-  assert.match(html, /<h1><span>利润测试<\/span><span class="profit-heading-meta">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
+test('profit calculation title owns the market selector and uses flat section headings', () => {
+  assert.match(html, /<h1><span>利润测算<\/span><span class="profit-heading-meta">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
   assert.equal((html.match(/id="marketCountry"/g) ?? []).length, 1);
   assert.equal((html.match(/id="profitFx"/g) ?? []).length, 1);
   assert.doesNotMatch(html, /单 SKU 利润测算/);
   assert.match(html, /<div class="section-title fba-basis-heading">尺寸分级依据（实际 \/ 上限）<\/div>/);
+  assert.match(html, /\.fba-rule-list\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,/);
+  assert.match(html, /\.fba-rule-value \.metric-value\s*\{\s*color:\s*#aaa/);
+  assert.doesNotMatch(html, /重货\/抛货判断|头程、仓储与 FBA|Amazon FBA · 2026 美国站估算/);
   assert.match(html, /\.profit-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
 });
 
