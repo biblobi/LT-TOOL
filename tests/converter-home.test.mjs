@@ -189,6 +189,7 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
   assert.deepEqual(normalize(parseBoxDimensions('11*11*11')), [11, 11, 11]);
   assert.deepEqual(normalize(parseBoxDimensions('11*11*11cm')), [11, 11, 11]);
   assert.deepEqual(normalize(parseBoxDimensions('11cm*12cm*13cm')), [11, 12, 13]);
+  assert.deepEqual(normalize(parseBoxDimensions('4.33*4.33*4.33in')), [4.33, 4.33, 4.33]);
   assert.deepEqual(normalize(parseBoxDimensions('11 x 12 x 13')), [11, 12, 13]);
   assert.equal(parseBoxDimensions('11x11'), null);
 
@@ -279,11 +280,11 @@ test('advertising calculator derives CVR, POS, CPA, ACOS, ROAS and blended cost 
   assert.equal(metrics.acoas, 0.1);
 });
 
-test('advertising calculator does not accept a manual CVR fallback', () => {
+test('advertising calculator accepts a manual CVR when clicks are unavailable', () => {
   const { calculateAdMetrics } = loadProfitHelpers();
   const metrics = calculateAdMetrics({ cpc: 0.8, clicks: 0, orders: 2, cvr: 25, monthlyUnits: 20, paidOrderShare: 100, price: 20 });
-  assert.equal(metrics.cvr, 0);
-  assert.equal(metrics.cpa, null);
+  assert.equal(metrics.cvr, 0.25);
+  assert.equal(metrics.cpa, 3.2);
 });
 
 test('profit calculator supports chargeable weight, cubic-foot storage, and advertising cost inputs', () => {
@@ -331,11 +332,21 @@ test('advertising and profit inputs use stacked labels and POS is only shown as 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
   for (const required of [
     'grid-template-columns: repeat(3, minmax(0, 1fr))', 'grid-template-columns: repeat(6, minmax(0, 1fr))',
-    '.term-tip::after', 'data-tip="广告转化率：广告订单量 ÷ 广告点击量。"', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
+    '.term-tip::after', 'data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"', 'id="marketCountry"', 'value="CA"', 'selected>美国 / US',
     'function updateMarketCountry', 'CA: { name: \'加拿大站\'', 'currencyManualToggle', 'currencyManualRate',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.doesNotMatch(html, /title="(?:每次点击成本|广告转化率|汇率)：/);
-  assert.doesNotMatch(html, /id="adManualPos"|id="adManualCvr"|function toggleAdManual/);
+  assert.doesNotMatch(html, /title="(?:每次点击成本|汇率|输入包装长宽高|可直接修改英寸尺寸)：/);
+  assert.doesNotMatch(html, /id="adCvrValue"|id="adManualPos"|id="adManualCvr"|function toggleAdManual/);
+});
+
+test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () => {
+  for (const required of [
+    'id="cargoDimensionInInput"', 'id="cargoWeightLbInput"',
+    'oninput="syncCargoDimensionPair(\'cm\')"', 'oninput="syncCargoDimensionPair(\'in\')"',
+    'oninput="syncCargoWeightPair(\'kg\')"', 'oninput="syncCargoWeightPair(\'lb\')"',
+    'function syncCargoDimensionPair(sourceUnit)', 'function syncCargoWeightPair(sourceUnit)',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.doesNotMatch(html, /setLabel\('profitFbaLabel'/);
 });
 
 test('profit test title owns the market selector and uses flat section headings', () => {
