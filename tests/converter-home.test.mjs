@@ -619,6 +619,28 @@ test('US storage detail calculator is collapsed by default and opens for guided 
   assert.match(html, /storagePanel\?\.tagName === 'DETAILS'/);
 });
 
+test('US storage forecast supports batch monthly plans and clears only monthly plan values', () => {
+  for (const required of [
+    'id="storageBatchSales"', 'id="storageBatchRestock"', 'id="storageBatchFillButton"', 'id="storageClearButton"',
+    'function batchFillStorageForecast', 'function clearStorageForecast', 'function storageBatchInputValue',
+    '批量填充 12 个月', '一键清空计划', '留空不改', '起始月、库存和历史销量未修改',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  const batchFill = extractFunctionSource('batchFillStorageForecast');
+  assert.match(batchFill, /sales !== null/);
+  assert.match(batchFill, /restock !== null/);
+  assert.match(batchFill, /storageSales\$\{index\}/);
+  assert.match(batchFill, /storageRestock\$\{index\}/);
+  assert.match(batchFill, /updateStorageForecast\(\)/);
+
+  const clearForecast = extractFunctionSource('clearStorageForecast');
+  assert.match(clearForecast, /storageSales\$\{index\}/);
+  assert.match(clearForecast, /storageRestock\$\{index\}/);
+  assert.match(clearForecast, /storageBatchSales/);
+  assert.match(clearForecast, /storageBatchRestock/);
+  assert.doesNotMatch(clearForecast, /storageOpeningUnits|storagePast13WeekSales|storageStartMonth|storageProfitMonth/);
+});
+
 test('AI chat and dotted tooltip underlines are removed', () => {
   for (const removed of ['module-chat', 'AI 对话', 'OPENROUTER_BASE_URL', 'sendMessage', 'toggleChatKey', 'text-decoration: underline dotted']) {
     assert.doesNotMatch(html, new RegExp(removed));
