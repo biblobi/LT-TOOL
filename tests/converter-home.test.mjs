@@ -61,6 +61,7 @@ test('converter layout uses a twelve-column desktop grid and compact responsive 
   assert.match(html, /\.conversion-table tbody[\s\S]*?grid-template-columns:\s*repeat\(12,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(html, /@media\s*\(max-width:\s*1200px\)\s*\{[\s\S]*?\.converter-grid\s*\{\s*grid-template-columns:\s*repeat\(6,/);
   assert.match(html, /max-width:\s*min\(1400px,\s*100%\)/);
+  assert.match(html, /@media\s*\(min-width:\s*1401px\)\s*\{[\s\S]*?\.container,\s*\.converter-home,\s*\.calculator-home\s*\{\s*max-width:\s*none;/);
   assert.doesNotMatch(html, /footer\s*\{[^}]*position:\s*fixed/s);
 });
 
@@ -355,7 +356,7 @@ test('currency converter covers requested market currencies and renders a stable
   for (const required of [
     'CAD 加拿大', 'VND 越南', 'THB 泰国', 'BRL 巴西', 'MXN 墨西哥', 'IDR 印尼', 'MYR 马来西亚', 'PHP 菲律宾',
     'AED 阿联酋', 'SAR 沙特', 'ZAR 南非', 'id="currencyTrendChart"', 'function updateCurrencyTrend', 'function drawCurrencyTrend',
-    'api.frankfurter.dev/v1/', 'FRANKFURTER_HISTORICAL_CURRENCIES', "!FRANKFURTER_HISTORICAL_CURRENCIES.has(source)", 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(4)} ${target}', 'id="cargo-check"', 'scrollConverterSection', 'aspect-ratio: 4 / 1', 'canvas.clientHeight || width / 4',
+    'api.frankfurter.dev/v1/', 'FRANKFURTER_HISTORICAL_CURRENCIES', "!FRANKFURTER_HISTORICAL_CURRENCIES.has(source)", 'currencyTrendRange', '1个月', '1年', '5年', '1 ${source} = ${latest.value.toFixed(2)} ${target}', 'id="cargo-check"', 'scrollConverterSection', 'aspect-ratio: 4 / 1', 'canvas.clientHeight || width / 4',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(html, /window\.updateCurrencyDisplay\s*=\s*\(\)\s*=>\s*\{[\s\S]*?currencyManualSource[\s\S]*?currencyManualRate/);
   assert.match(html, /<option value="USD">USD 美国<\/option>/);
@@ -369,6 +370,14 @@ test('advertising and profit inputs use stacked labels and POS is calculated bel
   assert.match(html, /id="adPosMetricValue"/);
   assert.doesNotMatch(html, /id="adPos"[^A-Za-z]/);
   assert.doesNotMatch(html, /id="adTacosValue"|TACoS/);
+});
+
+test('ad price is the first advertising input and tax discount defaults to zero', () => {
+  const adStart = html.indexOf('id="module-adcalc"');
+  const adEnd = html.indexOf('id="module-profit"', adStart);
+  const adMarkup = html.slice(adStart, adEnd);
+  assert.ok(adMarkup.indexOf('id="adPrice"') < adMarkup.indexOf('id="adCpc"'));
+  assert.match(html, /id="profitTaxDiscount"[^>]*value="0"/);
 });
 
 test('PPC explanations use the complete field label as the hover and keyboard target', () => {
@@ -432,12 +441,13 @@ test('freight heading owns the market selector and uses flat section headings', 
   assert.doesNotMatch(html, /单 SKU 利润测算/);
   assert.match(html, /<div class="section-title fba-basis-heading">尺寸分级依据（实际 \/ 上限）<\/div>/);
   assert.match(html, /\.fba-rule-list\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,/);
+  assert.match(html, /\.fba-rule-value\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;/);
   assert.match(html, /\.fba-rule-value \.metric-value\s*\{\s*color:\s*#aaa/);
   assert.doesNotMatch(html, /重货\/抛货判断|头程、仓储与 FBA|Amazon FBA · 2026 美国站估算/);
   assert.match(html, /\.freight-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
 });
 
-test('profit results display per-unit and monthly totals in market-currency and CNY without cargo detail cards', () => {
+test('profit results show per-unit market-currency and CNY values, but monthly totals only show CNY', () => {
   for (const required of [
     'id="profitFreightCnyValue"', 'id="profitFbaCnyValue"', 'id="profitStorageCnyValue"', 'id="profitAdCnyValue"',
     'id="profitTotalCostCnyValue"', 'id="profitCnyValue"', 'id="profitMaxCpcCnyValue"', 'id="profitMaxPurchaseCnyValue"',
@@ -447,6 +457,10 @@ test('profit results display per-unit and monthly totals in market-currency and 
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
   assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);
+  assert.match(html, /\.metric-total\s*\{[^}]*font:\s*0\.82rem\/1\.35/s);
+  assert.match(html, /totalEl\.textContent = `\$\{label\}（\$\{fmtNumber\(quantity\)\}件） \$\{rmbMoney\(total, fx\)\}`/);
+  const totalMetric = extractFunctionSource('setProfitTotalMetric');
+  assert.doesNotMatch(totalMetric, /money\(total\)/);
 });
 
 test('automatic result values guide users to their dependent inputs and explain FBA placement fees', () => {
@@ -480,20 +494,31 @@ test('theme switch defaults to light, persists the choice, and redraws chart col
 test('profit exchange-rate update fetches the selected market rate and recalculates profit', () => {
   assert.match(html, /async function updateProfitExchangeRate\(\)/);
   assert.match(html, /fetch\('https:\/\/open\.er-api\.com\/v6\/latest\/CNY'\)/);
-  assert.match(html, /fx\.value = \(1 \/ marketRate\)\.toFixed\(4\)/);
+  assert.match(html, /fx\.value = \(1 \/ marketRate\)\.toFixed\(2\)/);
   assert.match(html, /updateProfitCalculator\(\);/);
   assert.match(html, /updateMarketCountry\(\)[\s\S]*?updateProfitExchangeRate\(\);/);
 });
 
 test('site navigation and converter jumps are consolidated into a desktop sidebar', () => {
-  assert.match(html, /body\s*\{[\s\S]*?grid-template-columns:\s*82px\s+minmax\(0,\s*1fr\)/);
+  assert.match(html, /body\s*\{[\s\S]*?grid-template-columns:\s*72px\s+minmax\(0,\s*1fr\)/);
   assert.match(html, /\.nav-deck\s*\{[\s\S]*?position:\s*sticky/);
   const navStart = html.indexOf('<div class="nav-deck">');
   const converterStart = html.indexOf('<div id="module-converter"');
   const navMarkup = html.slice(navStart, converterStart);
-  for (const label of ['运费仓储', '广告换算', '利润测算', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
+  for (const label of ['运费仓储', '广告换算', '利润测算', '功能说明', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
   assert.match(navMarkup, /量子换算[\s\S]*?<div class="converter-subnav">[\s\S]*?运费仓储/);
   assert.doesNotMatch(html.slice(converterStart, html.indexOf('<div class="converter-workspace">', converterStart)), /converter-jump/);
+});
+
+test('guide tab and non-US/CA market currency switching are available without invented fees', () => {
+  for (const required of [
+    "switchTab('guide')", 'id="module-guide"', '使用流程', '颜色与交互',
+    'value="MX"', 'value="EU"', 'value="UK"', "currency: 'MXN'", "currency: 'EUR'", "currency: 'GBP'", 'autoFees: false',
+    '待手动配置', '该站点暂不估算', "(1 / marketRate).toFixed(2)", "manualRate.value = (liveRates[target] / liveRates[source]).toFixed(2)",
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.match(html, /country === 'MX' \|\| country === 'EU' \|\| country === 'UK'/);
+  assert.match(html, /const index = \['converter','pdf','image','removebg','currency','guide'\]\.indexOf\(name\)/);
 });
 
 test('AI chat and dotted tooltip underlines are removed', () => {
