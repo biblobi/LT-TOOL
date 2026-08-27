@@ -586,13 +586,29 @@ test('site navigation and converter jumps are consolidated into a desktop sideba
 
 test('guide tab and non-US/CA market currency switching are available without invented fees', () => {
   for (const required of [
-    "switchTab('guide')", 'id="module-guide"', '使用流程', '颜色与交互',
+    "switchTab('guide')", 'id="module-guide"', '使用流程', '结果定位与提示',
     'value="MX"', 'value="EU"', 'value="UK"', "currency: 'MXN'", "currency: 'EUR'", "currency: 'GBP'", 'autoFees: false',
     '待手动配置', '该站点暂不估算', "(1 / marketRate).toFixed(2)", "manualRate.value = (liveRates[target] / liveRates[source]).toFixed(2)",
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   assert.match(html, /country === 'MX' \|\| country === 'EU' \|\| country === 'UK'/);
   assert.match(html, /const index = \['converter','pdf','image','removebg','currency','guide'\]\.indexOf\(name\)/);
+});
+
+test('guide explains complex calculations, special interactions, and data-source boundaries', () => {
+  const guideStart = html.indexOf('id="module-guide"');
+  const guideEnd = html.indexOf('<footer>', guideStart);
+  const guideMarkup = html.slice(guideStart, guideEnd);
+  for (const required of [
+    '美国仓储预测', 'FIFO', '月度仓储计费库存', '库存利用率周数', '22 周', '25 ft³',
+    '仓储/件', '非美国仓储', '35.3147', '计费重', '体积系数', '尺寸分级',
+    'CPA', 'ACoAS', '混合广告费/件', '退货成本', '保本 ACOS', '最大 CPC',
+    '更新汇率', 'ExchangeRate-API', 'Frankfurter', '结果定位与提示', '缺少的字段会优先高亮',
+    'PDF 聚合', '背景移除', '主题选择', 'InventoryHero', 'Seller Central',
+  ]) assert.match(guideMarkup, new RegExp(required.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')));
+  assert.match(guideMarkup, /href="https:\/\/www\.inventoryhero\.ai\/blog\/fba-storage-fees-2026#how-to-keep-storage-costs-down"/);
+  assert.match(guideMarkup, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(html, /\.guide-section code\s*\{[^}]*font:/);
 });
 
 test('AI chat and dotted tooltip underlines are removed', () => {
