@@ -25,12 +25,20 @@ test('converter is the default home module and first navigation item', () => {
   assert.ok(converterNav < pdfNav, 'converter nav should appear before PDF nav');
 });
 
-test('dimension conversion section appears before the other conversion groups', () => {
-  const lengthSection = indexOfSnippet('<div class="section-title">尺寸 Dimension</div>');
-  const massSection = indexOfSnippet('<div class="section-title">重量 Mass</div>');
-  const volumeSection = indexOfSnippet('<div class="section-title">体积 Volume</div>');
+test('unit conversion groups use concise Chinese titles in the expected order', () => {
+  const lengthSection = indexOfSnippet('<div class="section-title">尺寸</div>');
+  const massSection = indexOfSnippet('<div class="section-title">重量</div>');
+  const volumeSection = indexOfSnippet('<div class="section-title">体积</div>');
   assert.ok(lengthSection < massSection, 'dimension section should be before mass');
   assert.ok(lengthSection < volumeSection, 'dimension section should be before volume');
+});
+
+test('unit names use Chinese labels and abbreviations on one line', () => {
+  for (const required of ['<h1>单位换算</h1>', '米（m）', '千克（kg）', '立方厘米（cm3）', '立方英尺（ft3）', '摄氏（C）']) {
+    assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.match(html, /\.conversion-table td:first-child\s*\{\s*white-space:\s*nowrap;/);
+  for (const removed of ['Meter (m)', 'Kilogram (kg)', 'Cubic meter (m3)', 'Celsius (C)']) assert.doesNotMatch(html, new RegExp(removed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
 
 test('ton-level mass units are removed from visible inputs and conversion data', () => {
@@ -224,7 +232,7 @@ test('low-frequency distance units are grouped in a collapsible section', () => 
 
 test('volume conversion includes cubic centimetres and cubic feet', () => {
   for (const required of [
-    'data-unit="cm3"', '立方厘米 Cubic centimeter (cm3)', 'data-unit="ft3"', '立方英尺 Cubic foot (ft3)',
+    'data-unit="cm3"', '立方厘米（cm3）', 'data-unit="ft3"', '立方英尺（ft3）',
     'cm3: 0.001', 'ft3: 28.316846592', '体积（立方米）', 'function fmtVolumeM3',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
@@ -382,6 +390,19 @@ test('advertising inputs and outputs share one calculation panel', () => {
   assert.equal((adMarkup.match(/<section class="calculator-panel">/g) ?? []).length, 1);
   assert.ok(adMarkup.indexOf('id="adCpc"') < adMarkup.indexOf('id="adCpaValue"'));
   assert.match(html, /\.ad-calculator-grid \.metric-grid\s*\{\s*margin-top:\s*8px;/);
+  assert.doesNotMatch(adMarkup, /PPC 广告费换算/);
+});
+
+test('profit results separate direct operating outcomes from target and break-even controls', () => {
+  const profitStart = html.indexOf('id="module-profit"');
+  const profitEnd = html.indexOf('<!-- 格式转换 -->', profitStart);
+  const profitMarkup = html.slice(profitStart, profitEnd);
+
+  assert.match(profitMarkup, /class="profit-layout"/);
+  assert.match(profitMarkup, /class="profit-column profit-results"[\s\S]*?经营结果[\s\S]*?id="profitPurchaseRmb"[\s\S]*?id="profitMarginValue"/);
+  assert.match(profitMarkup, /class="profit-column profit-targets"[\s\S]*?目标与保本[\s\S]*?id="profitTargetMargin"[\s\S]*?id="profitBreakEvenAcosValue"[\s\S]*?id="profitMaxPurchaseValue"/);
+  assert.doesNotMatch(profitMarkup, /<div class="section-title"[\s\S]*?利润结果/);
+  assert.match(html, /\.profit-layout\s*\{\s*display:\s*grid;[\s\S]*?grid-template-columns:\s*minmax\(0,\s*2fr\)\s+minmax\(260px,\s*1fr\)/);
 });
 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {

@@ -203,6 +203,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
         }
+        .conversion-table td:first-child { white-space: nowrap; }
 
         .cyber-input {
             width: 100%;
@@ -458,7 +459,14 @@
         .calculator-panel > .formula-note { display: none; }
         .calculator-panel > .source-note, .profit-grid .cargo-note { display: none; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.45; margin: 8px 0 0; border-top: 1px solid #202020; padding-top: 7px; }
-        .profit-breakdown { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+        .profit-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 12px; align-items: start; }
+        .profit-column { min-width: 0; }
+        .profit-section-title { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; font-weight: 700; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
+        .profit-breakdown { display: grid; gap: 6px; margin-top: 8px; }
+        .profit-results .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .profit-results .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .profit-targets .calculator-fields { grid-template-columns: 1fr; }
+        .profit-targets .profit-breakdown { grid-template-columns: 1fr; }
         .freight-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
         .freight-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
         .freight-grid .cargo-title { margin-bottom: 7px; }
@@ -478,8 +486,8 @@
         .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
         .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
         .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
-        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); } .freight-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(3, minmax(0, 1fr)); } .freight-grid .cargo-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-layout { grid-template-columns: 1fr; } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-layout { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid { grid-template-columns: 1fr; }
             .calculator-fields label { min-height: 0; }
@@ -638,78 +646,78 @@
 
     <!-- 量子换算模块 -->
     <div id="module-converter" class="container converter-home active">
-        <h1>量子换算系统</h1>
+        <h1>单位换算</h1>
         <div class="converter-workspace">
         <div class="converter-grid">
             <div class="converter-panel">
-                <div class="section-title">尺寸 Dimension</div>
+                <div class="section-title">尺寸</div>
                 <table class="conversion-table">
-                    <tr><th colspan="2">公制 Metric</th></tr>
-                    <tr><td>米 Meter (m)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="m" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>厘米 Centimeter (cm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="cm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>毫米 Millimeter (mm)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><th colspan="2">公制</th></tr>
+                    <tr><td>米（m）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="m" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>厘米（cm）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="cm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>毫米（mm）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
 
-                    <tr><th colspan="2">美制/英制 US/Imperial</th></tr>
-                    <tr><td>英寸 Inch (in)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="in" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    <tr><td>英尺 Foot (ft)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="ft" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><th colspan="2">英美制</th></tr>
+                    <tr><td>英寸（in）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="in" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>英尺（ft）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="ft" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                 </table>
                 <details class="optional-units">
                     <summary>展开低频单位：千米 / 码 / 英里 / 海里</summary>
                     <table class="conversion-table">
-                        <tr><td>千米 Kilometer (km)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>码 Yard (yd)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>英里 Mile (mi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>海里 Nautical mile (nmi)</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>千米（km）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>码（yd）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>英里（mi）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                        <tr><td>海里（nmi）</td><td><input type="text" inputmode="decimal" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     </table>
                 </details>
 
             </div>
 
             <div class="converter-panel">
-                <div class="section-title">重量 Mass</div>
+                <div class="section-title">重量</div>
                 <table class="conversion-table">
-                    <tr><th colspan="2">公制 Metric</th></tr>
-                    <tr><td>千克 Kilogram (kg)</td><td><input type="number" class="mass-input" data-unit="kg" oninput="convertMass()"></td></tr>
-                    <tr><td>克 Gram (g)</td><td><input type="number" class="mass-input" data-unit="g" oninput="convertMass()"></td></tr>
-                    <tr><td>毫克 Milligram (mg)</td><td><input type="number" class="mass-input" data-unit="mg" oninput="convertMass()"></td></tr>
+                    <tr><th colspan="2">公制</th></tr>
+                    <tr><td>千克（kg）</td><td><input type="number" class="mass-input" data-unit="kg" oninput="convertMass()"></td></tr>
+                    <tr><td>克（g）</td><td><input type="number" class="mass-input" data-unit="g" oninput="convertMass()"></td></tr>
+                    <tr><td>毫克（mg）</td><td><input type="number" class="mass-input" data-unit="mg" oninput="convertMass()"></td></tr>
 
-                    <tr><th colspan="2">美制 US</th></tr>
-                    <tr><td>磅 Pound (lb)</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
-                    <tr><td>盎司 Ounce (oz)</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
+                    <tr><th colspan="2">美制</th></tr>
+                    <tr><td>磅（lb）</td><td><input type="number" class="mass-input" data-unit="lb" oninput="convertMass()"></td></tr>
+                    <tr><td>盎司（oz）</td><td><input type="number" class="mass-input" data-unit="oz" oninput="convertMass()"></td></tr>
 
                 </table>
             </div>
 
             <div class="converter-panel">
-                <div class="section-title">体积 Volume</div>
+                <div class="section-title">体积</div>
                 <table class="conversion-table">
-                    <tr><th colspan="2">公制 Metric</th></tr>
-                    <tr><td>立方米 Cubic meter (m3)</td><td><input type="number" class="vol-input" data-unit="m3" oninput="convertVolume()"></td></tr>
-                    <tr><td>立方厘米 Cubic centimeter (cm3)</td><td><input type="number" class="vol-input" data-unit="cm3" oninput="convertVolume()"></td></tr>
-                    <tr><td>升 Liter (L)</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
-                    <tr><td>毫升 Milliliter (mL)</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
+                    <tr><th colspan="2">公制</th></tr>
+                    <tr><td>立方米（m3）</td><td><input type="number" class="vol-input" data-unit="m3" oninput="convertVolume()"></td></tr>
+                    <tr><td>立方厘米（cm3）</td><td><input type="number" class="vol-input" data-unit="cm3" oninput="convertVolume()"></td></tr>
+                    <tr><td>升（L）</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
+                    <tr><td>毫升（mL）</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
 
-                    <tr><th colspan="2">美制 US</th></tr>
-                    <tr><td>立方英尺 Cubic foot (ft3)</td><td><input type="number" class="vol-input" data-unit="ft3" oninput="convertVolume()"></td></tr>
-                    <tr><td>美制加仑 US gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
-                    <tr><td>美制夸脱 US quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
-                    <tr><td>美制品脱 US pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
-                    <tr><td>美制液盎司 US fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
+                    <tr><th colspan="2">美制</th></tr>
+                    <tr><td>立方英尺（ft3）</td><td><input type="number" class="vol-input" data-unit="ft3" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制加仑（gal）</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制夸脱（qt）</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制品脱（pt）</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
+                    <tr><td>美制液盎司（fl oz）</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
 
-                    <tr><th colspan="2">英制 Imperial</th></tr>
-                    <tr><td>英制加仑 Imperial gallon (gal)</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制夸脱 Imperial quart (qt)</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制品脱 Imperial pint (pt)</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制液盎司 Imperial fl oz (fl oz)</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
+                    <tr><th colspan="2">英制</th></tr>
+                    <tr><td>英制加仑（gal）</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制夸脱（qt）</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制品脱（pt）</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制液盎司（fl oz）</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
                 </table>
             </div>
 
             <div class="converter-panel">
-                <div class="section-title">温度 Temperature</div>
+                <div class="section-title">温度</div>
                 <table class="conversion-table">
-                    <tr><td>摄氏 Celsius (C)</td><td><input type="number" class="temp-input" data-unit="c" oninput="convertTemperature()"></td></tr>
-                    <tr><td>华氏 Fahrenheit (F)</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
-                    <tr><td>开尔文 Kelvin (K)</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
+                    <tr><td>摄氏（C）</td><td><input type="number" class="temp-input" data-unit="c" oninput="convertTemperature()"></td></tr>
+                    <tr><td>华氏（F）</td><td><input type="number" class="temp-input" data-unit="f" oninput="convertTemperature()"></td></tr>
+                    <tr><td>开尔文（K）</td><td><input type="number" class="temp-input" data-unit="k" oninput="convertTemperature()"></td></tr>
                 </table>
             </div>
         </div>
@@ -739,10 +747,9 @@
             </div>
         </div>
         <div id="module-adcalc" class="calculator-home embedded-calculator">
-            <h1>广告费换算</h1>
+            <h1><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">广告费换算</span></h1>
             <div class="calculator-grid ad-calculator-grid">
                 <section class="calculator-panel">
-                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">PPC 广告费换算</span></div>
                     <div class="calculator-fields">
                         <label><span class="field-label term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。"><span>CPC</span><span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
                         <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数。"><span>月点击量</span><span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="可选" oninput="updateAdCalculator()"></label>
@@ -759,18 +766,19 @@
             </div>
         </div>
         <div id="module-profit" class="calculator-home embedded-calculator">
-            <h1>利润测算</h1>
+            <h1><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span></h1>
             <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full">
-                    <div class="section-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润结果</span></div>
+                    <div class="profit-layout">
+                    <section class="profit-column profit-results" aria-labelledby="profitResultsHeading">
+                    <div id="profitResultsHeading" class="profit-section-title">经营结果</div>
                     <div class="calculator-fields">
                         <label>含税采购成本（人民币）<input id="profitPurchaseRmb" type="number" min="0" step="0.01" value="50" oninput="updateProfitCalculator()"></label>
                         <label>采购退税/折扣 %<input id="profitTaxDiscount" type="number" min="0" max="100" step="0.01" value="10" oninput="updateProfitCalculator()"></label>
                         <label>佣金 %<input id="profitReferralRate" data-market-default="1" type="number" min="0" max="100" step="0.01" value="15" oninput="updateProfitCalculator()"></label>
                         <label><span id="profitPlacementLabel" class="term-tip" tabindex="0" data-tip="FBA 入库配置费（Inventory Placement Service Fee）是亚马逊将库存分配至入库地点时按件收取的费用，不是 FBA 配送费。请按 Send to Amazon 或结算报表中的每件实际费用填写；该项会单独计入总成本。">FBA 入库配置费（美元/件）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
-                        <label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label>
                     </div>
-                    <div class="profit-breakdown" style="margin-top:8px">
+                    <div class="profit-breakdown">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/计费千克）× 计费重 ÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和重量对应的配送费；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="仓储/件 = 包装体积（立方米）× 35.3147 × 仓储单价 × 平均库存月数；总费用 = 仓储/件 × 月销量。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,profitStorageRate,profitInventoryMonths,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
@@ -778,9 +786,19 @@
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货；总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
+                    </div>
+                    </section>
+                    <section class="profit-column profit-targets" aria-labelledby="profitTargetsHeading">
+                    <div id="profitTargetsHeading" class="profit-section-title">目标与保本</div>
+                    <div class="calculator-fields">
+                        <label>目标利润率 %<input id="profitTargetMargin" type="number" min="0" max="100" step="0.01" value="20" oninput="updateProfitCalculator()"></label>
+                    </div>
+                    <div class="profit-breakdown">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="保本 ACOS = 扣除广告前的可用利润 ÷ 售价，是不亏损时可承受的广告成本占比。">保本 ACOS</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate" onclick="guideCalculationInputs(this)" aria-label="定位保本 ACOS 所需输入"><strong id="profitBreakEvenAcosValue">-</strong></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="最大 CPC = 售价 × 保本 ACOS × CVR。">最大 CPC</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位最大 CPC 所需输入"><span class="metric-money"><strong id="profitMaxCpcValue">-</strong><span class="metric-rmb" id="profitMaxCpcCnyValue">-</span></span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="目标采购上限 = 在目标利润率下可承受的最高采购成本，已考虑退税/折扣；下方同时显示站点币种和人民币。">目标采购上限</span><button class="metric-action" type="button" data-inputs="adPrice,profitTaxDiscount,profitReferralRate,profitPlacementFee,profitTargetMargin,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位目标采购上限所需输入"><span class="metric-money"><strong id="profitMaxPurchaseValue">-</strong><span class="metric-rmb" id="profitMaxPurchaseCnyValue">-</span></span></button></div>
+                    </div>
+                    </section>
                     </div>
                 </section>
             </div>
