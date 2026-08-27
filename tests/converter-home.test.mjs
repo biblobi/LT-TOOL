@@ -81,6 +81,28 @@ function extractFunctionSource(name) {
   assert.fail(`Could not extract function ${name}`);
 }
 
+function extractConstantSource(name) {
+  const start = html.indexOf(`const ${name} =`);
+  assert.notEqual(start, -1, `Missing constant: ${name}`);
+  let braces = 0;
+  let brackets = 0;
+  let parentheses = 0;
+  let started = false;
+  for (let i = start; i < html.length; i += 1) {
+    const char = html[i];
+    if (char === '=') started = true;
+    if (!started) continue;
+    if (char === '{') braces += 1;
+    if (char === '}') braces -= 1;
+    if (char === '[') brackets += 1;
+    if (char === ']') brackets -= 1;
+    if (char === '(') parentheses += 1;
+    if (char === ')') parentheses -= 1;
+    if (char === ';' && braces === 0 && brackets === 0 && parentheses === 0) return html.slice(start, i + 1);
+  }
+  assert.fail(`Could not extract constant: ${name}`);
+}
+
 function loadDimensionHelpers() {
   const code = [
     extractFunctionSource('fmtNumber'),
@@ -122,6 +144,19 @@ function loadProfitHelpers() {
     extractFunctionSource('calculateAdMetrics'),
     extractFunctionSource('calculateProfitMetrics'),
     '({ calculateAdMetrics, calculateProfitMetrics })',
+  ].join('\n');
+  return vm.runInNewContext(code);
+}
+
+function loadStorageHelpers() {
+  const code = [
+    extractConstantSource('US_FBA_STORAGE_2026'),
+    extractFunctionSource('storageMonthNumber'),
+    extractFunctionSource('storageDaysInMonth'),
+    extractFunctionSource('getUsStorageBaseRate'),
+    extractFunctionSource('getUsStorageUtilizationSurcharge'),
+    extractFunctionSource('calculateUsFbaStorageForecast'),
+    '({ getUsStorageBaseRate, getUsStorageUtilizationSurcharge, calculateUsFbaStorageForecast })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -338,6 +373,45 @@ test('profit calculator supports chargeable weight, cubic-foot storage, advertis
   assert.equal(withPlacement.placement, 1.25);
   assert.equal(withPlacement.totalCost - result.totalCost, 1.25);
   assert.equal(result.profit - withPlacement.profit, 1.25);
+
+  const forecastStorage = calculateProfitMetrics({
+    price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
+    packageVolumeM3: 0.0283168466, referralRate: 15, fbaFee: 5, storageRate: 99, inventoryMonths: 99, storageCost: 1.25,
+    adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
+  });
+  assert.equal(forecastStorage.storage, 1.25);
+});
+
+test('US FBA storage forecast uses daily-average inventory, seasonal rates, rolling utilization, and FIFO shortage protection', () => {
+  const { getUsStorageBaseRate, getUsStorageUtilizationSurcharge, calculateUsFbaStorageForecast } = loadStorageHelpers();
+  const plan = Array.from({ length: 12 }, (_, index) => ({ sales: index < 3 ? 100 : 0, restock: 0 }));
+  const forecast = calculateUsFbaStorageForecast({
+    startMonth: 8, openingUnits: 300, prior13WeekSales: 1300, unitVolumeFt3: 1, sizeClass: 'standard', plan,
+  });
+
+  assert.deepEqual(JSON.parse(JSON.stringify(forecast.rows.slice(0, 3).map(row => row.averageUnits))), [250, 150, 50]);
+  assert.deepEqual(JSON.parse(JSON.stringify(forecast.rows.slice(0, 3).map(row => row.storageCost))), [195, 117, 120]);
+  assert.equal(getUsStorageBaseRate(9, 'standard', false), 0.78);
+  assert.equal(getUsStorageBaseRate(10, 'standard', false), 2.4);
+  assert.equal(getUsStorageBaseRate(10, 'oversize', false), 1.4);
+  assert.equal(getUsStorageUtilizationSurcharge(23, 'standard'), 0.44);
+  assert.equal(getUsStorageUtilizationSurcharge(53, 'oversize'), 1.26);
+
+  const surchargeForecast = calculateUsFbaStorageForecast({
+    startMonth: 8, openingUnits: 2300, prior13WeekSales: 1300, unitVolumeFt3: 1, sizeClass: 'standard',
+    plan: Array.from({ length: 12 }, () => ({ sales: 0, restock: 0 })),
+  });
+  assert.ok(Math.abs(surchargeForecast.rows[0].utilizationWeeks - 23) < 1e-10);
+  assert.equal(surchargeForecast.rows[0].surchargeRate, 0.44);
+  assert.equal(surchargeForecast.rows[0].storageCost, 2806);
+
+  const shortageForecast = calculateUsFbaStorageForecast({
+    startMonth: 8, openingUnits: 100, prior13WeekSales: 1300, unitVolumeFt3: 1, sizeClass: 'standard',
+    plan: [{ sales: 150, restock: 20 }],
+  });
+  assert.equal(shortageForecast.rows[0].soldUnits, 120);
+  assert.equal(shortageForecast.rows[0].shortageUnits, 30);
+  assert.equal(shortageForecast.rows[0].endingUnits, 0);
 });
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {
