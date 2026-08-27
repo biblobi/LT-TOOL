@@ -484,7 +484,10 @@
         .freight-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
         .freight-grid .fba-basis { padding-left: 12px; }
         .storage-forecast-panel { margin: 10px 0 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
-        .storage-forecast-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+        .storage-forecast-toggle { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; padding: 0 2px 6px; color: var(--text-primary); cursor: pointer; list-style-position: inside; }
+        .storage-forecast-toggle::marker { color: var(--accent); }
+        .storage-forecast-toggle::-webkit-details-marker { color: var(--accent); }
+        .storage-forecast-toggle:hover .storage-forecast-title { color: var(--accent-hover); }
         .storage-forecast-title { color: var(--accent); font: 700 0.96rem 'Share Tech Mono', monospace; }
         .storage-forecast-source { color: var(--text-subtle); font-size: 0.72rem; }
         .storage-control-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px 8px; }
@@ -781,8 +784,8 @@
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
                     </div>
-                    <section id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
-                        <div class="storage-forecast-head"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">美国 FBA 仓储预测</span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></div>
+                    <details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
+                        <summary class="storage-forecast-toggle"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
                         <div class="storage-control-grid">
                             <label><span class="term-tip" tabindex="0" data-tip="预测连续计算 12 个月。起始月决定淡季/旺季基础仓储费率。">起始月份</span><select id="storageStartMonth" oninput="updateStorageForecast()"></select></label>
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" placeholder="例如 300" oninput="updateStorageForecast()"></label>
@@ -790,7 +793,7 @@
                             <label class="storage-switch"><input id="storageNewSeller" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="仅在新卖家资格有效且日均库存体积低于 25 立方英尺时，使用新卖家低库存费率；否则自动回到常规费率。">新卖家低库存资格</span></label>
                             <label><span class="term-tip" tabindex="0" data-tip="利润测算中的仓储/件使用这一预测月的仓储总费用 ÷ 实际可售量。">利润取用月份</span><select id="storageProfitMonth" oninput="updateStorageForecast()"></select></label>
                         </div>
-                        <table class="storage-forecast-table" aria-label="美国 FBA 月度仓储预测">
+                        <table class="storage-forecast-table" aria-label="美国仓储费每月详细计算">
                             <thead><tr><th>月份</th><th>计划销量</th><th>补货</th><th>日均库存</th><th><span class="term-tip" tabindex="0" data-tip="滚动 13 周库存利用率 = 日均库存 ÷ 过去 13 周日均发货量。超过 22 周开始收取附加费。">利用率</span></th><th>仓储费</th><th>状态</th></tr></thead>
                             <tbody id="storageForecastRows"></tbody>
                         </table>
@@ -801,7 +804,7 @@
                             <div class="storage-summary-item">取用月日均库存<strong id="storageForecastAverageValue">-</strong></div>
                         </div>
                         <p id="storageForecastStatus" class="storage-forecast-status"></p>
-                    </section>
+                    </details>
                     <div class="calculator-fields">
                         <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label id="legacyStorageRateField"><span id="profitStorageLabel" class="term-tip" tabindex="0" data-tip="非美国站仓储/件 = 包装体积（立方米）× 35.3147 × 仓储单价 × 平均库存月数。">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><label id="legacyStorageMonthsField"><span class="term-tip" tabindex="0" data-tip="非美国站使用手动平均库存月数估算仓储成本。">平均库存月数</span><input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="退货率用于估算售价损失；退货处理费按每件退货额外计入成本。两者共同影响退货成本和利润。">退货率 %</span><input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel" class="term-tip" tabindex="0" data-tip="每件退货产生的处理费用，按退货率折算后计入利润结果中的退货成本。">退货处理费（美元/件）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                     </div>
@@ -954,7 +957,7 @@
             <section class="guide-section"><h2>使用流程</h2><ul><li>先在单位换算或运费与仓储计算填写尺寸、重量；两处数据会相互联动。</li><li>选择国家/站点后检查汇率，再填写广告和采购等必填项。</li><li>利润测算从前面模块读取售价、广告、FBA、头程和仓储结果，不需要重复填写。</li></ul></section>
             <section class="guide-section"><h2>单位换算</h2><ul><li>当前聚焦的输入是换算源，其他同组单位会同步更新；数字最多保留两位小数。</li><li>尺寸支持 <code>11x11x11</code>、<code>11*11*11</code>、<code>11×11×11</code>，也支持简单分数输入。</li><li>运费模块中的厘米/英寸、千克/磅可以从任一侧修改，另一侧和后续计算会立即刷新。</li></ul></section>
             <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>体积：</strong>长 × 宽 × 高；体积重 = 体积（cm³） ÷ 体积系数，默认系数为 6000。</li><li><strong>计费重：</strong>实际重量与体积重取较大值；体积重较大时标记为抛货，否则为重货。</li><li><strong>尺寸分级：</strong>先按最长边、次长边、最短边排序，再按标准件、大号大件、超大件限制判断。美国站自动估算 FBA 配送费，加拿大按美国估算费乘 1.34；墨西哥、欧洲、英国显示待手动配置。</li></ul></section>
-            <section class="guide-section"><h2>美国仓储预测</h2><ul><li>仅美国站启用，预测连续 12 个月。填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
+            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
             <section class="guide-section"><h2>非美国仓储</h2><ul><li>加拿大、墨西哥、欧洲和英国不启用美国月度预测，保留手动仓储单价和平均库存月数。</li><li>手动仓储/件 = 包装体积（m³）× 35.3147 × 仓储单价（目标币种/ft³/月）× 平均库存月数。</li><li>这些站点的 FBA 配送费暂不自动估算；请以对应站点的 Seller Central 费用或结算报表为准。</li></ul></section>
             <section class="guide-section"><h2>广告费换算</h2><ul><li><strong>CPA</strong> = CPC ÷ CVR；<strong>POS</strong> = 广告订单量 ÷ 月销量。</li><li><strong>ACOS</strong> = CPA ÷ 售价；<strong>混合广告费/件</strong> = CPA × POS，表示摊到每个总订单的平均广告成本。</li><li><strong>ACoAS</strong> = 混合广告费/件 ÷ 售价；<strong>ROAS</strong> = 售价 ÷ CPA。</li><li>CVR 可直接编辑为百分比；点击量和广告订单量都有值、且 CVR 留空或为 0 时，程序用广告订单量 ÷ 点击量补齐。利润测算读取混合广告费/件。</li></ul></section>
             <section class="guide-section"><h2>利润测算</h2><ul><li>售价、CPC、CVR、广告订单量和月销量统一取自广告费换算；头程、计费重和 FBA 取自运费模块。</li><li>总成本/件 = 采购（扣除退税/折扣） + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货。</li><li>退货成本 = 售价 × 退货率 + 退货处理费；退货率、处理费、促销费和入库配置费需要手动确认。</li><li>单件结果同时显示站点币种和人民币；销量相关的总费用只显示人民币，并按月销量相乘。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
@@ -1468,6 +1471,10 @@
         const ids = [...new Set((trigger.dataset.inputs || '').split(',').filter(Boolean))];
         if (document.getElementById('marketCountry')?.value === 'US' && ids.includes('profitStorageRate')) {
             ids.push('storageOpeningUnits', 'storagePast13WeekSales', 'storageStartMonth', 'storageProfitMonth');
+        }
+        const storagePanel = document.getElementById('storageForecastPanel');
+        if (storagePanel?.tagName === 'DETAILS' && ids.some(id => document.getElementById(id)?.closest('#storageForecastPanel'))) {
+            storagePanel.open = true;
         }
         const fields = [...new Set(ids)].map(id => document.getElementById(id)).filter(field => field && !field.closest('[hidden]'));
         if (!fields.length) return;
