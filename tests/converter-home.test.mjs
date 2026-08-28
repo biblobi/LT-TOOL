@@ -128,6 +128,7 @@ function loadCargoHelpers() {
 
 function loadFbaHelpers() {
   const code = [
+    extractConstantSource('US_FBA_FULFILLMENT_2026'),
     extractFunctionSource('fmtNumber'),
     extractFunctionSource('getFbaTierAnalysis'),
     extractFunctionSource('getFbaSizeTier'),
@@ -305,6 +306,27 @@ test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () 
   assert.equal(fba.tier, '标准件');
   assert.equal(Math.round(fba.weightLb), 20);
   assert.equal(fba.fee, 19.5);
+});
+
+test('FBA uses its own dimensional shipping weight and applies the 2026 peak option separately from cargo freight', () => {
+  const { calculateFbaMetrics } = loadFbaHelpers();
+  const bulkyByVolume = calculateFbaMetrics([45.72, 35.56, 20.32], 0.45359237, { country: 'US', peakShipping: false });
+  const peak = calculateFbaMetrics([45.72, 35.56, 20.32], 0.45359237, { country: 'US', peakShipping: true });
+
+  assert.ok(Math.abs(bulkyByVolume.dimensionalWeightLb - (2016 / 139)) < 1e-10);
+  assert.equal(bulkyByVolume.shippingWeightLb, bulkyByVolume.dimensionalWeightLb);
+  assert.equal(peak.peakSurcharge, 0.32);
+  assert.equal(peak.fee, bulkyByVolume.fee + 0.32);
+
+  for (const required of [
+    'id="fbaPeakShipping"', '旺季发货', '2026-10-15 至 2027-01-14',
+    'id="fbaDimensionalWeightValue"', 'id="fbaShippingWeightValue"',
+    'dimensionalWeightDivisorIn3PerLb: 139', 'peakAverageSurcharge: 0.32',
+    '头程体积系数', 'FBA体积重（磅）', 'FBA计费重（磅）',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /calculateFbaMetrics\(dimensionsCm, weightKg, options\)[\s\S]*?dimensionalWeightLb[\s\S]*?shippingWeightLb[\s\S]*?peakSurcharge/s);
+  assert.match(html, /头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。/);
+  assert.match(html, /FBA 配送费按实重与体积重中的较大者计费；本工具用 139 in³\/lb（约 5021 cm³\/kg）/);
 });
 
 test('FBA basis stays side-by-side until a phone-width breakpoint', () => {

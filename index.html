@@ -329,6 +329,25 @@
             width: 100%;
             font-weight: 500;
         }
+        .cargo-fields .cargo-peak-toggle {
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: center;
+            gap: 4px 7px;
+            min-height: 68px;
+        }
+        .cargo-peak-toggle input {
+            width: auto;
+            margin: 0;
+            accent-color: var(--neon-cyan);
+        }
+        .cargo-peak-toggle small {
+            grid-column: 2;
+            color: #777;
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        .cargo-peak-toggle:has(input:disabled) { opacity: 0.52; }
         select { background: #000; color: #fff; }
         select option { background: #000; color: #fff; }
         .cargo-summary {
@@ -794,9 +813,10 @@
                                     <label><span class="term-tip" tabindex="0" data-tip="可直接修改英寸尺寸，支持 in 后缀；会同步回厘米。">尺寸（英寸）</span><input id="cargoDimensionInInput" type="text" inputmode="decimal" placeholder="4.33*4.33*4.33in" oninput="syncCargoDimensionPair('in')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="输入包装实际重量，单位千克；会同步换算到磅。">实重（千克）</span><input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="syncCargoWeightPair('kg')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="可直接修改磅数；会同步回千克。">实重（磅）</span><input id="cargoWeightLbInput" type="number" min="0" step="0.01" placeholder="0.22" oninput="syncCargoWeightPair('lb')"></label>
-                                    <label><span class="term-tip" tabindex="0" data-tip="体积重 = 包装体积（立方厘米）÷ 体积系数；可按承运商规则修改。">体积系数</span><input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()"></label>
+                                    <label><span class="term-tip" tabindex="0" data-tip="头程体积重 = 包装体积（立方厘米）÷ 体积系数；可按承运商规则修改。该系数只用于头程，不用于 FBA。">头程体积系数</span><input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()"></label>
+                                    <label class="cargo-peak-toggle"><input id="fbaPeakShipping" type="checkbox" oninput="updateCargoCheck()"><span class="term-tip" tabindex="0" data-tip="勾选后按 2026 年 10 月 15 日至 2027 年 1 月 14 日的 FBA 旺季平均增量估算；FBA 按商品出库日计费。具体 SKU 费率以 Seller Central 为准。">旺季发货</span><small>2026-10-15 至 2027-01-14</small></label>
                                 </div>
-                                <div class="cargo-summary"><div>体积（立方米）：<span id="cargoVolumeValue">-</span></div><div>体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div></div>
+                                <div class="cargo-summary"><div>体积（立方米）：<span id="cargoVolumeValue">-</span></div><div>头程体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>头程计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div><div>FBA体积重（磅）：<span id="fbaDimensionalWeightValue">-</span></div><div>FBA计费重（磅）：<span id="fbaShippingWeightValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div></div>
                             </div>
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
@@ -869,7 +889,7 @@
                     </div>
                     <div class="profit-breakdown">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/计费千克）× 计费重 ÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和重量对应的配送费；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和 FBA 计费重对应的配送费；FBA 计费重取实重与 139 in³/lb 体积重的较大值。勾选旺季发货时会增加 2026 旺季平均增量；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 利润取用月份的 FBA 月度仓储总费 ÷ 当月实际可售量，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth,storageProfitMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件；总费用 = 广告/件 × 月销量。">广告/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位广告费所需输入"><span class="metric-money"><strong id="profitAdValue">-</strong><span class="metric-rmb" id="profitAdCnyValue">-</span></span><span class="metric-total" id="profitAdTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货；总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
@@ -980,7 +1000,7 @@
         <div class="guide-grid">
             <section class="guide-section"><h2>使用流程</h2><ul><li>先在单位换算或运费与仓储计算填写尺寸、重量；两处数据会相互联动。</li><li>选择国家/站点后检查汇率，再填写广告和采购等必填项。</li><li>利润测算从前面模块读取售价、广告、FBA、头程和仓储结果，不需要重复填写。</li></ul></section>
             <section class="guide-section"><h2>单位换算</h2><ul><li>当前聚焦的输入是换算源，其他同组单位会同步更新；数字最多保留两位小数。</li><li>尺寸支持 <code>11x11x11</code>、<code>11*11*11</code>、<code>11×11×11</code>，也支持简单分数输入。</li><li>运费模块中的厘米/英寸、千克/磅可以从任一侧修改，另一侧和后续计算会立即刷新。</li></ul></section>
-            <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>体积：</strong>长 × 宽 × 高；体积重 = 体积（cm³） ÷ 体积系数，默认系数为 6000。</li><li><strong>计费重：</strong>实际重量与体积重取较大值；体积重较大时标记为抛货，否则为重货。</li><li><strong>尺寸分级：</strong>先按最长边、次长边、最短边排序，再按标准件、大号大件、超大件限制判断。美国站自动估算 FBA 配送费，加拿大按美国估算费乘 1.34；墨西哥、欧洲、英国显示待手动配置。</li></ul></section>
+            <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>头程体积：</strong>长 × 宽 × 高；头程体积重 = 体积（cm³） ÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>FBA 配送费按实重与体积重中的较大者计费；本工具用 139 in³/lb（约 5021 cm³/kg）估算 FBA 体积重，再与实际磅数比较。亚马逊的最终计费还可能受尺寸等级、价格区间和品类规则影响。</li><li><strong>旺季发货：</strong>勾选后适用 2026 年 10 月 15 日至 2027 年 1 月 14 日，按出库日收取旺季配送费；本工具采用公开资料披露的平均每件增加 $0.32 作为规划估算，具体 SKU 费率和 3.5% 燃油与物流附加费请以 Seller Central Revenue Calculator、Fee Preview 和结算报表为准。</li><li><strong>尺寸分级：</strong>先按最长边、次长边、最短边排序，再按标准件、大号大件、超大件限制判断。美国站自动估算 FBA 配送费，加拿大按美国估算费乘 1.34；墨西哥、欧洲、英国显示待手动配置。</li></ul></section>
             <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。点击“展开明细”后，填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>批量填充可将销量或补货写入前 1–12 个月；填充月数外的月份保持原值，其中一项留空时也不会改动对应列。一键清空只清除 12 个月的计划销量、补货和批量填写框，保留起始月、期初库存、历史销量及利润取用月份。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
             <section class="guide-section"><h2>非美国仓储</h2><ul><li>加拿大、墨西哥、欧洲和英国不启用美国月度预测，保留手动仓储单价和平均库存月数。</li><li>手动仓储/件 = 包装体积（m³）× 35.3147 × 仓储单价（目标币种/ft³/月）× 平均库存月数。</li><li>这些站点的 FBA 配送费暂不自动估算；请以对应站点的 Seller Central 费用或结算报表为准。</li></ul></section>
             <section class="guide-section"><h2>广告费换算</h2><ul><li><strong>CPA</strong> = CPC ÷ CVR；<strong>POS</strong> = 广告订单量 ÷ 月销量。</li><li><strong>ACOS</strong> = CPA ÷ 售价；<strong>混合广告费/件</strong> = CPA × POS，表示摊到每个总订单的平均广告成本。</li><li><strong>ACoAS</strong> = 混合广告费/件 ÷ 售价；<strong>ROAS</strong> = 售价 ÷ CPA。</li><li>CVR 可直接编辑为百分比；点击量和广告订单量都有值、且 CVR 留空或为 0 时，程序用广告订单量 ÷ 点击量补齐。利润测算读取混合广告费/件。</li></ul></section>
@@ -988,7 +1008,7 @@
             <section class="guide-section"><h2>汇率与曲线</h2><ul><li>切换站点会自动刷新该站点汇率；“更新汇率”读取 ExchangeRate-API 的 CNY 基准实时数据，显示为 1 目标币 = X 人民币，保留两位小数。</li><li>实时汇率页支持手动汇率覆盖。历史曲线固定以人民币为目标币，支持 1 个月、1 年、5 年；接口不可用时不影响手动换算。</li><li>历史曲线的数据点来自 Frankfurter 工作日参考汇率，不等同于平台结算汇率。</li></ul></section>
             <section class="guide-section"><h2>结果定位与提示</h2><ul><li>点击任一自动结果，页面会滚动到相关输入；缺少的字段会优先高亮，已填写完整时会高亮全部依赖项。</li><li>悬停或键盘聚焦带提示的名称可查看公式、费率范围和适用条件；提示不会改变计算值。</li><li>默认文字颜色表示需要人工确认的基础数据，强调色表示换算或联动结果。API 失败、销量不足、无历史销量和缺货会在状态文字中说明。</li></ul></section>
             <section class="guide-section"><h2>其他工具</h2><ul><li><strong>PDF 聚合：</strong>首次选择文件会按文件名中的数字顺序排序并自动处理；继续添加文件后可重新合并下载。</li><li><strong>格式转换：</strong>图片在浏览器本地转换为 JPG、PNG 或 WEBP，选择文件后点击执行并下载。</li><li><strong>背景移除：</strong>模型在本地浏览器推理，可选择 GPU/WebGPU 或 CPU；首次使用可能需要下载模型，处理期间不要关闭页面。</li><li><strong>主题切换：</strong>主题选择保存在当前浏览器，下次打开会沿用上次选择。</li></ul></section>
-            <section class="guide-section"><h2>来源与边界</h2><ul><li>美国 FBA 仓储费率：<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero《FBA Storage Fees 2026》</a>，为本工具采用的用户提供参考表；不是实时费率接口。</li><li>实时汇率：ExchangeRate-API（<code>open.er-api.com</code>）；历史曲线：Frankfurter（<code>api.frankfurter.dev</code>）。</li><li>FBA 分级和配送费为页面内置估算规则，最终收费以 Amazon Seller Central、入库配置服务和实际结算报表为准。</li></ul></section>
+            <section class="guide-section"><h2>来源与边界</h2><ul><li>美国 FBA 仓储费率：<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero《FBA Storage Fees 2026》</a>，为本工具采用的用户提供参考表；不是实时费率接口。</li><li>2026 旺季窗口和出库计费口径：<a href="https://sellercentral.amazon.com/help/hub/reference/external/GABBX6GZPA8MSZGW?mons_sel_locale=zh_CN" target="_blank" rel="noopener noreferrer">Amazon Seller Central 2026 US FBA fulfillment fee changes</a>；公开公告给出平均旺季增量，具体 SKU 费率请以 Amazon 工具为准。</li><li>实时汇率：ExchangeRate-API（<code>open.er-api.com</code>）；历史曲线：Frankfurter（<code>api.frankfurter.dev</code>）。</li><li>FBA 分级、体积重和配送费为页面内置估算规则，最终收费以 Amazon Seller Central、入库配置服务和实际结算报表为准。</li></ul></section>
         </div>
     </div>
 
@@ -1025,6 +1045,12 @@
         newSellerVolumeLimitFt3: 25,
         rollingWindowDays: 91,
         forecastMonths: 12
+    });
+    const US_FBA_FULFILLMENT_2026 = Object.freeze({
+        dimensionalWeightDivisorIn3PerLb: 139,
+        peakShippingStart: '2026-10-15',
+        peakShippingEnd: '2027-01-14',
+        peakAverageSurcharge: 0.32
     });
 
     function currentTheme() {
@@ -1311,41 +1337,40 @@
         return typeof analysis === 'string' ? analysis : analysis.tier;
     }
 
-    function estimateFbaFee(tier, weightLb) {
-        if (!Number.isFinite(weightLb) || weightLb <= 0) return null;
+    function estimateFbaFee(tier, shippingWeightLb) {
+        if (!Number.isFinite(shippingWeightLb) || shippingWeightLb <= 0) return null;
         if (tier === '标准件') {
             const brackets = [[0.25, 3.68], [0.5, 3.98], [0.75, 4.28], [1, 4.75], [1.5, 5.37], [2, 5.68], [2.5, 5.98], [3, 6.28]];
-            const bracket = brackets.find(([maxWeight]) => weightLb <= maxWeight);
+            const bracket = brackets.find(([maxWeight]) => shippingWeightLb <= maxWeight);
             if (bracket) return bracket[1];
-            return 6.58 + Math.ceil((weightLb - 3) * 2) * 0.38;
+            return 6.58 + Math.ceil((shippingWeightLb - 3) * 2) * 0.38;
         }
-        if (tier === '大号大件') return 9.61 + Math.ceil(Math.max(0, weightLb - 1)) * 0.38;
-        if (weightLb <= 50) return 26.33 + Math.ceil(Math.max(0, weightLb - 1)) * 0.38;
-        if (weightLb <= 70) return 40.12 + Math.ceil(Math.max(0, weightLb - 51)) * 0.75;
-        if (weightLb <= 150) return 54.81 + Math.ceil(Math.max(0, weightLb - 71)) * 0.75;
-        return 194.45 + Math.ceil(Math.max(0, weightLb - 151)) * 0.19;
+        if (tier === '大号大件') return 9.61 + Math.ceil(Math.max(0, shippingWeightLb - 1)) * 0.38;
+        if (shippingWeightLb <= 50) return 26.33 + Math.ceil(Math.max(0, shippingWeightLb - 1)) * 0.38;
+        if (shippingWeightLb <= 70) return 40.12 + Math.ceil(Math.max(0, shippingWeightLb - 51)) * 0.75;
+        if (shippingWeightLb <= 150) return 54.81 + Math.ceil(Math.max(0, shippingWeightLb - 71)) * 0.75;
+        return 194.45 + Math.ceil(Math.max(0, shippingWeightLb - 151)) * 0.19;
     }
 
-    function estimateMarketFbaFee(tier, weightLb) {
-        const fee = estimateFbaFee(tier, weightLb);
-        if (fee === null) return null;
-        const country = typeof document !== 'undefined' ? document.getElementById('marketCountry')?.value : 'US';
-        if (country === 'MX' || country === 'EU' || country === 'UK') return null;
-        return country === 'CA' ? fee * 1.34 : fee;
-    }
-
-    function calculateFbaMetrics(dimensionsCm, weightKg) {
+    function calculateFbaMetrics(dimensionsCm, weightKg, options) {
+        options = options || {};
         if (!dimensionsCm || dimensionsCm.length !== 3 || !Number.isFinite(weightKg) || weightKg <= 0) return null;
         const dimensionsIn = dimensionsCm.map(value => value / 2.54);
         const weightLb = weightKg / 0.45359237;
         const analysis = getFbaTierAnalysis(dimensionsIn, weightLb);
         const tier = analysis.tier;
-        const marketFee = estimateFbaFee(tier, weightLb);
-        const country = typeof document !== 'undefined' ? document.getElementById('marketCountry')?.value : 'US';
-        const fee = country === 'MX' || country === 'EU' || country === 'UK'
+        const volumeIn3 = dimensionsIn.reduce((total, value) => total * value, 1);
+        const dimensionalWeightLb = volumeIn3 / US_FBA_FULFILLMENT_2026.dimensionalWeightDivisorIn3PerLb;
+        const shippingWeightLb = Math.max(weightLb, dimensionalWeightLb);
+        const baseFee = estimateFbaFee(tier, shippingWeightLb);
+        const country = options.country || (typeof document !== 'undefined' ? document.getElementById('marketCountry')?.value : 'US');
+        const scale = country === 'CA' ? 1.34 : 1;
+        const peakShipping = options.peakShipping ?? (typeof document !== 'undefined' && Boolean(document.getElementById('fbaPeakShipping')?.checked));
+        const peakSurcharge = peakShipping && baseFee !== null ? US_FBA_FULFILLMENT_2026.peakAverageSurcharge * scale : 0;
+        const fee = country === 'MX' || country === 'EU' || country === 'UK' || baseFee === null
             ? null
-            : country === 'CA' && marketFee !== null ? marketFee * 1.34 : marketFee;
-        return { dimensionsIn, weightLb, tier, fee, analysis };
+            : baseFee * scale + peakSurcharge;
+        return { dimensionsIn, weightLb, volumeIn3, dimensionalWeightLb, shippingWeightLb, tier, baseFee: baseFee === null ? null : baseFee * scale, peakSurcharge, peakShipping, fee, analysis };
     }
 
     function setCargoText(id, value) {
@@ -1391,6 +1416,8 @@
         setCargoText('cargoVolumeWeightValue', '-');
         setCargoText('cargoChargeableWeightValue', '-');
         setCargoText('cargoTypeValue', '-');
+        setCargoText('fbaDimensionalWeightValue', '-');
+        setCargoText('fbaShippingWeightValue', '-');
         setCargoText('fbaTierValue', '-');
         setCargoText('fbaFeeValue', '-');
         setFbaRuleSummary('-');
@@ -1418,6 +1445,8 @@
         if (!metrics) {
             setCargoText('cargoChargeableWeightValue', '-');
             setCargoText('cargoTypeValue', '-');
+            setCargoText('fbaDimensionalWeightValue', '-');
+            setCargoText('fbaShippingWeightValue', '-');
             setCargoText('fbaTierValue', '-');
             setCargoText('fbaFeeValue', '-');
             setFbaRuleSummary('-');
@@ -1429,9 +1458,14 @@
         setCargoText('cargoTypeValue', metrics.cargoType);
         const fba = calculateFbaMetrics(dimensions, metrics.actualWeightKg);
         if (fba) {
+            setCargoText('fbaDimensionalWeightValue', fmtNumber(fba.dimensionalWeightLb));
+            setCargoText('fbaShippingWeightValue', fmtNumber(fba.shippingWeightLb));
             setCargoText('fbaTierValue', fba.tier);
             const marketCurrency = currentMarket().currency;
-            setCargoText('fbaFeeValue', fba.fee === null ? '待手动配置' : marketCurrency + ' ' + fba.fee.toFixed(2));
+            const feeText = fba.fee === null
+                ? '待手动配置'
+                : marketCurrency + ' ' + fba.fee.toFixed(2) + (fba.peakShipping ? `（旺季 +${marketCurrency} ${fba.peakSurcharge.toFixed(2)}）` : '');
+            setCargoText('fbaFeeValue', feeText);
             const { analysis } = fba;
             const activeChecks = fba.tier === '标准件' ? analysis.standardChecks : analysis.bulkyChecks;
             const tierName = fba.tier === '标准件' ? '标准件' : '大号大件';
@@ -1939,6 +1973,7 @@
         const fx = document.getElementById('profitFx');
         const storage = document.getElementById('profitStorageRate');
         const referral = document.getElementById('profitReferralRate');
+        const peakShipping = document.getElementById('fbaPeakShipping');
         const isUs = document.getElementById('marketCountry')?.value === 'US';
         document.getElementById('storageForecastPanel').hidden = !isUs;
         document.getElementById('legacyStorageRateField').hidden = isUs;
@@ -1950,6 +1985,7 @@
         };
         applyFeeDefault(storage, market.storage);
         applyFeeDefault(referral, market.referral);
+        if (peakShipping) peakShipping.disabled = market.autoFees === false;
         const currencyNames = { USD: '美元', CAD: '加元', MXN: '墨西哥比索', EUR: '欧元', GBP: '英镑' };
         const currencyName = currencyNames[market.currency] || market.currency;
         const setLabel = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
