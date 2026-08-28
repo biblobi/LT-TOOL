@@ -440,7 +440,7 @@
             .calculator-home { max-width: none; }
         }
         .embedded-calculator { display: block; margin-top: 0; border-top: 0; padding-top: 0; }
-        .calculator-home h1 { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 1rem; margin: 0; padding: 9px 14px 7px; border: 1px solid var(--border-color); border-bottom: 0; background: #0d0d0d; }
+        .calculator-module-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0; padding: 9px 14px 7px; border: 1px solid var(--border-color); border-bottom: 0; background: #0d0d0d; color: var(--neon-cyan); font: 700 1rem 'Share Tech Mono', monospace; }
         .heading-controls { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
         .market-country { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font: 700 0.82rem Roboto, sans-serif; white-space: nowrap; }
         .market-country select { width: auto; min-width: 108px; padding: 5px 7px; background: #000; border: 1px solid #333; color: #fff; font: 500 0.82rem Roboto, sans-serif; }
@@ -515,7 +515,7 @@
         .storage-forecast-toggle::-webkit-details-marker { color: var(--accent); }
         .storage-forecast-toggle:hover .storage-forecast-title { color: var(--accent-hover); }
         .storage-forecast-title { color: var(--accent); font: 700 1.02rem 'Share Tech Mono', monospace; }
-        .storage-forecast-summary-actions { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+        .storage-forecast-heading { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
         .storage-forecast-source { color: var(--text-subtle); font-size: 0.8rem; font-weight: 600; }
         .storage-expand-button { min-height: 30px; padding: 5px 10px; border: 1px solid var(--accent); background: transparent; color: var(--accent); font: 700 0.8rem Roboto, sans-serif; cursor: pointer; white-space: nowrap; }
         .storage-expand-button:hover, .storage-expand-button:focus-visible { background: var(--accent); color: var(--accent-contrast); }
@@ -570,7 +570,7 @@
         @media (max-width: 520px) {
             .calculator-fields, .metric-grid, .storage-batch-controls { grid-template-columns: 1fr; }
             .calculator-fields label { min-height: 0; }
-            .calculator-home h1 { padding-inline: 10px; }
+            .calculator-module-title { padding-inline: 10px; }
             .heading-controls { width: 100%; justify-content: space-between; margin-top: 6px; }
             .market-country, .market-fx { width: 100%; justify-content: space-between; }
             .market-country select, .market-fx input { flex: 1; }
@@ -604,7 +604,7 @@
         :root[data-theme] .cargo-check,
         :root[data-theme] .calculator-panel,
         :root[data-theme] .currency-chart { background: var(--surface-raised); border-color: var(--border-color); }
-        :root[data-theme] .calculator-home h1 { background: var(--surface-muted); }
+        :root[data-theme] .calculator-module-title { background: var(--surface-muted); }
         :root[data-theme] .upload-area { background: var(--surface-raised); border-color: var(--border-strong); }
         :root[data-theme] .upload-area:hover { background: var(--surface-muted); border-color: var(--accent); }
         :root[data-theme] .nav-btn { background: var(--surface); border-color: var(--border-color); color: var(--text-muted); }
@@ -802,7 +802,7 @@
             </div>
         </div>
         <div id="module-freight" class="calculator-home embedded-calculator">
-            <h1><span>运费与仓储计算</span><span class="heading-controls"><label class="market-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option><option value="MX">墨西哥 / MX</option><option value="EU">欧洲 / EU</option><option value="UK">英国 / UK</option></select></label><label class="market-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel" class="market-fx-unit">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.01" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="market-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h1>
+            <h2 class="calculator-module-title"><span>运费与仓储计算</span><span class="heading-controls"><label class="market-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option><option value="MX">墨西哥 / MX</option><option value="EU">欧洲 / EU</option><option value="UK">英国 / UK</option></select></label><label class="market-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel" class="market-fx-unit">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.01" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="market-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h2>
             <div class="calculator-grid freight-grid">
                 <section class="calculator-panel">
                     <div id="cargo-check" class="cargo-check">
@@ -822,7 +822,7 @@
                         </div>
                     </div>
                     <details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
-                        <summary class="storage-forecast-toggle"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><span class="storage-forecast-summary-actions"><span class="storage-forecast-source">2026 美国站非危险品费率参考</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button></span></summary>
+                        <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button></span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
                         <div class="storage-control-grid">
                             <label><span class="term-tip" tabindex="0" data-tip="预测连续计算 12 个月。起始月决定淡季/旺季基础仓储费率。">起始月份</span><select id="storageStartMonth" oninput="updateStorageForecast()"></select></label>
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" placeholder="例如 300" oninput="updateStorageForecast()"></label>
@@ -856,7 +856,7 @@
             </div>
         </div>
         <div id="module-adcalc" class="calculator-home embedded-calculator">
-            <h1><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">广告费换算</span></h1>
+            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">广告费换算</span></h2>
             <div class="calculator-grid ad-calculator-grid">
                 <section class="calculator-panel">
                     <div class="calculator-fields">
@@ -875,7 +875,7 @@
             </div>
         </div>
         <div id="module-profit" class="calculator-home embedded-calculator">
-            <h1><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span></h1>
+            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span></h2>
             <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full">
                     <div class="profit-layout">

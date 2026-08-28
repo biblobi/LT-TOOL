@@ -462,7 +462,7 @@ test('advertising and profit inputs use stacked labels and POS is calculated bel
   assert.match(html, /\.calculator-fields label \{ display: flex; flex-direction: column;/);
   assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
   assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
-  assert.match(html, /<h1><span>运费与仓储计算<\/span>[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"/);
+  assert.match(html, /<h2 class="calculator-module-title"><span>运费与仓储计算<\/span>[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"/);
   assert.match(html, /id="adPosMetricValue"/);
   assert.doesNotMatch(html, /id="adPos"[^A-Za-z]/);
   assert.doesNotMatch(html, /id="adTacosValue"|TACoS/);
@@ -530,8 +530,11 @@ test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () =
   assert.doesNotMatch(html, /setLabel\('profitFbaLabel'/);
 });
 
-test('freight heading owns the market selector and uses flat section headings', () => {
-  assert.match(html, /<h1><span>运费与仓储计算<\/span><span class="heading-controls">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
+test('calculator module headings are siblings and freight owns the market selector', () => {
+  assert.match(html, /<h2 class="calculator-module-title"><span>运费与仓储计算<\/span><span class="heading-controls">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
+  assert.match(html, /<h2 class="calculator-module-title"><span class="term-tip"[^>]*>广告费换算<\/span><\/h2>/);
+  assert.match(html, /<h2 class="calculator-module-title"><span class="term-tip"[^>]*>利润测算<\/span><\/h2>/);
+  assert.match(html, /\.calculator-module-title\s*\{[\s\S]*?font:\s*700\s+1rem/s);
   assert.equal((html.match(/id="marketCountry"/g) ?? []).length, 1);
   assert.equal((html.match(/id="profitFx"/g) ?? []).length, 1);
   assert.doesNotMatch(html, /单 SKU 利润测算/);
@@ -641,6 +644,17 @@ test('US storage detail calculator is collapsed by default and opens for guided 
   assert.doesNotMatch(html, /<details id="storageForecastPanel"[^>]*\bopen\b/);
   assert.match(html, /storagePanel\.open = true/);
   assert.match(html, /storagePanel\?\.tagName === 'DETAILS'/);
+});
+
+test('storage detail button stays immediately beside its title', () => {
+  const summary = html.match(/<summary class="storage-forecast-toggle">([\s\S]*?)<\/summary>/)?.[1] ?? '';
+  const title = summary.indexOf('id="storageForecastTitle"');
+  const button = summary.indexOf('id="storageExpandButton"');
+  const source = summary.indexOf('storage-forecast-source');
+
+  assert.ok(title >= 0 && button > title && source > button);
+  assert.match(summary, /class="storage-forecast-heading"/);
+  assert.match(html, /\.storage-forecast-heading\s*\{\s*display:\s*inline-flex;[\s\S]*?align-items:\s*center/s);
 });
 
 test('storage forecast exposes an explicit expand control and stronger readable data typography', () => {
