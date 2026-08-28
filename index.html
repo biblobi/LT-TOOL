@@ -8,7 +8,7 @@
     <script>
         try { document.documentElement.dataset.theme = localStorage.getItem('lt_tool_theme') || 'light'; } catch { document.documentElement.dataset.theme = 'light'; }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
@@ -90,7 +90,10 @@
             color: var(--text-primary);
             padding: 16px;
             padding-bottom: 16px;
+            font-size: 1.05rem;
+            font-weight: 500;
         }
+        input, select, button, textarea { font-weight: 500; }
         ::selection { background: var(--accent-soft); color: var(--text-primary); }
         *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         * { scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
@@ -122,7 +125,8 @@
             min-height: 40px;
             padding: 8px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.84rem;
+            font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
             text-transform: uppercase;
@@ -139,7 +143,7 @@
         .theme-toggle { border-color: var(--accent); color: var(--accent-hover); }
         .nav-divider { height: 1px; margin: 4px 0; background: var(--border-color); }
         .converter-subnav { display: grid; gap: 4px; padding-left: 4px; }
-        .converter-subnav .converter-jump { min-height: 34px; padding: 7px 5px; font-size: 0.74rem; }
+        .converter-subnav .converter-jump { min-height: 34px; padding: 7px 5px; font-size: 0.78rem; }
 
         .container {
             background-color: var(--panel-bg);
@@ -191,6 +195,7 @@
             margin: 0 0 20px 0;
             font-family: 'Share Tech Mono', monospace;
             font-size: 1.4rem;
+            font-weight: 700;
             color: var(--neon-cyan);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
@@ -273,8 +278,8 @@
         .conversion-table tbody { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 5px; }
         .conversion-table tr { display: grid; gap: 4px; min-width: 0; padding: 5px; border: 1px solid #222; background: #0b0b0b; }
         .conversion-table tr:has(th) { display: none; }
-        .conversion-table th { text-align: left; color: #888; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
-        .conversion-table td { min-width: 0; padding: 0; color: #aaa; font-size: 0.78rem; }
+        .conversion-table th { text-align: left; color: #888; font-family: 'Share Tech Mono'; font-size: 0.84rem; font-weight: 700; }
+        .conversion-table td { min-width: 0; padding: 0; color: #aaa; font-size: 0.82rem; font-weight: 600; }
         .conversion-table td:first-child { font-weight: 700; }
         .conversion-table td:first-child { white-space: nowrap; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 5px; width: 100%; min-width: 0; font-size: 0.82rem; }
@@ -322,7 +327,7 @@
             color: #fff;
             padding: 8px;
             width: 100%;
-            font-weight: 400;
+            font-weight: 500;
         }
         select { background: #000; color: #fff; }
         select option { background: #000; color: #fff; }
@@ -342,6 +347,7 @@
         .cargo-summary span {
             color: var(--neon-cyan);
             font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
         }
         .cargo-note {
             margin: 10px 0 0 0;
@@ -356,7 +362,8 @@
         .fba-heading {
             color: #aaa;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.86rem;
+            font-weight: 700;
             margin-bottom: 9px;
         }
         .fba-basis {
@@ -380,7 +387,7 @@
             min-width: 0;
         }
         .fba-rule-label { color: #aaa; font-size: 0.84rem; font-weight: 700; }
-        .fba-rule-value { display: flex; flex-direction: column; gap: 2px; color: #aaa; font-family: 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
+        .fba-rule-value { display: flex; flex-direction: column; gap: 2px; color: #aaa; font-family: 'Share Tech Mono', monospace; font-weight: 600; overflow-wrap: anywhere; }
         .fba-rule-value .imperial-value { color: var(--neon-cyan); }
         .fba-rule-value .metric-value { color: #aaa; }
         .fba-trigger {
@@ -417,11 +424,11 @@
         .calculator-home h1 { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 1rem; margin: 0; padding: 9px 14px 7px; border: 1px solid var(--border-color); border-bottom: 0; background: #0d0d0d; }
         .heading-controls { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
         .market-country { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font: 700 0.82rem Roboto, sans-serif; white-space: nowrap; }
-        .market-country select { width: auto; min-width: 108px; padding: 5px 7px; background: #000; border: 1px solid #333; color: #fff; font: 400 0.78rem Roboto, sans-serif; }
+        .market-country select { width: auto; min-width: 108px; padding: 5px 7px; background: #000; border: 1px solid #333; color: #fff; font: 500 0.82rem Roboto, sans-serif; }
         .market-fx { display: inline-flex; align-items: center; gap: 5px; color: #aaa; font: 700 0.82rem Roboto, sans-serif; white-space: nowrap; }
-        .market-fx input { width: 72px; min-width: 0; padding: 5px 6px; background: #000; border: 1px solid #333; color: #fff; font: 400 0.78rem Roboto, sans-serif; }
-        .market-fx .market-fx-unit { font-weight: 400; }
-        .market-rate-update { padding: 5px 7px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font: 0.7rem 'Share Tech Mono', monospace; cursor: pointer; white-space: nowrap; }
+        .market-fx input { width: 72px; min-width: 0; padding: 5px 6px; background: #000; border: 1px solid #333; color: #fff; font: 500 0.82rem Roboto, sans-serif; }
+        .market-fx .market-fx-unit { font-weight: 500; }
+        .market-rate-update { padding: 5px 7px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font: 700 0.76rem 'Share Tech Mono', monospace; cursor: pointer; white-space: nowrap; }
         .market-rate-update:hover:not(:disabled) { background: var(--neon-cyan); color: #000; }
         .market-rate-update:disabled { opacity: 0.55; cursor: wait; }
         .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; border: 1px solid var(--border-color); padding: 8px; }
@@ -437,9 +444,9 @@
         .calculator-fields .field-label.term-tip { display: flex; position: relative; }
         .calculator-fields .term-tip, .cargo-fields .term-tip { color: inherit; white-space: nowrap; }
         .calculator-fields label > input, .calculator-fields label > select { align-self: stretch; }
-        .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: 400 0.82rem Roboto, sans-serif; }
+        .calculator-fields input, .calculator-fields select { width: 100%; min-width: 0; background: #000; border: 1px solid #333; color: #fff; padding: 6px; font: 500 0.86rem Roboto, sans-serif; }
         .field-label { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; min-height: 16px; }
-        .field-hint { color: #666; font-size: 0.72rem; font-weight: 400; }
+        .field-hint { color: #666; font-size: 0.76rem; font-weight: 500; }
         .term-tip { position: relative; display: inline-block; color: var(--neon-cyan); text-decoration: none; cursor: pointer; }
         .term-tip::after { content: attr(data-tip); position: absolute; z-index: 20; display: none; left: 0; top: calc(100% + 7px); width: max-content; max-width: 280px; padding: 8px 10px; background: #050505; border: 1px solid var(--neon-cyan); color: #ddd; font: 12px/1.45 Roboto, sans-serif; text-decoration: none; white-space: normal; box-shadow: 0 5px 16px #000; }
         .term-tip:hover::after, .term-tip:focus::after, .term-tip.is-open::after { display: block; }
@@ -447,9 +454,9 @@
         .link-control input { width: auto; accent-color: var(--neon-cyan); }
         .metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
         .ad-calculator-grid .metric-grid { margin-top: 8px; }
-        .metric { border: 1px solid #222; padding: 6px; min-height: 46px; color: #888; font-size: 0.7rem; }
+        .metric { border: 1px solid #222; padding: 6px; min-height: 46px; color: #888; font-size: 0.78rem; font-weight: 600; }
         .metric > .term-tip { font-size: 0.8rem; font-weight: 700; }
-        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; margin-top: 3px; overflow-wrap: anywhere; }
+        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; font-weight: 700; margin-top: 3px; overflow-wrap: anywhere; }
         .metric > .term-tip { white-space: nowrap; }
         .metric.negative strong { color: var(--neon-pink); }
         .metric-action { display: block; width: 100%; border: 0; margin: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -457,9 +464,9 @@
         .metric-action:focus-visible { outline: 1px solid var(--neon-cyan); outline-offset: 3px; }
         .metric-money { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 3px; min-width: 0; }
         .metric-money strong { margin: 0; min-width: 0; white-space: nowrap; font-size: 0.82rem; }
-        .metric-rmb { flex: 0 0 auto; color: #aaa; font: 0.7rem 'Share Tech Mono', monospace; white-space: nowrap; }
+        .metric-rmb { flex: 0 0 auto; color: #aaa; font: 700 0.76rem 'Share Tech Mono', monospace; white-space: nowrap; }
         .metric.negative .metric-rmb { color: var(--neon-pink); }
-        .metric-total { display: block; margin-top: 4px; padding-top: 4px; border-top: 1px solid #202020; color: #777; font: 0.82rem/1.35 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
+        .metric-total { display: block; margin-top: 4px; padding-top: 4px; border-top: 1px solid #202020; color: #777; font: 700 0.84rem/1.35 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
         .metric.negative .metric-total { color: var(--neon-pink); }
         .input-guided { border-color: var(--neon-cyan) !important; background: #071619 !important; animation: input-guidance 1.2s ease-out 2; }
         .input-guided-field { color: var(--neon-cyan) !important; scroll-margin-top: 24px; }
@@ -484,41 +491,44 @@
         .freight-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
         .freight-grid .fba-basis { padding-left: 12px; }
         .storage-forecast-panel { margin: 10px 0 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
-        .storage-forecast-toggle { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; padding: 0 2px 6px; color: var(--text-primary); cursor: pointer; list-style-position: inside; }
+        .storage-forecast-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; padding: 0 2px 6px; color: var(--text-primary); cursor: pointer; list-style-position: inside; }
         .storage-forecast-toggle::marker { color: var(--accent); }
         .storage-forecast-toggle::-webkit-details-marker { color: var(--accent); }
         .storage-forecast-toggle:hover .storage-forecast-title { color: var(--accent-hover); }
-        .storage-forecast-title { color: var(--accent); font: 700 0.96rem 'Share Tech Mono', monospace; }
-        .storage-forecast-source { color: var(--text-subtle); font-size: 0.72rem; }
+        .storage-forecast-title { color: var(--accent); font: 700 1.02rem 'Share Tech Mono', monospace; }
+        .storage-forecast-summary-actions { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+        .storage-forecast-source { color: var(--text-subtle); font-size: 0.8rem; font-weight: 600; }
+        .storage-expand-button { min-height: 30px; padding: 5px 10px; border: 1px solid var(--accent); background: transparent; color: var(--accent); font: 700 0.8rem Roboto, sans-serif; cursor: pointer; white-space: nowrap; }
+        .storage-expand-button:hover, .storage-expand-button:focus-visible { background: var(--accent); color: var(--accent-contrast); }
         .storage-control-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px 8px; }
-        .storage-control-grid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; }
-        .storage-control-grid input, .storage-control-grid select { width: 100%; min-width: 0; padding: 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 400 0.82rem Roboto, sans-serif; }
+        .storage-control-grid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: var(--text-muted); font-size: 0.82rem; font-weight: 700; }
+        .storage-control-grid input, .storage-control-grid select { width: 100%; min-width: 0; padding: 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 500 0.86rem Roboto, sans-serif; }
         .storage-control-grid .storage-switch { flex-direction: row; align-items: center; padding-top: 18px; white-space: nowrap; }
         .storage-control-grid .storage-switch input { width: auto; accent-color: var(--accent); }
-        .storage-batch-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 8px; margin: 8px 0 2px; align-items: end; }
-        .storage-batch-controls label { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; }
-        .storage-batch-controls input { width: 100%; min-width: 0; padding: 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 400 0.82rem Roboto, sans-serif; }
-        .storage-batch-controls button { min-width: 0; min-height: 32px; padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 700 0.76rem Roboto, sans-serif; cursor: pointer; }
+        .storage-batch-controls { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px 8px; margin: 8px 0 2px; align-items: end; }
+        .storage-batch-controls label { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: var(--text-muted); font-size: 0.82rem; font-weight: 700; }
+        .storage-batch-controls input { width: 100%; min-width: 0; padding: 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 500 0.86rem Roboto, sans-serif; }
+        .storage-batch-controls button { min-width: 0; min-height: 34px; padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 700 0.8rem Roboto, sans-serif; cursor: pointer; }
         .storage-batch-controls button:hover, .storage-batch-controls button:focus-visible { border-color: var(--accent); color: var(--accent); }
         .storage-batch-controls .storage-clear-button { border-color: var(--danger); color: var(--danger); }
         .storage-batch-controls .storage-clear-button:hover, .storage-batch-controls .storage-clear-button:focus-visible { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
-        .storage-forecast-table { width: 100%; margin-top: 8px; border-collapse: collapse; table-layout: fixed; font-size: 0.75rem; }
+        .storage-forecast-table { width: 100%; margin-top: 8px; border-collapse: collapse; table-layout: fixed; font-size: 0.84rem; font-weight: 600; }
         .storage-forecast-table th, .storage-forecast-table td { min-width: 0; padding: 6px; border: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
         .storage-forecast-table th { color: var(--text-muted); font-weight: 700; }
-        .storage-forecast-table td { color: var(--text-muted); font-family: 'Share Tech Mono', monospace; }
-        .storage-forecast-table input { width: 100%; min-width: 0; padding: 5px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 400 0.8rem Roboto, sans-serif; }
+        .storage-forecast-table td { color: var(--text-muted); font-family: 'Share Tech Mono', monospace; font-weight: 600; }
+        .storage-forecast-table input { width: 100%; min-width: 0; padding: 5px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 500 0.86rem Roboto, sans-serif; }
         .storage-forecast-table .storage-month { color: var(--accent); font-family: Roboto, sans-serif; font-weight: 700; }
-        .storage-forecast-table .storage-cost { color: var(--accent); white-space: nowrap; }
-        .storage-forecast-table .storage-status { color: var(--text-subtle); font-family: Roboto, sans-serif; overflow-wrap: anywhere; }
+        .storage-forecast-table .storage-cost { color: var(--accent); white-space: nowrap; font-size: 0.86rem; font-weight: 700; }
+        .storage-forecast-table .storage-status { color: var(--text-subtle); font-family: Roboto, sans-serif; font-size: 0.86rem; font-weight: 700; overflow-wrap: anywhere; }
         .storage-forecast-table tr.is-shortage .storage-status { color: var(--danger); font-weight: 700; }
         .storage-forecast-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
-        .storage-summary-item { min-width: 0; padding: 6px; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.72rem; }
+        .storage-summary-item { min-width: 0; padding: 6px; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
         .storage-summary-item strong { display: block; margin-top: 3px; color: var(--accent); font: 700 0.84rem 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
-        .storage-forecast-status { min-height: 18px; margin: 7px 0 0; color: var(--text-subtle); font-size: 0.72rem; }
+        .storage-forecast-status { min-height: 20px; margin: 7px 0 0; color: var(--text-subtle); font-size: 0.8rem; font-weight: 600; }
         .currency-chart { margin-top: 12px; border: 1px solid #222; padding: 10px; background: #080808; }
-        .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 0.75rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
+        .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 700 0.8rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
         .currency-range { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
-        .currency-range button { border: 1px solid #333; background: #050505; color: #888; padding: 4px 8px; font: 0.7rem 'Share Tech Mono', monospace; cursor: pointer; }
+        .currency-range button { border: 1px solid #333; background: #050505; color: #888; padding: 4px 8px; font: 700 0.76rem 'Share Tech Mono', monospace; cursor: pointer; }
         .currency-range button:hover, .currency-range button.active { border-color: var(--neon-cyan); color: var(--neon-cyan); }
         .currency-chart canvas { width: 100%; height: auto; aspect-ratio: 4 / 1; display: block; }
         .currency-chart-status { color: #666; font-size: 0.72rem; margin: 7px 0 0; }
@@ -526,7 +536,7 @@
         .currency-manual-row .link-control { padding: 0; }
         .currency-manual-row .field-label { display: flex; align-items: center; white-space: nowrap; }
         .currency-manual-row input[type="number"] { width: 120px; margin: 0; padding: 5px; background: #000; border: 1px solid #333; color: #fff; }
-        .market-badge { color: var(--neon-cyan); font: 0.72rem 'Share Tech Mono', monospace; margin-left: 8px; }
+        .market-badge { color: var(--neon-cyan); font: 700 0.78rem 'Share Tech Mono', monospace; margin-left: 8px; }
         .guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
         .guide-section { border: 1px solid var(--border-color); background: var(--surface-raised); padding: 14px; min-width: 0; }
         .guide-section h2 { margin: 0 0 8px; color: var(--accent); font: 700 1rem 'Share Tech Mono', monospace; }
@@ -534,7 +544,7 @@
         .guide-section ul { padding-left: 1.15rem; }
         .guide-section li + li { margin-top: 5px; }
         .guide-section strong { color: var(--text-primary); }
-        .guide-section code { color: var(--accent); font: 0.9em 'Share Tech Mono', monospace; }
+        .guide-section code { color: var(--accent); font: 700 0.9em 'Share Tech Mono', monospace; }
         .guide-section a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
         @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(3, minmax(0, 1fr)); } .freight-grid .cargo-fields, .storage-control-grid, .storage-batch-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .storage-forecast-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-layout { grid-template-columns: 1fr; } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-layout, .guide-grid { grid-template-columns: 1fr; } }
@@ -551,7 +561,7 @@
         .currency-display {
             background: #000; border: 1px solid var(--neon-green);
             padding: 15px; margin-top: 15px; text-align: center;
-            color: var(--neon-green); font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-green); font-family: 'Share Tech Mono', monospace; font-size: 1.05rem; font-weight: 700;
         }
 
         #bgOutput { max-width: 100%; border: 1px solid #333; margin-top: 10px; display: block; margin-left: auto; margin-right: auto; background: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23222"/><rect x="5" y="5" width="5" height="5" fill="%23222"/></svg>'); }
@@ -560,7 +570,7 @@
             width: 100%; background: #000;
             border-top: 1px solid #333; padding: 10px;
             margin-top: 12px;
-            font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #666;
+            font-family: 'Share Tech Mono'; font-size: 0.84rem; font-weight: 700; color: #666;
             display: flex; align-items: center; justify-content: center;
             flex-direction: column; gap: 4px;
         }
@@ -792,7 +802,7 @@
                         </div>
                     </div>
                     <details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
-                        <summary class="storage-forecast-toggle"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
+                        <summary class="storage-forecast-toggle"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><span class="storage-forecast-summary-actions"><span class="storage-forecast-source">2026 美国站非危险品费率参考</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button></span></summary>
                         <div class="storage-control-grid">
                             <label><span class="term-tip" tabindex="0" data-tip="预测连续计算 12 个月。起始月决定淡季/旺季基础仓储费率。">起始月份</span><select id="storageStartMonth" oninput="updateStorageForecast()"></select></label>
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" placeholder="例如 300" oninput="updateStorageForecast()"></label>
@@ -801,9 +811,10 @@
                             <label><span class="term-tip" tabindex="0" data-tip="利润测算中的仓储/件使用这一预测月的仓储总费用 ÷ 实际可售量。">利润取用月份</span><select id="storageProfitMonth" oninput="updateStorageForecast()"></select></label>
                         </div>
                         <div class="storage-batch-controls" aria-label="仓储预测批量操作">
-                            <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该销量写入 12 个月；留空表示不修改销量列。">批量月销量</span><input id="storageBatchSales" type="number" min="0" step="1" placeholder="留空不改"></label>
-                            <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该补货量写入 12 个月；留空表示不修改补货列。">批量月补货</span><input id="storageBatchRestock" type="number" min="0" step="1" placeholder="留空不改"></label>
-                            <button id="storageBatchFillButton" type="button" onclick="batchFillStorageForecast()">批量填充 12 个月</button>
+                            <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该销量写入前 N 个月（默认 12 个月）；留空表示不修改销量列。">批量月销量</span><input id="storageBatchSales" type="number" min="0" step="1" placeholder="留空不改"></label>
+                            <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该补货量写入前 N 个月（默认 12 个月）；留空表示不修改补货列。">批量月补货</span><input id="storageBatchRestock" type="number" min="0" step="1" placeholder="留空不改"></label>
+                            <label><span class="term-tip" tabindex="0" data-tip="批量填充从第 1 个月开始写入；填写 1–12，留空按 12 个月处理，未覆盖的月份保持原值。">填充月数</span><input id="storageBatchMonths" type="number" min="1" max="12" step="1" value="12" placeholder="默认 12" inputmode="numeric"></label>
+                            <button id="storageBatchFillButton" type="button" onclick="batchFillStorageForecast()">批量填充</button>
                             <button id="storageClearButton" class="storage-clear-button" type="button" onclick="clearStorageForecast()">一键清空计划</button>
                         </div>
                         <table class="storage-forecast-table" aria-label="美国仓储费每月详细计算">
@@ -944,7 +955,7 @@
 
         <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:15px;">
             <input type="number" id="amountInput" class="cyber-input" style="text-align:right" placeholder="金额" oninput="calcCurrency('amount')">
-            <span style="font-family:'Share Tech Mono'; color:#888; font-size:1.2rem;">↔</span>
+            <span style="font-family:'Share Tech Mono'; color:#888; font-size:1.2rem; font-weight:700;">↔</span>
             <input type="number" id="resultInput" class="cyber-input" placeholder="结果" oninput="calcCurrency('result')">
         </div>
 
@@ -970,7 +981,7 @@
             <section class="guide-section"><h2>使用流程</h2><ul><li>先在单位换算或运费与仓储计算填写尺寸、重量；两处数据会相互联动。</li><li>选择国家/站点后检查汇率，再填写广告和采购等必填项。</li><li>利润测算从前面模块读取售价、广告、FBA、头程和仓储结果，不需要重复填写。</li></ul></section>
             <section class="guide-section"><h2>单位换算</h2><ul><li>当前聚焦的输入是换算源，其他同组单位会同步更新；数字最多保留两位小数。</li><li>尺寸支持 <code>11x11x11</code>、<code>11*11*11</code>、<code>11×11×11</code>，也支持简单分数输入。</li><li>运费模块中的厘米/英寸、千克/磅可以从任一侧修改，另一侧和后续计算会立即刷新。</li></ul></section>
             <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>体积：</strong>长 × 宽 × 高；体积重 = 体积（cm³） ÷ 体积系数，默认系数为 6000。</li><li><strong>计费重：</strong>实际重量与体积重取较大值；体积重较大时标记为抛货，否则为重货。</li><li><strong>尺寸分级：</strong>先按最长边、次长边、最短边排序，再按标准件、大号大件、超大件限制判断。美国站自动估算 FBA 配送费，加拿大按美国估算费乘 1.34；墨西哥、欧洲、英国显示待手动配置。</li></ul></section>
-            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>批量填充可一次写入 12 个月的销量或补货；其中一项留空时不会改动对应列。一键清空只清除 12 个月的计划销量、补货和批量填写框，保留起始月、期初库存、历史销量及利润取用月份。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
+            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。点击“展开明细”后，填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>批量填充可将销量或补货写入前 1–12 个月；填充月数外的月份保持原值，其中一项留空时也不会改动对应列。一键清空只清除 12 个月的计划销量、补货和批量填写框，保留起始月、期初库存、历史销量及利润取用月份。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
             <section class="guide-section"><h2>非美国仓储</h2><ul><li>加拿大、墨西哥、欧洲和英国不启用美国月度预测，保留手动仓储单价和平均库存月数。</li><li>手动仓储/件 = 包装体积（m³）× 35.3147 × 仓储单价（目标币种/ft³/月）× 平均库存月数。</li><li>这些站点的 FBA 配送费暂不自动估算；请以对应站点的 Seller Central 费用或结算报表为准。</li></ul></section>
             <section class="guide-section"><h2>广告费换算</h2><ul><li><strong>CPA</strong> = CPC ÷ CVR；<strong>POS</strong> = 广告订单量 ÷ 月销量。</li><li><strong>ACOS</strong> = CPA ÷ 售价；<strong>混合广告费/件</strong> = CPA × POS，表示摊到每个总订单的平均广告成本。</li><li><strong>ACoAS</strong> = 混合广告费/件 ÷ 售价；<strong>ROAS</strong> = 售价 ÷ CPA。</li><li>CVR 可直接编辑为百分比；点击量和广告订单量都有值、且 CVR 留空或为 0 时，程序用广告订单量 ÷ 点击量补齐。利润测算读取混合广告费/件。</li></ul></section>
             <section class="guide-section"><h2>利润测算</h2><ul><li>售价、CPC、CVR、广告订单量和月销量统一取自广告费换算；头程、计费重和 FBA 取自运费模块。</li><li>总成本/件 = 采购（扣除退税/折扣） + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货。</li><li>退货成本 = 售价 × 退货率 + 退货处理费；退货率、处理费、促销费和入库配置费需要手动确认。</li><li>单件结果同时显示站点币种和人民币；销量相关的总费用只显示人民币，并按月销量相乘。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
@@ -1745,11 +1756,36 @@
         updateProfitCalculator();
     }
 
+    function updateStorageExpandButton() {
+        const panel = document.getElementById('storageForecastPanel');
+        const button = document.getElementById('storageExpandButton');
+        if (!panel || !button) return;
+        const expanded = panel.open;
+        button.textContent = expanded ? '收起明细' : '展开明细';
+        button.setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleStorageForecast(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const panel = document.getElementById('storageForecastPanel');
+        if (!panel) return;
+        panel.open = !panel.open;
+        updateStorageExpandButton();
+    }
+
     function storageBatchInputValue(id) {
         const value = document.getElementById(id)?.value.trim() || '';
         if (!value) return null;
         const number = Number(value);
         return Number.isFinite(number) && number >= 0 ? value : NaN;
+    }
+
+    function storageBatchMonthCount() {
+        const value = document.getElementById('storageBatchMonths')?.value.trim() || '';
+        if (!value) return US_FBA_STORAGE_2026.forecastMonths;
+        const number = Number(value);
+        return Number.isInteger(number) && number >= 1 && number <= US_FBA_STORAGE_2026.forecastMonths ? number : NaN;
     }
 
     function setStorageForecastStatus(message) {
@@ -1760,8 +1796,14 @@
     function batchFillStorageForecast() {
         const sales = storageBatchInputValue('storageBatchSales');
         const restock = storageBatchInputValue('storageBatchRestock');
+        const months = storageBatchMonthCount();
         if (Number.isNaN(sales) || Number.isNaN(restock)) {
             setStorageForecastStatus('批量销量和批量补货必须是大于或等于 0 的数字。');
+            return;
+        }
+        if (Number.isNaN(months)) {
+            setStorageForecastStatus('填充月数必须是 1 到 12 之间的整数。');
+            document.getElementById('storageBatchMonths')?.focus();
             return;
         }
         if (sales === null && restock === null) {
@@ -1769,13 +1811,13 @@
             document.getElementById('storageBatchSales')?.focus();
             return;
         }
-        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+        for (let index = 0; index < months; index += 1) {
             if (sales !== null) document.getElementById(`storageSales${index}`).value = sales;
             if (restock !== null) document.getElementById(`storageRestock${index}`).value = restock;
         }
         updateStorageForecast();
         const changed = [sales !== null ? `销量 ${sales} 件/月` : '', restock !== null ? `补货 ${restock} 件/月` : ''].filter(Boolean).join('，');
-        setStorageForecastStatus(`已将 ${changed} 批量填充到 12 个月；起始月、库存和历史销量未修改。`);
+        setStorageForecastStatus(`已将 ${changed} 批量填充到前 ${months} 个月；其余月份未修改，起始月、库存和历史销量未修改。`);
     }
 
     function clearStorageForecast() {
@@ -1787,10 +1829,12 @@
         }
         const batchSales = document.getElementById('storageBatchSales');
         const batchRestock = document.getElementById('storageBatchRestock');
+        const batchMonths = document.getElementById('storageBatchMonths');
         if (batchSales) batchSales.value = '';
         if (batchRestock) batchRestock.value = '';
+        if (batchMonths) batchMonths.value = '';
         updateStorageForecast();
-        setStorageForecastStatus('已清空 12 个月的计划销量与补货；起始月、库存和历史销量未修改。');
+        setStorageForecastStatus('已清空 12 个月的计划销量、补货和批量填写框；起始月、库存和历史销量未修改。');
     }
 
     function calculateProfitMetrics(values) {
@@ -2236,7 +2280,7 @@
         ctx.strokeStyle = themeColor('--accent'); ctx.lineWidth = 2; ctx.stroke();
         const latest = points[points.length - 1];
         ctx.fillStyle = themeColor('--accent'); ctx.beginPath(); ctx.arc(x(points.length - 1), y(latest.value), 3, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = themeColor('--text-subtle'); ctx.font = '11px Share Tech Mono, monospace';
+        ctx.fillStyle = themeColor('--text-subtle'); ctx.font = '700 11px Share Tech Mono, monospace';
         ctx.fillText(`1 ${source} = ${latest.value.toFixed(2)} ${target}`, pad.left, 11);
         ctx.fillText(points[0].date.slice(5), pad.left, height - 5);
         const finalLabel = points[points.length - 1].date.slice(5); const labelWidth = ctx.measureText(finalLabel).width;
@@ -2248,6 +2292,8 @@
         if (!currencyTrendSnapshot || !currencyModule?.classList.contains('active')) return;
         window.requestAnimationFrame(() => drawCurrencyTrend(currencyTrendSnapshot.points, currencyTrendSnapshot.source, currencyTrendSnapshot.target));
     });
+
+    document.getElementById('storageForecastPanel')?.addEventListener('toggle', updateStorageExpandButton);
 
     async function updateCurrencyTrend() {
         const sourceValue = document.getElementById('sourceCurrency').value;
@@ -2310,6 +2356,7 @@
 
     applyTheme(currentTheme(), false);
     initializeStorageForecast();
+    updateStorageExpandButton();
     installTermTips();
     updateMarketCountry();
     updateAdCalculator();

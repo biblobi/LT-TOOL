@@ -531,7 +531,7 @@ test('profit results show per-unit market-currency and CNY values, but monthly t
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
   assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);
-  assert.match(html, /\.metric-total\s*\{[^}]*font:\s*0\.82rem\/1\.35/s);
+  assert.match(html, /\.metric-total\s*\{[^}]*font:\s*700\s+0\.84rem\/1\.35/s);
   assert.match(html, /totalEl\.textContent = `\$\{label\}（\$\{fmtNumber\(quantity\)\}件） \$\{rmbMoney\(total, fx\)\}`/);
   const totalMetric = extractFunctionSource('setProfitTotalMetric');
   assert.doesNotMatch(totalMetric, /money\(total\)/);
@@ -614,21 +614,37 @@ test('guide explains complex calculations, special interactions, and data-source
 test('US storage detail calculator is collapsed by default and opens for guided results', () => {
   assert.match(html, /<details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">/);
   assert.match(html, /<summary class="storage-forecast-toggle">[\s\S]*仓储费每月详细计算（美国）/);
+  assert.match(html, /id="storageExpandButton"[^>]*aria-expanded="false"[^>]*aria-controls="storageForecastPanel"/);
+  assert.match(html, /onclick="toggleStorageForecast\(event\)"/);
   assert.doesNotMatch(html, /<details id="storageForecastPanel"[^>]*\bopen\b/);
   assert.match(html, /storagePanel\.open = true/);
   assert.match(html, /storagePanel\?\.tagName === 'DETAILS'/);
 });
 
+test('storage forecast exposes an explicit expand control and stronger readable data typography', () => {
+  assert.match(html, /function updateStorageExpandButton\(\)/);
+  assert.match(html, /function toggleStorageForecast\(event\)/);
+  assert.match(html, /panel\.open = !panel\.open/);
+  assert.match(html, /button\.textContent = expanded \? '收起明细' : '展开明细'/);
+  assert.match(html, /storage-forecast-table\s*\{[^}]*font-size:\s*0\.84rem[^}]*font-weight:\s*600/s);
+  assert.match(html, /storage-forecast-table \.storage-cost\s*\{[^}]*font-size:\s*0\.86rem[^}]*font-weight:\s*700/s);
+  assert.match(html, /storage-forecast-table \.storage-status\s*\{[^}]*font-size:\s*0\.86rem[^}]*font-weight:\s*700/s);
+  assert.match(html, /body\s*\{[\s\S]*?font-size:\s*1\.05rem;[\s\S]*?font-weight:\s*500;/);
+});
+
 test('US storage forecast supports batch monthly plans and clears only monthly plan values', () => {
   for (const required of [
-    'id="storageBatchSales"', 'id="storageBatchRestock"', 'id="storageBatchFillButton"', 'id="storageClearButton"',
-    'function batchFillStorageForecast', 'function clearStorageForecast', 'function storageBatchInputValue',
-    '批量填充 12 个月', '一键清空计划', '留空不改', '起始月、库存和历史销量未修改',
+    'id="storageBatchSales"', 'id="storageBatchRestock"', 'id="storageBatchMonths"', 'id="storageBatchFillButton"', 'id="storageClearButton"',
+    'function batchFillStorageForecast', 'function clearStorageForecast', 'function storageBatchInputValue', 'function storageBatchMonthCount',
+    '批量填充', '填充月数', '一键清空计划', '留空不改', '起始月、库存和历史销量未修改',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   const batchFill = extractFunctionSource('batchFillStorageForecast');
   assert.match(batchFill, /sales !== null/);
   assert.match(batchFill, /restock !== null/);
+  assert.match(batchFill, /const months = storageBatchMonthCount\(\)/);
+  assert.match(batchFill, /index < months/);
+  assert.match(batchFill, /填充月数必须是 1 到 12 之间的整数/);
   assert.match(batchFill, /storageSales\$\{index\}/);
   assert.match(batchFill, /storageRestock\$\{index\}/);
   assert.match(batchFill, /updateStorageForecast\(\)/);
@@ -638,6 +654,7 @@ test('US storage forecast supports batch monthly plans and clears only monthly p
   assert.match(clearForecast, /storageRestock\$\{index\}/);
   assert.match(clearForecast, /storageBatchSales/);
   assert.match(clearForecast, /storageBatchRestock/);
+  assert.match(clearForecast, /storageBatchMonths/);
   assert.doesNotMatch(clearForecast, /storageOpeningUnits|storagePast13WeekSales|storageStartMonth|storageProfitMonth/);
 });
 
