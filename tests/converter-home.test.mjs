@@ -157,7 +157,9 @@ function loadStorageHelpers() {
     extractFunctionSource('getUsStorageBaseRate'),
     extractFunctionSource('getUsStorageUtilizationSurcharge'),
     extractFunctionSource('calculateUsFbaStorageForecast'),
-    '({ getUsStorageBaseRate, getUsStorageUtilizationSurcharge, calculateUsFbaStorageForecast })',
+    extractFunctionSource('calculateStoragePeriodAllocation'),
+    extractFunctionSource('calculateUsFbaReplenishmentPlan'),
+    '({ getUsStorageBaseRate, getUsStorageUtilizationSurcharge, calculateUsFbaStorageForecast, calculateStoragePeriodAllocation, calculateUsFbaReplenishmentPlan })',
   ].join('\n');
   return vm.runInNewContext(code);
 }
@@ -402,6 +404,13 @@ test('profit calculator supports chargeable weight, cubic-foot storage, advertis
     adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
   });
   assert.equal(forecastStorage.storage, 1.25);
+
+  const manualStorage = calculateProfitMetrics({
+    price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 10, freightRateRmb: 8, chargeableWeightKg: 1.2,
+    packageVolumeM3: 0.0283168466, referralRate: 15, fbaFee: 5, storageRate: 0.95, inventoryMonths: 1, storageCost: undefined,
+    adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
+  });
+  assert.equal(manualStorage.storage, 0.95);
 });
 
 test('US FBA storage forecast uses daily-average inventory, seasonal rates, rolling utilization, and FIFO shortage protection', () => {
@@ -434,6 +443,76 @@ test('US FBA storage forecast uses daily-average inventory, seasonal rates, roll
   assert.equal(shortageForecast.rows[0].soldUnits, 120);
   assert.equal(shortageForecast.rows[0].shortageUnits, 30);
   assert.equal(shortageForecast.rows[0].endingUnits, 0);
+});
+
+test('US storage uses a forecast-period weighted allocation, including zero-sales months', () => {
+  const { calculateUsFbaStorageForecast, calculateStoragePeriodAllocation } = loadStorageHelpers();
+  const { calculateProfitMetrics } = loadProfitHelpers();
+  const forecast = calculateUsFbaStorageForecast({
+    startMonth: 8, openingUnits: 200, prior13WeekSales: 1300, unitVolumeFt3: 1, sizeClass: 'standard',
+    plan: [{ sales: 100, restock: 0 }, { sales: 0, restock: 0 }],
+  });
+
+  assert.equal(forecast.totalSoldUnits, 100);
+  assert.ok(forecast.rows[1].storageCost > 0, 'zero-sales month still incurs storage cost');
+  assert.equal(calculateStoragePeriodAllocation(forecast), forecast.totalStorageCost / forecast.totalSoldUnits);
+  assert.equal(calculateStoragePeriodAllocation({ totalStorageCost: 50, totalSoldUnits: 0 }), null);
+
+  const unavailableStorage = calculateProfitMetrics({
+    price: 30, fx: 7.2, purchaseRmb: 50, taxDiscount: 0, freightRateRmb: 8, chargeableWeightKg: 1,
+    packageVolumeM3: 0.02, referralRate: 15, fbaFee: 5, storageCost: null, storageCostUnavailable: true,
+    adCost: 2, promoRate: 0, returnRate: 0, returnHandling: 0, placementFee: 0, targetMargin: 20, cvr: 0.1,
+  });
+  assert.equal(unavailableStorage.storage, null);
+  assert.equal(unavailableStorage.totalCost, null);
+  assert.equal(unavailableStorage.profit, null);
+  assert.equal(unavailableStorage.margin, null);
+});
+
+test('new products defer utilization surcharges until 91 forecast days have completed', () => {
+  const { calculateUsFbaStorageForecast } = loadStorageHelpers();
+  const forecast = calculateUsFbaStorageForecast({
+    startMonth: 1, openingUnits: 1000, prior13WeekSales: 0, unitVolumeFt3: 1, sizeClass: 'standard',
+    plan: Array.from({ length: 12 }, () => ({ sales: 100, restock: 100 })),
+  });
+
+  assert.equal(forecast.hasHistory, false);
+  assert.equal(forecast.rows[0].newProductObservation, true);
+  assert.equal(forecast.rows[0].utilizationAvailable, false);
+  assert.equal(forecast.rows[0].surchargeRate, 0);
+  assert.equal(forecast.rows[3].utilizationAvailable, false);
+  assert.equal(forecast.rows[4].utilizationAvailable, true);
+  assert.ok(forecast.rows[4].surchargeRate > 0);
+  assert.notEqual(forecast.rows[4].utilizationWeeks, Infinity);
+});
+
+test('replenishment recommendations avoid shortage and retain next-month safety stock', () => {
+  const { calculateUsFbaReplenishmentPlan } = loadStorageHelpers();
+  const recommendation = calculateUsFbaReplenishmentPlan({
+    openingUnits: 30,
+    plan: [{ sales: 40 }, { sales: 100 }, { sales: 80 }],
+    leadTimeMonths: 1,
+    safetyStockRatio: 0.5,
+  });
+
+  assert.equal(recommendation.rows[0].recommendedArrivalUnits, 60);
+  assert.equal(recommendation.rows[0].endingUnits, 50);
+  assert.equal(recommendation.rows[0].orderMonthIndex, -1);
+  assert.equal(recommendation.rows[0].needsImmediateArrangement, true);
+  assert.equal(recommendation.rows[1].openingUnits, 50);
+  assert.equal(recommendation.rows[1].endingUnits, 40);
+  assert.equal(recommendation.rows[1].orderMonthIndex, 0);
+  assert.ok(recommendation.rows.every(row => row.shortageUnits === 0));
+});
+
+test('storage UI uses period allocation and exposes non-destructive replenishment controls', () => {
+  for (const required of [
+    '有销量月份平均仓储/件', 'id="storageForecastSoldValue"', 'id="storageLeadTimeMonths"',
+    'id="storageSafetyStockRatio"', 'id="storageReplenishmentRows"', '计划期总仓储',
+    '新品观察期内只按基础仓储费率估算', '补货建议不会改写计划补货', '完整 13 周观察期', '包含仓储的利润结果会显示为不可用',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.doesNotMatch(html, /id="storageProfitMonth"|function storageForecastProfitRow|function updateStorageGuide|利润取用月份|所选预测月/);
 });
 
 test('profit and ad calculators are embedded in the converter home with a single calculated cost flow', () => {

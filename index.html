@@ -543,6 +543,15 @@
         .storage-forecast-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
         .storage-summary-item { min-width: 0; padding: 6px; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
         .storage-summary-item strong { display: block; margin-top: 3px; color: var(--accent); font: 700 0.84rem 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
+        .storage-replenishment { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); }
+        .storage-replenishment-heading { color: var(--text-primary); font: 700 0.9rem 'Share Tech Mono', monospace; }
+        .storage-replenishment-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; margin-top: 6px; }
+        .storage-replenishment-controls label { display: flex; flex-direction: column; gap: 4px; color: var(--text-muted); font-size: 0.82rem; font-weight: 700; }
+        .storage-replenishment-controls input { width: 100%; min-width: 0; padding: 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 500 0.86rem Roboto, sans-serif; }
+        .storage-replenishment-table { width: 100%; margin-top: 7px; border-collapse: collapse; table-layout: fixed; font-size: 0.82rem; font-weight: 600; }
+        .storage-replenishment-table th, .storage-replenishment-table td { padding: 5px 6px; border: 1px solid var(--border-color); text-align: left; color: var(--text-muted); }
+        .storage-replenishment-table th { font-weight: 700; }
+        .storage-replenishment-table td { font-family: 'Share Tech Mono', monospace; }
         .storage-forecast-status { min-height: 20px; margin: 7px 0 0; color: var(--text-subtle); font-size: 0.8rem; font-weight: 600; }
         .currency-chart { margin-top: 12px; border: 1px solid #222; padding: 10px; background: #080808; }
         .currency-chart-header { display: flex; justify-content: space-between; gap: 12px; color: #888; font: 700 0.8rem 'Share Tech Mono', monospace; margin-bottom: 8px; }
@@ -828,7 +837,6 @@
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" placeholder="例如 300" oninput="updateStorageForecast()"></label>
                             <label><span class="term-tip" tabindex="0" data-tip="库存利用率附加费以过去 13 周实际发货量作为首月基准。后续月份会逐日滚动采用预测中的实际可售量。">过去 13 周销量</span><input id="storagePast13WeekSales" type="number" min="0" step="1" placeholder="例如 1300" oninput="updateStorageForecast()"></label>
                             <label class="storage-switch"><input id="storageNewSeller" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="仅在新卖家资格有效且日均库存体积低于 25 立方英尺时，使用新卖家低库存费率；否则自动回到常规费率。">新卖家低库存资格</span></label>
-                            <label><span class="term-tip" tabindex="0" data-tip="利润测算中的仓储/件使用这一预测月的仓储总费用 ÷ 实际可售量。">利润取用月份</span><select id="storageProfitMonth" oninput="updateStorageForecast()"></select></label>
                         </div>
                         <div class="storage-batch-controls" aria-label="仓储预测批量操作">
                             <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该销量写入前 N 个月（默认 12 个月）；留空表示不修改销量列。">批量月销量</span><input id="storageBatchSales" type="number" min="0" step="1" placeholder="留空不改"></label>
@@ -843,9 +851,14 @@
                         </table>
                         <div class="storage-forecast-summary">
                             <div class="storage-summary-item">预测期总仓储<strong id="storageForecastTotalValue">-</strong></div>
-                            <div class="storage-summary-item">取用月仓储/件<strong id="storageForecastPerUnitValue">-</strong></div>
-                            <div class="storage-summary-item">取用月利用率<strong id="storageForecastWeeksValue">-</strong></div>
-                            <div class="storage-summary-item">取用月日均库存<strong id="storageForecastAverageValue">-</strong></div>
+                            <div class="storage-summary-item">有销量月份平均仓储/件<strong id="storageForecastPerUnitValue">-</strong></div>
+                            <div class="storage-summary-item">有销量月份总销量<strong id="storageForecastSoldValue">-</strong></div>
+                            <div class="storage-summary-item">平均日均库存<strong id="storageForecastAverageValue">-</strong></div>
+                        </div>
+                        <div class="storage-replenishment" aria-label="补货建议">
+                            <div class="storage-replenishment-heading"><span class="term-tip" tabindex="0" data-tip="建议不会改写上方计划补货。它以不断货为前提，在每月售完后保留下一月计划销量的一定比例作为安全库存，并给出最小建议到仓量和提前下单月份。">补货建议</span></div>
+                            <div class="storage-replenishment-controls"><label>到仓提前期（月）<input id="storageLeadTimeMonths" type="number" min="1" step="1" value="1" oninput="updateStorageForecast()"></label><label>安全库存比例<input id="storageSafetyStockRatio" type="number" min="0" step="0.01" value="0.5" oninput="updateStorageForecast()"></label></div>
+                            <table class="storage-replenishment-table" aria-label="美国 FBA 补货建议"><thead><tr><th>月份</th><th>建议到仓</th><th>建议下单</th><th>月末安全库存</th></tr></thead><tbody id="storageReplenishmentRows"></tbody></table>
                         </div>
                         <p id="storageForecastStatus" class="storage-forecast-status"></p>
                     </details>
@@ -890,7 +903,7 @@
                     <div class="profit-breakdown">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/计费千克）× 计费重 ÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和 FBA 计费重对应的配送费；FBA 计费重取实重与 139 in³/lb 体积重的较大值。勾选旺季发货时会增加 2026 旺季平均增量；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 利润取用月份的 FBA 月度仓储总费 ÷ 当月实际可售量，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth,storageProfitMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 预测期仓储总费 ÷ 预测期实际售出总件数；零销量月份的仓储费仍计入总费用。非美国站保留手动体积仓储估算。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件；总费用 = 广告/件 × 月销量。">广告/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位广告费所需输入"><span class="metric-money"><strong id="profitAdValue">-</strong><span class="metric-rmb" id="profitAdCnyValue">-</span></span><span class="metric-total" id="profitAdTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货；总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
@@ -1001,7 +1014,7 @@
             <section class="guide-section"><h2>使用流程</h2><ul><li>先在单位换算或运费与仓储计算填写尺寸、重量；两处数据会相互联动。</li><li>选择国家/站点后检查汇率，再填写广告和采购等必填项。</li><li>利润测算从前面模块读取售价、广告、FBA、头程和仓储结果，不需要重复填写。</li></ul></section>
             <section class="guide-section"><h2>单位换算</h2><ul><li>当前聚焦的输入是换算源，其他同组单位会同步更新；数字最多保留两位小数。</li><li>尺寸支持 <code>11x11x11</code>、<code>11*11*11</code>、<code>11×11×11</code>，也支持简单分数输入。</li><li>运费模块中的厘米/英寸、千克/磅可以从任一侧修改，另一侧和后续计算会立即刷新。</li></ul></section>
             <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>头程体积：</strong>长 × 宽 × 高；头程体积重 = 体积（cm³） ÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>FBA 配送费按实重与体积重中的较大者计费；本工具用 139 in³/lb（约 5021 cm³/kg）估算 FBA 体积重，再与实际磅数比较。亚马逊的最终计费还可能受尺寸等级、价格区间和品类规则影响。</li><li><strong>旺季发货：</strong>勾选后适用 2026 年 10 月 15 日至 2027 年 1 月 14 日，按出库日收取旺季配送费；本工具采用公开资料披露的平均每件增加 $0.32 作为规划估算，具体 SKU 费率和 3.5% 燃油与物流附加费请以 Seller Central Revenue Calculator、Fee Preview 和结算报表为准。</li><li><strong>尺寸分级：</strong>先按最长边、次长边、最短边排序，再按标准件、大号大件、超大件限制判断。美国站自动估算 FBA 配送费，加拿大按美国估算费乘 1.34；墨西哥、欧洲、英国显示待手动配置。</li></ul></section>
-            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。点击“展开明细”后，填写起始月份、期初库存、过去 13 周销量，以及每月计划销量和补货量。</li><li>批量填充可将销量或补货写入前 1–12 个月；填充月数外的月份保持原值，其中一项留空时也不会改动对应列。一键清空只清除 12 个月的计划销量、补货和批量填写框，保留起始月、期初库存、历史销量及利润取用月份。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。当前内置配置为 1–9 月常规费率、10–12 月旺季费率；标准件、大件费率不同。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 所选预测月仓储总费 ÷ 当月实际售出量；没有售出量时不会虚构单件成本。</li></ul></section>
+            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>仅美国站启用，预测连续 12 个月。库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；计划销量超过可售库存时会显示缺货件数。</li><li>日均库存体积按立方英尺计费，内置 1–9 月常规费率和 10–12 月旺季费率。库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量；达到 22 周后才计入利用率附加费。勾选新卖家低库存资格且日均库存低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。</li><li>新品首次开卖时可将过去 13 周销量留空；系统先经过完整 13 周观察期，只计算基础仓储费率，之后才按滚动实际销量判断库存利用率附加费。</li><li>利润测算中的“仓储/件” = 预测期仓储总费 ÷ 预测期实际售出总件数；零销量月份的仓储费仍计入总费用。全期没有实际售出量时不虚构单件成本，包含仓储的利润结果会显示为不可用。</li><li>补货建议不会改写计划补货。系统按到仓提前期和安全库存比例计算每月最小建议到仓量；首月无法提前下单的建议会标为“立即安排/已有在途”。固定头程费、MOQ、容量限制、第三方仓成本和入库延误未纳入建议。</li><li>批量填充只写入前 1–12 个月的销量或补货；一键清空只清除月度计划和批量填写框，保留起始月、期初库存及历史销量。</li></ul></section>
             <section class="guide-section"><h2>非美国仓储</h2><ul><li>加拿大、墨西哥、欧洲和英国不启用美国月度预测，保留手动仓储单价和平均库存月数。</li><li>手动仓储/件 = 包装体积（m³）× 35.3147 × 仓储单价（目标币种/ft³/月）× 平均库存月数。</li><li>这些站点的 FBA 配送费暂不自动估算；请以对应站点的 Seller Central 费用或结算报表为准。</li></ul></section>
             <section class="guide-section"><h2>广告费换算</h2><ul><li><strong>CPA</strong> = CPC ÷ CVR；<strong>POS</strong> = 广告订单量 ÷ 月销量。</li><li><strong>ACOS</strong> = CPA ÷ 售价；<strong>混合广告费/件</strong> = CPA × POS，表示摊到每个总订单的平均广告成本。</li><li><strong>ACoAS</strong> = 混合广告费/件 ÷ 售价；<strong>ROAS</strong> = 售价 ÷ CPA。</li><li>CVR 可直接编辑为百分比；点击量和广告订单量都有值、且 CVR 留空或为 0 时，程序用广告订单量 ÷ 点击量补齐。利润测算读取混合广告费/件。</li></ul></section>
             <section class="guide-section"><h2>利润测算</h2><ul><li>售价、CPC、CVR、广告订单量和月销量统一取自广告费换算；头程、计费重和 FBA 取自运费模块。</li><li>总成本/件 = 采购（扣除退税/折扣） + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货。</li><li>退货成本 = 售价 × 退货率 + 退货处理费；退货率、处理费、促销费和入库配置费需要手动确认。</li><li>单件结果同时显示站点币种和人民币；销量相关的总费用只显示人民币，并按月销量相乘。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
@@ -1528,7 +1541,7 @@
     function guideCalculationInputs(trigger) {
         const ids = [...new Set((trigger.dataset.inputs || '').split(',').filter(Boolean))];
         if (document.getElementById('marketCountry')?.value === 'US' && ids.includes('profitStorageRate')) {
-            ids.push('storageOpeningUnits', 'storagePast13WeekSales', 'storageStartMonth', 'storageProfitMonth');
+            ids.push('storageOpeningUnits', 'storagePast13WeekSales', 'storageStartMonth');
         }
         const storagePanel = document.getElementById('storageForecastPanel');
         if (storagePanel?.tagName === 'DETAILS' && ids.some(id => document.getElementById(id)?.closest('#storageForecastPanel'))) {
@@ -1619,7 +1632,9 @@
         const plan = Array.isArray(values.plan) ? values.plan : [];
         const hasHistory = prior13WeekSales > 0;
         const historicalDailySales = prior13WeekSales / US_FBA_STORAGE_2026.rollingWindowDays;
-        const salesWindow = Array.from({ length: US_FBA_STORAGE_2026.rollingWindowDays }, () => historicalDailySales);
+        const salesWindow = hasHistory
+            ? Array.from({ length: US_FBA_STORAGE_2026.rollingWindowDays }, () => historicalDailySales)
+            : [];
         const lots = openingUnits > 0 ? [{ quantity: openingUnits, source: 'opening' }] : [];
         const rows = [];
         let simulatedDays = 0;
@@ -1652,7 +1667,7 @@
             const rollingSalesUnits = salesWindow.reduce((total, sales) => total + sales, 0);
             const utilizationAvailable = hasHistory || simulatedDays >= US_FBA_STORAGE_2026.rollingWindowDays;
             const utilizationWeeks = utilizationAvailable
-                ? rollingSalesUnits > 0 ? averageUnits * 13 / rollingSalesUnits : averageUnits > 0 ? Infinity : 0
+                ? rollingSalesUnits > 0 ? averageUnits * 13 / rollingSalesUnits : 0
                 : null;
             const averageVolumeFt3 = averageUnits * unitVolumeFt3;
             const newSellerEligible = Boolean(values.newSellerEligible) && averageVolumeFt3 < US_FBA_STORAGE_2026.newSellerVolumeLimitFt3;
@@ -1666,12 +1681,13 @@
             rows.push({
                 index, monthNumber, plannedSales, restockUnits, openingUnits: opening, endingUnits: ending,
                 averageUnits, soldUnits, shortageUnits, utilizationWeeks, utilizationAvailable,
+                newProductObservation: !hasHistory && !utilizationAvailable,
                 baseRate, surchargeRate, storageCost, newSellerEligible, averageVolumeFt3
             });
 
             const dailySales = soldUnits / daysInMonth;
             for (let day = 0; day < daysInMonth; day += 1) {
-                salesWindow.shift();
+                if (salesWindow.length >= US_FBA_STORAGE_2026.rollingWindowDays) salesWindow.shift();
                 salesWindow.push(dailySales);
             }
             simulatedDays += daysInMonth;
@@ -1685,6 +1701,37 @@
             hasHistory,
             sizeClass
         };
+    }
+
+    function calculateStoragePeriodAllocation(forecast) {
+        if (!forecast || !(Number(forecast.totalSoldUnits) > 0)) return null;
+        const totalStorageCost = Number(forecast.totalStorageCost);
+        return Number.isFinite(totalStorageCost) ? totalStorageCost / Number(forecast.totalSoldUnits) : null;
+    }
+
+    function calculateUsFbaReplenishmentPlan(values) {
+        const plan = Array.isArray(values?.plan) ? values.plan : [];
+        const leadTimeMonths = Math.max(1, Math.floor(Number(values?.leadTimeMonths) || 1));
+        const safetyStockRatio = Math.max(0, Number(values?.safetyStockRatio) || 0);
+        let inventory = Math.max(0, Number(values?.openingUnits) || 0);
+        const rows = plan.map((month, index) => {
+            const plannedSales = Math.max(0, Number(month?.sales) || 0);
+            const nextSales = index < plan.length - 1 ? Math.max(0, Number(plan[index + 1]?.sales) || 0) : 0;
+            const safetyStockUnits = index < plan.length - 1 ? nextSales * safetyStockRatio : 0;
+            const openingUnits = inventory;
+            const recommendedArrivalUnits = Math.max(0, plannedSales + safetyStockUnits - openingUnits);
+            const availableUnits = openingUnits + recommendedArrivalUnits;
+            const soldUnits = Math.min(plannedSales, availableUnits);
+            const shortageUnits = Math.max(0, plannedSales - soldUnits);
+            inventory = availableUnits - soldUnits;
+            const orderMonthIndex = index - leadTimeMonths;
+            return {
+                index, plannedSales, safetyStockUnits, openingUnits, recommendedArrivalUnits,
+                soldUnits, shortageUnits, endingUnits: inventory, orderMonthIndex,
+                needsImmediateArrangement: recommendedArrivalUnits > 0 && orderMonthIndex < 0
+            };
+        });
+        return { rows, leadTimeMonths, safetyStockRatio };
     }
 
     function storageForecastPlanFromPage() {
@@ -1707,26 +1754,14 @@
         });
     }
 
-    function storageForecastProfitRow(forecast) {
-        if (!forecast) return null;
-        const index = Math.max(0, Math.min(US_FBA_STORAGE_2026.forecastMonths - 1, inputNumber('storageProfitMonth')));
-        return forecast.rows[index] || null;
-    }
-
     function formatStorageWeeks(weeks) {
-        if (weeks === null) return '待补充 13 周销量';
+        if (weeks === null) return '新品观察期';
         if (!Number.isFinite(weeks)) return '无销量';
         return `${weeks.toFixed(1)}周`;
     }
 
     function updateStorageForecastLabels() {
         const startMonth = inputNumber('storageStartMonth', new Date().getMonth() + 1);
-        const profitMonth = document.getElementById('storageProfitMonth');
-        if (profitMonth) {
-            const selected = profitMonth.value;
-            profitMonth.innerHTML = Array.from({ length: US_FBA_STORAGE_2026.forecastMonths }, (_, index) => `<option value="${index}">第${index + 1}月 · ${storageMonthLabel(storageMonthNumber(startMonth, index))}</option>`).join('');
-            profitMonth.value = selected || '0';
-        }
         for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
             const label = document.getElementById(`storageMonthLabel${index}`);
             if (label) label.textContent = storageMonthLabel(storageMonthNumber(startMonth, index));
@@ -1762,7 +1797,7 @@
             if (statusEl) {
                 const status = [];
                 if (row.shortageUnits > 0) status.push(`缺货 ${fmtNumber(row.shortageUnits)}件`);
-                if (!row.utilizationAvailable) status.push('补充 13 周销量');
+                if (row.newProductObservation) status.push('新品观察期');
                 else if (row.newSellerEligible) status.push('新卖家费率');
                 else if (row.surchargeRate > 0) status.push(`附加 $${row.surchargeRate.toFixed(2)}/ft³`);
                 statusEl.textContent = status.join('；') || '正常';
@@ -1770,19 +1805,40 @@
             if (rowEl) rowEl.classList.toggle('is-shortage', row.shortageUnits > 0);
         });
 
-        const selected = storageForecastProfitRow(forecast);
-        const selectedPerUnit = selected && selected.soldUnits > 0 ? selected.storageCost / selected.soldUnits : null;
+        const allocatedStorageCost = calculateStoragePeriodAllocation(forecast);
+        const averageInventory = forecast.rows.length
+            ? forecast.rows.reduce((total, row) => total + row.averageUnits, 0) / forecast.rows.length
+            : null;
         const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
         setText('storageForecastTotalValue', `${money(forecast.totalStorageCost)} · ${rmbMoney(forecast.totalStorageCost, fx)}`);
-        setText('storageForecastPerUnitValue', selectedPerUnit === null ? '-' : `${money(selectedPerUnit)} · ${rmbMoney(selectedPerUnit, fx)}`);
-        setText('storageForecastWeeksValue', selected ? formatStorageWeeks(selected.utilizationWeeks) : '-');
-        setText('storageForecastAverageValue', selected ? `${fmtNumber(selected.averageUnits)}件` : '-');
+        setText('storageForecastPerUnitValue', allocatedStorageCost === null ? '-' : `${money(allocatedStorageCost)} · ${rmbMoney(allocatedStorageCost, fx)}`);
+        setText('storageForecastSoldValue', forecast.totalSoldUnits > 0 ? `${fmtNumber(forecast.totalSoldUnits)}件` : '-');
+        setText('storageForecastAverageValue', averageInventory === null ? '-' : `${fmtNumber(averageInventory)}件`);
+        renderStorageReplenishment(forecast);
         const status = document.getElementById('storageForecastStatus');
         if (status) {
             if (forecast.totalSoldUnits <= 0) status.textContent = '填写每月计划销量后，系统会计算库存利用率与仓储费。';
-            else if (!forecast.hasHistory) status.textContent = '首月库存利用率附加费需要填写过去 13 周销量；当前未计入该附加费。';
+            else if (!forecast.hasHistory) status.textContent = '新品观察期内只按基础仓储费率估算；满 13 周后按滚动实际销量判断库存利用率附加费。';
             else status.textContent = `预测结束库存 ${fmtNumber(forecast.remainingUnits)} 件；费率按 ${forecast.sizeClass === 'standard' ? '标准尺寸' : '大件'}、日均库存和滚动 13 周发货量计算。`;
         }
+    }
+
+    function renderStorageReplenishment(forecast) {
+        const rows = document.getElementById('storageReplenishmentRows');
+        if (!rows || !forecast) return;
+        const recommendation = calculateUsFbaReplenishmentPlan({
+            openingUnits: inputNumber('storageOpeningUnits'),
+            plan: forecast.rows.map(row => ({ sales: row.plannedSales })),
+            leadTimeMonths: inputNumber('storageLeadTimeMonths', 1),
+            safetyStockRatio: inputNumber('storageSafetyStockRatio', 0.5)
+        });
+        rows.innerHTML = recommendation.rows.map(row => {
+            const month = storageMonthLabel(storageMonthNumber(inputNumber('storageStartMonth', new Date().getMonth() + 1), row.index));
+            const order = row.recommendedArrivalUnits <= 0 ? '-' : row.needsImmediateArrangement
+                ? '立即安排/已有在途'
+                : `第${row.orderMonthIndex + 1}月`;
+            return `<tr><td>${month}</td><td>${row.recommendedArrivalUnits > 0 ? `${fmtNumber(row.recommendedArrivalUnits)}件` : '-'}</td><td>${order}</td><td>${row.safetyStockUnits > 0 ? `${fmtNumber(row.safetyStockUnits)}件` : '-'}</td></tr>`;
+        }).join('');
     }
 
     function updateStorageForecast() {
@@ -1880,21 +1936,23 @@
         const fba = Math.max(0, Number(values.fbaFee) || 0);
         const volumeFt3 = Math.max(0, Number(values.packageVolumeM3) || 0) * 1000000 / 28316.8466;
         const forecastStorage = Number(values.storageCost);
-        const storage = Number.isFinite(forecastStorage)
+        const storage = values.storageCostUnavailable
+            ? null
+            : Number.isFinite(forecastStorage)
             ? Math.max(0, forecastStorage)
             : volumeFt3 * Math.max(0, Number(values.storageRate) || 0) * Math.max(0, Number(values.inventoryMonths) || 0);
         const ad = Math.max(0, Number(values.adCost) || 0);
         const promo = price * Math.min(100, Math.max(0, Number(values.promoRate) || 0)) / 100;
         const returns = price * Math.min(100, Math.max(0, Number(values.returnRate) || 0)) / 100 + Math.max(0, Number(values.returnHandling) || 0);
         const placement = Math.max(0, Number(values.placementFee) || 0);
-        const totalCost = purchase + freight + referral + fba + storage + ad + promo + returns + placement;
-        const profit = price - totalCost;
-        const preAdContribution = price - (totalCost - ad);
-        const breakEvenAcos = price > 0 ? Math.max(0, preAdContribution / price) : null;
+        const totalCost = storage === null ? null : purchase + freight + referral + fba + storage + ad + promo + returns + placement;
+        const profit = totalCost === null ? null : price - totalCost;
+        const preAdContribution = totalCost === null ? null : price - (totalCost - ad);
+        const breakEvenAcos = price > 0 && preAdContribution !== null ? Math.max(0, preAdContribution / price) : null;
         const targetMargin = Math.min(100, Math.max(0, Number(values.targetMargin) || 0)) / 100;
-        const maxPurchaseRmb = fx > 0 ? Math.max(0, (price * (1 - targetMargin) - (totalCost - purchase)) * fx / (1 - Math.min(100, Math.max(0, Number(values.taxDiscount) || 0)) / 100)) : null;
+        const maxPurchaseRmb = fx > 0 && totalCost !== null ? Math.max(0, (price * (1 - targetMargin) - (totalCost - purchase)) * fx / (1 - Math.min(100, Math.max(0, Number(values.taxDiscount) || 0)) / 100)) : null;
         const cvr = Math.max(0, Number(values.cvr) || 0);
-        return { purchase, freight, referral, fba, volumeFt3, storage, ad, promo, returns, placement, totalCost, profit, margin: price > 0 ? profit / price : null, breakEvenAcos, maxCpc: breakEvenAcos !== null ? price * breakEvenAcos * cvr : null, maxPurchaseRmb };
+        return { purchase, freight, referral, fba, volumeFt3, storage, ad, promo, returns, placement, totalCost, profit, margin: price > 0 && profit !== null ? profit / price : null, breakEvenAcos, maxCpc: breakEvenAcos !== null ? price * breakEvenAcos * cvr : null, maxPurchaseRmb };
     }
 
     function updateAdCalculator() {
@@ -1934,14 +1992,15 @@
         const autoFeesSupported = market.autoFees !== false;
         const volumeFt3 = cargo ? cargo.volumeM3 * 1000000 / 28316.8466 : 0;
         const storageForecast = currentUsStorageForecast(volumeFt3, getUsStorageSizeClass(fba?.tier));
-        const storageForecastRow = storageForecastProfitRow(storageForecast);
-        const storageCost = market.currency === 'USD' && document.getElementById('marketCountry')?.value === 'US'
-            ? storageForecastRow && storageForecastRow.soldUnits > 0 ? storageForecastRow.storageCost / storageForecastRow.soldUnits : 0
-            : null;
+        const storagePeriodAllocation = calculateStoragePeriodAllocation(storageForecast);
+        const usesUsStorageForecast = market.currency === 'USD' && document.getElementById('marketCountry')?.value === 'US';
+        const storageCost = usesUsStorageForecast
+            ? storagePeriodAllocation
+            : undefined;
         const result = calculateProfitMetrics({
             price: inputNumber('adPrice'), fx: inputNumber('profitFx') || market.fx, purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
             chargeableWeightKg: cargo ? cargo.chargeableWeightKg : 0, packageVolumeM3: cargo ? cargo.volumeM3 : 0,
-            referralRate: inputNumber('profitReferralRate') || market.referral, fbaFee: fba ? fba.fee : 0, storageRate: inputNumber('profitStorageRate') || market.storage, inventoryMonths: inputNumber('profitInventoryMonths'), storageCost,
+            referralRate: inputNumber('profitReferralRate') || market.referral, fbaFee: fba ? fba.fee : 0, storageRate: inputNumber('profitStorageRate') || market.storage, inventoryMonths: inputNumber('profitInventoryMonths'), storageCost, storageCostUnavailable: usesUsStorageForecast && storagePeriodAllocation === null,
             adCost: ad.blendedCost, promoRate: inputNumber('profitPromoRate'), returnRate: inputNumber('profitReturnRate'), returnHandling: inputNumber('profitReturnHandling'), placementFee: inputNumber('profitPlacementFee'), targetMargin: inputNumber('profitTargetMargin'), cvr: ad.cvr,
         });
         const fx = inputNumber('profitFx') || market.fx;
@@ -1956,11 +2015,16 @@
         setProfitTotalMetric('profitFreightTotalValue', result.freight, fx, monthlyUnits);
         if (autoFeesSupported) setProfitTotalMetric('profitFbaTotalValue', result.fba, fx, monthlyUnits);
         else document.getElementById('profitFbaTotalValue').textContent = '该站点暂不估算';
-        if (storageForecastRow) document.getElementById('profitStorageTotalValue').textContent = `预测月总仓储 ${rmbMoney(storageForecastRow.storageCost, fx)}`;
+        if (storageForecast) document.getElementById('profitStorageTotalValue').textContent = `计划期总仓储 ${rmbMoney(storageForecast.totalStorageCost, fx)}`;
         else setProfitTotalMetric('profitStorageTotalValue', result.storage, fx, monthlyUnits);
         setProfitTotalMetric('profitAdTotalValue', result.ad, fx, monthlyUnits);
-        setProfitTotalMetric('profitTotalCostTotalValue', result.totalCost, fx, monthlyUnits);
-        setProfitTotalMetric('profitTotalValue', result.profit, fx, monthlyUnits, '总利润');
+        if (storageCost === null && usesUsStorageForecast) {
+            document.getElementById('profitTotalCostTotalValue').textContent = '总费用（仓储/件不可用）';
+            document.getElementById('profitTotalValue').textContent = '总利润（仓储/件不可用）';
+        } else {
+            setProfitTotalMetric('profitTotalCostTotalValue', result.totalCost, fx, monthlyUnits);
+            setProfitTotalMetric('profitTotalValue', result.profit, fx, monthlyUnits, '总利润');
+        }
         document.getElementById('profitMarginValue').textContent = percent(result.margin);
         document.getElementById('profitBreakEvenAcosValue').textContent = percent(result.breakEvenAcos);
         setProfitMoneyMetric('profitMaxCpcValue', 'profitMaxCpcCnyValue', result.maxCpc, fx);
