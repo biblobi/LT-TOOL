@@ -186,7 +186,7 @@ function loadNumberFormatter() {
   return vm.runInNewContext(code);
 }
 
-test('dimension inputs accept multi-part text values with a mobile multiplication key', () => {
+test('dimension inputs accept multi-part text values without a multiplication button', () => {
   const lengthInputs = html.match(/<input[^>]+class="len-input"[^>]+>/g) ?? [];
   assert.equal(lengthInputs.length, 9);
 
@@ -196,9 +196,10 @@ test('dimension inputs accept multi-part text values with a mobile multiplicatio
     assert.match(input, /placeholder="11x11x11"/);
   }
   assert.match(html, /class="dimension-row"/);
-  assert.match(html, /class="dimension-multiply"[^>]*data-target="cargoDimensionInput"/);
-  assert.match(html, /function insertDimensionSeparator\(targetId\)/);
-  assert.match(html, /field\.value \+= '×'/);
+  assert.doesNotMatch(html, /class="dimension-multiply"/);
+  assert.doesNotMatch(html, /function insertDimensionSeparator\(/);
+  assert.match(html, /id="cargoDimensionInput"[^>]+placeholder="11x11x11cm"/);
+  assert.match(html, /id="cargoDimensionInInput"[^>]+placeholder="4\.33x4\.33x4\.33in"/);
 });
 
 test('dimension conversion handles x and star separated values', () => {
@@ -748,16 +749,38 @@ test('replenishment recommendations avoid shortage and retain next-month safety 
 test('storage UI uses period allocation and exposes non-destructive replenishment controls', () => {
   for (const required of [
     '有销量月份平均仓储/件', 'id="storageForecastSoldValue"', 'id="storageLeadTimeMonths"',
-    'id="storageSafetyStockRatio"', 'id="storageReplenishmentRows"', '计划期总仓储',
+    'id="storageSafetyStockRatio"', '计划期总仓储',
     '新品观察期内只按基础仓储费率估算', '补货建议不会改写计划补货', '完整 13 周观察期', '包含仓储的利润结果会显示为不可用',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   assert.doesNotMatch(html, /id="storageProfitMonth"|function storageForecastProfitRow|function updateStorageGuide|利润取用月份|所选预测月/);
 });
 
+test('replenishment advice is merged into the monthly plan table with per-row adoption', () => {
+  assert.doesNotMatch(html, /id="storageReplenishmentRows"/);
+  assert.doesNotMatch(html, /class="storage-replenishment"/);
+  for (const required of [
+    'class="storage-table-scroll"', 'storage-adopt-button',
+    'function adoptStorageAdvice', 'function recommendRowsFromForecast',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const templateId of ['storageAdvice', 'storageOrder', 'storageSafety']) {
+    assert.match(html, new RegExp(`id="${templateId}\\$\\{index\\}"`));
+  }
+  assert.match(html, /setCell\(`storageAdvice\$\{row\.index\}`, adviceHtml\)/);
+
+  const head = html.slice(html.indexOf('<thead><tr><th>月份</th>'), html.indexOf('</thead>', html.indexOf('<thead><tr><th>月份</th>')));
+  assert.match(head, /月份/);
+  const positionOf = label => head.indexOf(label);
+  for (const label of ['计划销量', '补货', '建议到仓', '建议下单', '日均库存', '利用率', '仓储费', '月末安全库存', '状态']) {
+    assert.ok(positionOf(label) > 0, `${label} should be a plan table column`);
+  }
+  assert.ok(positionOf('建议到仓') < positionOf('日均库存'), 'advice columns should sit before the inventory columns');
+  assert.ok(positionOf('月末安全库存') < positionOf('状态'), 'safety stock should sit before the status column');
+});
+
 test('profit and ad calculators are embedded in the profit home with a single calculated cost flow', () => {
   for (const required of [
-    'id="module-profit"', 'id="profitDetail"', 'id="module-freight"', 'id="module-adcalc"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPosMetricValue"',
+    'id="module-profit"', 'id="profitDetail"', 'id="module-freight"', 'id="module-adcalc"', 'embedded-calculator', 'converter-workspace', 'id="adClicks"', 'id="adMonthlyUnits"', 'id="adPosInput"',
     'id="profitStorageRate"', '售价与广告成本统一取自广告费换算模块', 'id="profitTargetMargin"',
     '广告订单占比', 'id="adAcoasValue"', '运费与仓储计算',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -782,9 +805,19 @@ test('advertising and profit inputs use stacked labels and POS is calculated bel
   assert.doesNotMatch(html, /<p class="formula-note"><span class="term-tip"[^>]*>POS<\/span>/);
   assert.match(html, /data-tip="PPC 输入用于估算点击广告成本/);
   assert.match(html, /<h2 class="calculator-module-title"><span>运费与仓储计算<\/span>[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"/);
-  assert.match(html, /id="adPosMetricValue"/);
+  assert.match(html, /id="adPosInput"/);
   assert.doesNotMatch(html, /id="adPos"[^A-Za-z]/);
   assert.doesNotMatch(html, /id="adTacosValue"|TACoS/);
+});
+
+test('POS is editable and back-solves ad orders without touching monthly units', () => {
+  assert.match(html, /<input id="adPosInput" type="number" min="0" max="100" step="0\.01"[^>]*oninput="markPosEditing\(true\); updateAdCalculator\(\)"/);
+  assert.match(html, /function syncPosInput/);
+  assert.match(html, /function markPosEditing/);
+  assert.match(html, /const editing = posManualEditing \|\| document\.activeElement === posEl;/);
+  assert.match(html, /ordersEl\.value = String\(Math\.round\(clamped \/ 100 \* monthlyUnits\)\);/);
+  assert.match(html, /if \(monthlyUnits <= 0\) \{\s*\n\s*posEl\.value = '';\s*\n\s*posEl\.disabled = true;/);
+  assert.match(html, /const clamped = Math\.min\(100, Math\.max\(0, entered\)\);/);
 });
 
 test('ad price is the first advertising input and tax discount defaults to zero', () => {
@@ -826,7 +859,99 @@ test('profit results separate direct operating outcomes from target and break-ev
   assert.match(profitMarkup, /class="profit-column profit-results"[\s\S]*?经营结果[\s\S]*?id="profitPurchaseRmb"[\s\S]*?id="profitMarginValue"/);
   assert.match(profitMarkup, /class="profit-column profit-targets"[\s\S]*?目标与保本[\s\S]*?id="profitTargetMargin"[\s\S]*?id="profitBreakEvenAcosValue"[\s\S]*?id="profitMaxPurchaseValue"/);
   assert.doesNotMatch(profitMarkup, /<div class="section-title"[\s\S]*?利润结果/);
-  assert.match(html, /\.profit-layout\s*\{\s*display:\s*grid;[\s\S]*?grid-template-columns:\s*minmax\(0,\s*2fr\)\s+minmax\(260px,\s*1fr\)/);
+  assert.match(html, /\.profit-layout\s*\{\s*display:\s*grid;[\s\S]*?grid-template-columns:\s*minmax\(0,\s*2fr\)\s+minmax\(240px,\s*1fr\)/);
+});
+
+test('comparison is rendered inline in the results rows and picked from the project toolbar', () => {
+  const profitStart = html.indexOf('id="profitDetail"');
+  const profitEnd = html.indexOf('<!-- 格式转换 -->', profitStart);
+  const profitMarkup = html.slice(profitStart, profitEnd);
+
+  // 不再有独立的对比模块
+  assert.doesNotMatch(profitMarkup, /class="profit-column profit-compare"/);
+  assert.doesNotMatch(html, /id="profitCompareList"|id="profitCompareBody"|function toggleComparePanel/);
+
+  // 多选对比放在「选择已保存产品」同一行的工具栏
+  const toolbar = profitMarkup.slice(profitMarkup.indexOf('class="project-toolbar"'), profitMarkup.indexOf('</h2>', profitMarkup.indexOf('class="project-toolbar"')));
+  assert.match(toolbar, /id="projectSelect"[\s\S]*?id="compareDropdown"/);
+  assert.match(toolbar, /id="compareProjectChecks"/);
+  assert.match(toolbar, /id="compareCountBadge"/);
+  assert.match(toolbar, /id="compareToCny"/);
+
+  for (const required of [
+    'COMPARE_KEY', 'COMPARE_MAX_SERIES = 3', 'function compareSeries',
+    'function updateCompareDropdown', 'function renderProfitBars', 'function toggleCompareProject',
+    'function clearCompare', 'function exportCompareCsv', 'function buildProfitSnapshot',
+    'function rememberProfitResult', 'function recomputeProjectSnapshot', 'function projectSnapshot',
+    'COMPARE_RECOMPUTE_CACHE', 'data.result = buildProfitSnapshot', 'initCompare();',
+    'profit-bar-stack', 'profit-bar-stack-row', 'cmp-series-1',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  // 经营结果每行由 renderProfitBars 统一渲染，两条计算路径都要调用
+  assert.equal((html.match(/renderProfitBars\(/g) || []).length >= 3, true, 'renderProfitBars should be defined and called from both profit paths');
+  assert.match(html, /renderProfitBars\(profitPrice\);/);
+  assert.match(html, /renderProfitBars\(weightedPrice\);/);
+});
+
+test('fee rate settings are reachable from the storage heading', () => {
+  assert.match(html, /id="feeConfigToggleButton"[^>]*onclick="toggleFeeConfigPanel\(event\)"/);
+  assert.match(html, /id="feeConfigFallbackButton"[^>]*onclick="toggleFeeConfigPanel\(event\)"/);
+  assert.match(html, /function toggleFeeConfigPanel/);
+  assert.match(html, /function updateFeeConfigToggle/);
+  assert.match(html, /fee-config-summary/);
+  // 费率设置面板自身不再保留默认可见的折叠标题
+  assert.match(html, /<summary class="storage-forecast-toggle fee-config-summary" hidden>/);
+  // 加拿大站仍有入口
+  assert.match(html, /const useFallback = panelSupported && !storageVisible;/);
+});
+
+test('optional advertising inputs are visually de-emphasised and can be auto-derived', () => {
+  for (const id of ['adClicks', 'adOrders', 'adMonthlyUnits']) {
+    assert.match(html, new RegExp(`id="${id}" class="is-optional"`));
+  }
+  assert.match(html, /class="field-optional-tag">选填</);
+  assert.match(html, /input\.is-optional/);
+  assert.match(html, /function autoFillOrdersFromClicks/);
+  assert.match(html, /function markOrdersEdited/);
+  assert.match(html, /oninput="markOrdersEdited\(\); updateAdCalculator\(\)"/);
+  assert.match(html, /if \(!editingPos\) autoFillOrdersFromClicks\(clicks, inputNumber\('adCvr'\)\);/);
+});
+
+test('inputs are auto-saved to a browser-local draft and restored on reload', () => {
+  for (const required of [
+    'DRAFT_KEY', 'LT_DRAFT_V1', 'DRAFT_SCOPE', 'DRAFT_DELAY_MS',
+    'function draftInScope', 'function draftStoragePlan', 'function collectDraft',
+    'function saveDraft', 'function scheduleDraftSave', 'function flushDraftSave',
+    'function clearDraft', 'function applyDraft', 'function initDraft', 'function installDraftAutosave',
+    'id="draftStatus"', 'id="draftClearButton"', 'initDraft();', 'installDraftAutosave();',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  // 只在相关模块范围内触发，避免汇率换算等模块的输入也写草稿
+  assert.match(html, /const DRAFT_SCOPE = \['#module-freight', '#module-adcalc', '#profitDetail'\];/);
+  assert.match(html, /window\.addEventListener\('beforeunload', flushDraftSave\)/);
+  assert.match(html, /addEventListener\('visibilitychange', \(\) => \{ if \(document\.visibilityState === 'hidden'\) flushDraftSave\(\); \}\)/);
+  // 首次访问存下的默认快照不算草稿，清除按钮不应立刻出现
+  assert.match(html, /button\.hidden = !\(hasDraft && draftUserEdited\);/);
+  // 草稿要覆盖 12 个月计划表，而不只是 PROJECT_FIELD_TYPES 里的字段
+  assert.match(html, /plan\[`sales\$\{index\}`\] = document\.getElementById\(`storageSales\$\{index\}`\)\?\.value \?\? '';/);
+});
+
+test('project fields are applied after switching market so market-scoped money fields survive', () => {
+  const applySrc = extractFunctionSource('applyProjectFields');
+  const marketSwitchAt = applySrc.indexOf("'marketCountry' in data");
+  const fieldLoopAt = applySrc.indexOf('for (const id of Object.keys(PROJECT_FIELD_TYPES))');
+  assert.ok(marketSwitchAt > -1, 'applyProjectFields should switch the market first');
+  assert.ok(marketSwitchAt < fieldLoopAt, 'market switch must run before writing the other fields');
+  assert.match(applySrc, /for \(const id of MARKET_MONEY_FIELDS\)/);
+});
+
+test('projects can be exported and imported as JSON including variant config', () => {
+  for (const required of [
+    'id="projectImportInput"', 'onclick="exportProjects()"', 'onchange="importProjects(this)"',
+    'function exportProjects', 'function importProjects', 'function sanitizeImportedProject',
+    "_variantsEnabled", "_variantsSameSpec", '_variants',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /project\.fields\._variantsEnabled = Boolean\(raw\.fields\._variantsEnabled\);/);
 });
 
 test('calculator workspace is compact, tooltip explanations are rendered, and market defaults to US with CA switching', () => {
@@ -878,8 +1003,9 @@ test('profit results show per-unit market-currency and CNY values, and monthly t
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
   assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);
-  assert.match(html, /profit-bar-track/);
+  assert.match(html, /profit-bar-stack/);
   assert.match(html, /profit-bar-ratio/);
+  assert.match(html, /function renderProfitBars/);
   assert.match(html, /\(ratio \* 100\)\.toFixed\(1\)/);
   assert.match(html, /\.metric-total\s*\{[^}]*font:\s*700\s+0\.84rem\/1\.35/s);
   assert.match(html, /totalEl\.textContent = `\$\{label\}（\$\{fmtNumber\(quantity\)\}件） \$\{rmbMoney\(total, fx\)\}`/);
