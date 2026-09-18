@@ -39,6 +39,10 @@
             --neon-cyan: var(--accent);
             --neon-pink: var(--danger);
             --neon-green: var(--success);
+            --series-track: #ddd5c7;
+            --series-1: #185fa5;
+            --series-2: #854f0b;
+            --series-3: #534ab7;
             --bg-dark: var(--canvas);
             --panel-bg: var(--surface);
         }
@@ -69,6 +73,13 @@
             --chart-grid: #222222;
             --scroll-track: #111111;
             --scroll-thumb: #555555;
+            --series-track: #262626;
+            --series-1: #85b7eb;
+            --series-2: #ef9f27;
+            --series-3: #af9aec;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ff66;
             --checker-pattern: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23222"/><rect x="5" y="5" width="5" height="5" fill="%23222"/></svg>');
         }
 
@@ -348,6 +359,17 @@
         .cargo-peak-toggle:has(input:disabled) { opacity: 0.52; }
         select { background: #000; color: #fff; }
         select option { background: #000; color: #fff; }
+        .cargo-fee-hero { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--border-strong); background: var(--surface-muted); }
+        .cargo-fee-label { color: var(--text-secondary); font-size: 0.82rem; letter-spacing: 0.04em; }
+        .cargo-fee-amount { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-top: 2px; }
+        .cargo-fee-amount strong { color: var(--accent); font: 700 1.55rem 'Share Tech Mono', monospace; line-height: 1.25; }
+        .cargo-fee-rmb { color: var(--text-secondary); font-size: 1rem; }
+        .cargo-fee-meta { margin-top: 4px; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.5; }
+        .cargo-notes { margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 6px; }
+        .cargo-notes-toggle { cursor: pointer; list-style: none; color: var(--text-secondary); font-size: 0.86rem; padding: 2px 0; }
+        .cargo-notes-toggle::-webkit-details-marker { display: none; }
+        .cargo-notes-toggle::before { content: '▸ '; }
+        .cargo-notes[open] > .cargo-notes-toggle::before { content: '▾ '; }
         .cargo-summary {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -479,6 +501,20 @@
         .metric-action { display: block; width: 100%; border: 0; margin: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
         .metric-action:hover strong, .metric-action:focus-visible strong { color: #fff; }
         .metric-action:focus-visible { outline: 1px solid var(--neon-cyan); outline-offset: 3px; }
+        .metric-pos .term-tip { display: block; }
+        .metric-pos-action { cursor: pointer; }
+        .metric-pos-field { display: flex; align-items: center; gap: 4px; margin-top: 5px; }
+        .metric-pos-field input { width: 100%; min-width: 0; padding: 4px 6px; background: var(--input-bg); border: 1px solid var(--border-strong); color: var(--text-primary); font: 500 0.92rem Roboto, sans-serif; }
+        .metric-pos-field input:disabled { opacity: 0.45; cursor: not-allowed; }
+        .metric-pos-field input:focus-visible { outline: 1px solid var(--neon-cyan); outline-offset: 1px; }
+        .metric-pos-unit { flex: 0 0 auto; color: var(--text-secondary); font-size: 0.82rem; }
+        .field-optional-tag { flex: 0 0 auto; margin-left: 5px; padding: 0 4px; border: 1px solid var(--border-color); color: var(--text-subtle); font-size: 0.68rem; font-weight: 600; }
+        :root[data-theme] .calculator-fields input.is-optional,
+        .calculator-fields input.is-optional { background: var(--surface-muted); color: var(--text-muted); }
+        :root[data-theme] .calculator-fields input.is-optional::placeholder,
+        .calculator-fields input.is-optional::placeholder { color: var(--text-subtle); }
+        :root[data-theme] .calculator-fields input.is-optional:focus,
+        .calculator-fields input.is-optional:focus { color: var(--text-primary); background: var(--input-bg); }
         .metric-money { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 3px; min-width: 0; }
         .metric-money strong { margin: 0; min-width: 0; white-space: nowrap; font-size: 0.82rem; }
         .metric-rmb { flex: 0 0 auto; color: #aaa; font: 700 0.76rem 'Share Tech Mono', monospace; white-space: nowrap; }
@@ -492,7 +528,7 @@
         .calculator-panel > .formula-note { display: none; }
         .calculator-panel > .source-note, .profit-grid .cargo-note { display: none; }
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.45; margin: 8px 0 0; border-top: 1px solid #202020; padding-top: 7px; }
-        .profit-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 12px; align-items: start; }
+        .profit-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 12px; align-items: start; }
         .profit-column { min-width: 0; }
         .profit-section-title { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 1rem; font-weight: 700; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         .profit-breakdown { display: grid; gap: 6px; margin-top: 8px; }
@@ -500,6 +536,35 @@
         .profit-results .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .profit-targets .calculator-fields { grid-template-columns: 1fr; }
         .profit-targets .profit-breakdown { grid-template-columns: 1fr; }
+        .compare-dropdown { position: relative; display: inline-block; }
+        .draft-status { color: var(--text-subtle); font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
+        .draft-status.is-dirty { color: var(--text-muted); }
+        .compare-dropdown-toggle { display: inline-flex; align-items: center; gap: 5px; list-style: none; cursor: pointer; white-space: nowrap; }
+        .compare-dropdown-toggle::-webkit-details-marker { display: none; }
+        .compare-count-badge { display: inline-block; min-width: 15px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: var(--accent-contrast); font: 700 0.7rem Roboto, sans-serif; text-align: center; }
+        .compare-dropdown-body { position: absolute; z-index: 30; right: 0; top: calc(100% + 5px); min-width: 232px; padding: 8px; background: var(--surface); border: 1px solid var(--border-strong); box-shadow: 0 6px 18px var(--tooltip-shadow); }
+        .compare-dropdown-list { display: grid; gap: 4px; max-height: 210px; overflow-y: auto; }
+        .compare-dropdown-list label { display: flex; align-items: center; gap: 6px; padding: 3px 4px; color: var(--text-primary); font-size: 0.84rem; font-weight: 500; cursor: pointer; }
+        .compare-dropdown-list label:hover { background: var(--surface-muted); }
+        .compare-dropdown-list input { width: auto; margin: 0; accent-color: var(--accent); }
+        .compare-dropdown-empty { color: var(--text-subtle); font-size: 0.82rem; font-weight: 600; }
+        .compare-dropdown-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--border-color); }
+        .compare-dropdown-tools button { padding: 3px 8px; border: 1px solid var(--border-strong); background: var(--input-bg); color: var(--text-primary); font: 600 0.78rem Roboto, sans-serif; cursor: pointer; }
+        .compare-dropdown-tools .storage-switch { font-size: 0.8rem; }
+        .profit-compare-warning { margin-top: 7px; padding: 5px 8px; border: 1px solid var(--danger); color: var(--danger); font-size: 0.78rem; font-weight: 600; line-height: 1.5; }
+        .profit-bar-stack { display: grid; gap: 2px; min-width: 0; }
+        .profit-bar-stack-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0; }
+        .profit-bar-stack-row > i { display: block; height: 7px; border-radius: 4px; background: var(--series-track); }
+        .profit-bar-stack-row > i[data-negative="1"] { background: var(--danger); }
+        .profit-bar-stack-row > b { text-align: right; font: 700 0.72rem 'Share Tech Mono', monospace; color: var(--text-muted); white-space: nowrap; }
+        .profit-bar-stack-row.is-current > b { color: var(--text-primary); }
+        .profit-compare-delta { font: 600 0.7rem Roboto, sans-serif; font-style: normal; }
+        .profit-compare-delta.is-up { color: var(--success); }
+        .profit-compare-delta.is-down { color: var(--danger); }
+        .cmp-series-0 > i { background: var(--accent); }
+        .cmp-series-1 > i { background: var(--series-1); }
+        .cmp-series-2 > i { background: var(--series-2); }
+        .cmp-series-3 > i { background: var(--series-3); }
         .freight-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
         .freight-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
         .freight-grid .cargo-title { margin-bottom: 7px; }
@@ -509,6 +574,7 @@
         .freight-grid .fba-basis { padding-left: 12px; }
         .storage-forecast-panel { margin: 10px 0 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .fee-config-panel { margin-top: 2px; border-top: 1px dashed var(--border-strong); }
+        .fee-config-summary[hidden] { display: none; }
         .fee-config-panel .storage-forecast-title { color: var(--accent-hover); }
         .fee-config-body { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 2px; }
         .fee-config-group { display: flex; flex-direction: column; gap: 6px; }
@@ -581,7 +647,8 @@
         .storage-batch-controls button:hover, .storage-batch-controls button:focus-visible { border-color: var(--accent); color: var(--accent); }
         .storage-batch-controls .storage-clear-button { border-color: var(--danger); color: var(--danger); }
         .storage-batch-controls .storage-clear-button:hover, .storage-batch-controls .storage-clear-button:focus-visible { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
-        .storage-forecast-table { width: 100%; margin-top: 8px; border-collapse: collapse; table-layout: fixed; font-size: 0.84rem; font-weight: 600; }
+        .storage-table-scroll { overflow-x: auto; margin-top: 4px; }
+        .storage-forecast-table { width: 100%; min-width: 880px; margin-top: 8px; border-collapse: collapse; table-layout: fixed; font-size: 0.84rem; font-weight: 600; }
         .storage-forecast-table th, .storage-forecast-table td { min-width: 0; padding: 6px; border: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
         .storage-forecast-table th { color: var(--text-muted); font-weight: 700; }
         .storage-forecast-table td { color: var(--text-muted); font-family: 'Share Tech Mono', monospace; font-weight: 600; }
@@ -590,6 +657,12 @@
         .storage-forecast-table .storage-cost { color: var(--accent); white-space: nowrap; font-size: 0.86rem; font-weight: 700; }
         .storage-forecast-table .storage-status { color: var(--text-subtle); font-family: Roboto, sans-serif; font-size: 0.86rem; font-weight: 700; overflow-wrap: anywhere; }
         .storage-forecast-table tr.is-shortage .storage-status { color: var(--danger); font-weight: 700; }
+        .storage-forecast-table .storage-advice { white-space: nowrap; }
+        .storage-advice-units { color: var(--text-primary); }
+        .storage-forecast-table .storage-order { color: var(--text-subtle); font-family: Roboto, sans-serif; font-size: 0.84rem; white-space: nowrap; }
+        .storage-forecast-table .storage-safety { color: var(--text-muted); white-space: nowrap; }
+        .storage-adopt-button { margin-left: 6px; padding: 2px 7px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--accent); font: 500 0.76rem Roboto, sans-serif; cursor: pointer; white-space: nowrap; vertical-align: middle; }
+        .storage-adopt-button:hover { border-color: var(--accent); }
         .storage-forecast-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
         .storage-summary-item { min-width: 0; padding: 6px; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
         .storage-summary-item strong { display: block; margin-top: 3px; color: var(--accent); font: 700 0.84rem 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
@@ -776,15 +849,14 @@
             font-size: 1rem;
         }
         .profit-result-bars .metric > .term-tip { font-size: 1rem; }
-        .profit-result-bars .profit-bar-track { height: 12px; border: 1px solid var(--border-color); background: var(--surface-muted); overflow: hidden; }
-        .profit-result-bars .profit-bar-track i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.2s ease; }
+        .profit-result-bars .profit-bar-stack { width: 100%; }
+        .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
         .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1rem 'Share Tech Mono', monospace; text-align: right; white-space: nowrap; }
         .profit-result-bars .metric-action { display: grid; gap: 3px; }
         .profit-result-bars .metric-money { justify-content: flex-start; gap: 10px; margin-top: 0; }
         .profit-result-bars .metric-money strong { font-size: 1.15rem; }
         .profit-result-bars .metric-rmb { font-size: 0.95rem; }
         .profit-result-bars .metric-total { margin-top: 1px; padding-top: 3px; font-size: 0.9rem; }
-        .profit-result-bars .metric.negative .profit-bar-track i { background: var(--danger); }
         .profit-result-bars .metric.negative .profit-bar-ratio { color: var(--danger); }
         .quick-risk-list { margin: 0; padding-left: 20px; color: var(--text-muted); display: grid; gap: 7px; }
         .quick-risk-list .warning { color: var(--danger); }
@@ -796,7 +868,7 @@
         }
         @media (max-width: 560px) {
             .profit-result-bars .metric { grid-template-columns: minmax(0, 1fr) 58px; }
-            .profit-result-bars .profit-bar-track { grid-column: 1 / -1; grid-row: 2; }
+            .profit-result-bars .profit-bar-stack { grid-column: 1 / -1; grid-row: 2; }
             .profit-result-bars .profit-bar-ratio { grid-column: 2; grid-row: 1; }
             .profit-result-bars .metric-action { grid-column: 1 / -1; }
         }
@@ -950,15 +1022,15 @@
         </section>
         <div id="professionalWorkspace" class="converter-workspace professional-workspace">
         <div id="module-freight" class="calculator-home embedded-calculator">
-            <h2 class="calculator-module-title"><span>运费与仓储计算</span><span class="heading-controls"><label class="market-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option><option value="MX">墨西哥 / MX</option><option value="EU">欧洲 / EU</option><option value="UK">英国 / UK</option><option value="JP">日本 / JP</option></select></label><label class="market-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel" class="market-fx-unit">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.01" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="market-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h2>
+            <h2 class="calculator-module-title"><span>运费与仓储计算</span><span class="heading-controls"><label class="market-country">国家/站点<select id="marketCountry" onchange="updateMarketCountry()"><option value="US" selected>美国 / US</option><option value="CA">加拿大 / CA</option><option value="MX">墨西哥 / MX</option><option value="EU">欧洲 / EU</option><option value="UK">英国 / UK</option><option value="JP">日本 / JP</option></select></label><label class="market-fx"><span class="term-tip" tabindex="0" data-tip="汇率：人民币与目标市场货币之间的换算比例。">汇率</span><span id="profitFxLabel" class="market-fx-unit">（人民币/USD）</span><input id="profitFx" data-market-default="1" type="number" min="0" step="0.01" value="7.20" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><button id="profitRateUpdate" class="market-rate-update" type="button" onclick="updateProfitExchangeRate()">更新汇率</button><button id="feeConfigFallbackButton" class="market-rate-update" type="button" hidden onclick="toggleFeeConfigPanel(event)">费率设置</button><span id="profitMarketBadge" class="market-badge">US / USD</span></span></h2>
             <div class="calculator-grid freight-grid">
                 <section class="calculator-panel">
                     <div id="cargo-check" class="cargo-check">
                         <div class="cargo-layout">
                             <div>
                                 <div class="cargo-fields">
-                                    <label><span class="term-tip" tabindex="0" data-tip="输入包装长宽高，单位厘米；会同步换算到英寸。">尺寸（厘米）</span><span class="dimension-row"><input id="cargoDimensionInput" type="text" inputmode="text" placeholder="11×11×11cm" oninput="syncCargoDimensionPair('cm')"><button class="dimension-multiply" type="button" data-target="cargoDimensionInput" onclick="insertDimensionSeparator(this.dataset.target)" aria-label="输入乘号">×</button></span></label>
-                                    <label><span class="term-tip" tabindex="0" data-tip="可直接修改英寸尺寸，支持 in 后缀；会同步回厘米。">尺寸（英寸）</span><span class="dimension-row"><input id="cargoDimensionInInput" type="text" inputmode="text" placeholder="4.33×4.33×4.33in" oninput="syncCargoDimensionPair('in')"><button class="dimension-multiply" type="button" data-target="cargoDimensionInInput" onclick="insertDimensionSeparator(this.dataset.target)" aria-label="输入乘号">×</button></span></label>
+                                    <label><span class="term-tip" tabindex="0" data-tip="输入包装长宽高，单位厘米；三维之间用 x、* 或 × 分隔，会同步换算到英寸。">尺寸（厘米）</span><span class="dimension-row"><input id="cargoDimensionInput" type="text" inputmode="text" placeholder="11x11x11cm" oninput="syncCargoDimensionPair('cm')"></span></label>
+                                    <label><span class="term-tip" tabindex="0" data-tip="可直接修改英寸尺寸，支持 in 后缀；三维之间用 x、* 或 × 分隔，会同步回厘米。">尺寸（英寸）</span><span class="dimension-row"><input id="cargoDimensionInInput" type="text" inputmode="text" placeholder="4.33x4.33x4.33in" oninput="syncCargoDimensionPair('in')"></span></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="输入包装实际重量，单位千克；会同步换算到磅。">实重（千克）</span><input id="cargoWeightInput" type="number" min="0" step="0.01" placeholder="0.10" oninput="syncCargoWeightPair('kg')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="可直接修改磅数；会同步回千克。">实重（磅）</span><input id="cargoWeightLbInput" type="number" min="0" step="0.01" placeholder="0.22" oninput="syncCargoWeightPair('lb')"></label>
                                     <label><span class="term-tip" tabindex="0" data-tip="产品类目决定 FBA 配送费费率：普通商品（非服装类、非危险品）为默认；服装类商品与危险品使用各自的费率表。">产品类目</span><select id="productCategory" onchange="updateCargoCheck()"><option value="standard" selected>普通商品</option><option value="apparel">服装类商品</option><option value="hazmat">危险品</option></select></label>
@@ -966,7 +1038,15 @@
                                     <label><span class="term-tip" tabindex="0" data-tip="头程体积重 = 包装体积（立方厘米）÷ 体积系数；可按承运商规则修改。该系数只用于头程，不用于 FBA。">头程体积系数</span><input id="cargoDivisorInput" type="number" min="1" step="1" value="6000" oninput="updateCargoCheck()"></label>
                                     <label class="cargo-peak-toggle"><input id="fbaPeakShipping" type="checkbox" oninput="updateCargoCheck()"><span class="term-tip" tabindex="0" data-tip="勾选后按 2026 年 10 月 15 日至 2027 年 1 月 14 日的 FBA 旺季平均增量估算；FBA 按商品出库日计费。具体 SKU 费率以 Seller Central 为准。">旺季发货</span><small>2026-10-15 至 2027-01-14</small></label>
                                 </div>
-                                <div class="cargo-summary"><div>体积（立方米）：<span id="cargoVolumeValue">-</span></div><div>头程体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>头程计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div><div><span id="fbaDimensionalWeightLabel">FBA体积重（磅）</span>：<span id="fbaDimensionalWeightValue">-</span></div><div><span id="fbaShippingWeightLabel">FBA计费重（磅）</span>：<span id="fbaShippingWeightValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div>配送费：<span id="fbaFeeValue">-</span></div><div id="cargoStorageRegularRow"><span class="term-tip" tabindex="0" data-tip="按包装体积 × 非旺季仓储费率估算的单件月度仓储费（未勾选旺季发货时展示）。费率可在 FBA 费率设置中修改，实际以 Seller Central 为准。">非旺季仓储费（/件/月）</span>：<span id="cargoStorageRegularValue">-</span></div><div id="cargoStoragePeakRow" style="display:none"><span class="term-tip" tabindex="0" data-tip="按包装体积 × 旺季仓储费率估算的单件月度仓储费（勾选旺季发货后展示）。费率可在 FBA 费率设置中修改，实际以 Seller Central 为准。">旺季仓储费（/件/月）</span>：<span id="cargoStoragePeakValue">-</span></div></div>
+                                <div class="cargo-fee-hero">
+                                    <div class="cargo-fee-label">FBA 配送费</div>
+                                    <div class="cargo-fee-amount"><strong id="fbaFeeValue">-</strong><span class="cargo-fee-rmb" id="fbaFeeCnyValue">-</span></div>
+                                    <div class="cargo-fee-meta" id="fbaFeeMetaValue">填写包装尺寸与实重后显示</div>
+                                </div>
+                                <details class="cargo-notes" id="cargoNotesPanel" open>
+                                    <summary class="cargo-notes-toggle">规格与仓储明细</summary>
+                                    <div class="cargo-summary"><div>体积（立方米）：<span id="cargoVolumeValue">-</span></div><div>头程体积重（千克）：<span id="cargoVolumeWeightValue">-</span></div><div>头程计费重（千克）：<span id="cargoChargeableWeightValue">-</span></div><div>判断：<span id="cargoTypeValue">-</span></div><div><span id="fbaDimensionalWeightLabel">FBA体积重（磅）</span>：<span id="fbaDimensionalWeightValue">-</span></div><div><span id="fbaShippingWeightLabel">FBA计费重（磅）</span>：<span id="fbaShippingWeightValue">-</span></div><div>尺寸等级：<span id="fbaTierValue">-</span></div><div id="cargoStorageRegularRow"><span class="term-tip" tabindex="0" data-tip="按包装体积 × 非旺季仓储费率估算的单件月度仓储费（未勾选旺季发货时展示）。费率可在 FBA 费率设置中修改，实际以 Seller Central 为准。">非旺季仓储费（/件/月）</span>：<span id="cargoStorageRegularValue">-</span></div><div id="cargoStoragePeakRow" style="display:none"><span class="term-tip" tabindex="0" data-tip="按包装体积 × 旺季仓储费率估算的单件月度仓储费（勾选旺季发货后展示）。费率可在 FBA 费率设置中修改，实际以 Seller Central 为准。">旺季仓储费（/件/月）</span>：<span id="cargoStoragePeakValue">-</span></div></div>
+                                </details>
                             </div>
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
@@ -982,25 +1062,31 @@
                         <p id="variantStatus" class="storage-forecast-status"></p>
                     </details>
                     <details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
-                        <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button></span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
+                        <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button><button id="feeConfigToggleButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="feeConfigPanel" onclick="toggleFeeConfigPanel(event)">费率设置</button></span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
                         <div class="storage-control-grid">
                             <label><span class="term-tip" tabindex="0" data-tip="预测连续计算 12 个月。起始月决定淡季/旺季基础仓储费率。">起始月份</span><select id="storageStartMonth" oninput="updateStorageForecast()"></select></label>
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" placeholder="例如 300" oninput="updateStorageForecast()"></label>
                             <label id="storageUsHistoryField"><span class="term-tip" tabindex="0" data-tip="库存利用率附加费以过去 13 周实际发货量作为首月基准。后续月份会逐日滚动采用预测中的实际可售量。">过去 13 周销量</span><input id="storagePast13WeekSales" type="number" min="0" step="1" placeholder="例如 1300" oninput="updateStorageForecast()"></label>
                             <label id="storageUsNewSellerField" class="storage-switch"><input id="storageNewSeller" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="仅在新卖家资格有效且日均库存体积低于 25 立方英尺时，使用新卖家低库存费率；否则自动回到常规费率。">新卖家低库存资格</span></label>
                             <label id="storageJpFashionField" class="storage-switch" hidden><input id="storageJpFashion" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="日本站服装服饰、鞋靴与箱包使用独立仓储费率。">服装/鞋靴/箱包</span></label>
+                            <label><span class="term-tip" tabindex="0" data-tip="从下单到货件到仓可用的月数，用于把建议到仓提前换算成建议下单月份。">到仓提前期（月）</span><input id="storageLeadTimeMonths" type="number" min="1" step="1" value="1" oninput="updateStorageForecast()"></label>
+                            <label><span class="term-tip" tabindex="0" data-tip="每月售完后保留下一月计划销量的一定比例作为不断货安全库存。">安全库存比例</span><input id="storageSafetyStockRatio" type="number" min="0" step="0.01" value="0.5" oninput="updateStorageForecast()"></label>
                         </div>
                         <div class="storage-batch-controls" aria-label="仓储预测批量操作">
                             <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该销量写入前 N 个月（默认 12 个月）；留空表示不修改销量列。">批量月销量</span><input id="storageBatchSales" type="number" min="0" step="1" placeholder="留空不改"></label>
                             <label><span class="term-tip" tabindex="0" data-tip="填写后点击批量填充，会将该补货量写入前 N 个月（默认 12 个月）；留空表示不修改补货列。">批量月补货</span><input id="storageBatchRestock" type="number" min="0" step="1" placeholder="留空不改"></label>
                             <label><span class="term-tip" tabindex="0" data-tip="批量填充从第 1 个月开始写入；填写 1–12，留空按 12 个月处理，未覆盖的月份保持原值。">填充月数</span><input id="storageBatchMonths" type="number" min="1" max="12" step="1" value="12" placeholder="默认 12" inputmode="numeric"></label>
                             <button id="storageBatchFillButton" type="button" onclick="batchFillStorageForecast()">批量填充</button>
+                            <button id="storageSalesSyncButton" type="button" onclick="syncSalesFromMonthlyUnits()">用月销量填充</button>
                             <button id="storageClearButton" class="storage-clear-button" type="button" onclick="clearStorageForecast()">一键清空计划</button>
                         </div>
+                        <div class="storage-table-scroll">
                         <table class="storage-forecast-table" aria-label="美国仓储费每月详细计算">
-                            <thead><tr><th>月份</th><th>计划销量</th><th>补货</th><th>日均库存</th><th><span class="term-tip" tabindex="0" data-tip="滚动 13 周库存利用率 = 日均库存 ÷ 过去 13 周日均发货量。超过 22 周开始收取附加费。">利用率</span></th><th>仓储费</th><th>状态</th></tr></thead>
+                            <colgroup><col style="width:7%"><col style="width:8%"><col style="width:8%"><col style="width:13%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:21%"></colgroup>
+                            <thead><tr><th>月份</th><th>计划销量</th><th>补货</th><th><span class="term-tip" tabindex="0" data-tip="不断货前提下该月最少需要到仓的数量；点击「采纳」可一键写入该月的补货列。">建议到仓</span></th><th><span class="term-tip" tabindex="0" data-tip="按到仓提前期倒推：应下单的月份；显示「立即安排」表示已来不及按提前期下单。">建议下单</span></th><th>日均库存</th><th><span class="term-tip" tabindex="0" data-tip="滚动 13 周库存利用率 = 日均库存 ÷ 过去 13 周日均发货量。超过 22 周开始收取附加费。">利用率</span></th><th>仓储费</th><th><span class="term-tip" tabindex="0" data-tip="该月月底按安全库存比例应保留的库存数量。">月末安全库存</span></th><th>状态</th></tr></thead>
                             <tbody id="storageForecastRows"></tbody>
                         </table>
+                        </div>
                         <div class="storage-forecast-summary">
                             <div class="storage-summary-item">计划期总仓储<strong id="storageForecastTotalValue">-</strong></div>
                             <div class="storage-summary-item">有销量月份平均仓储/件<strong id="storageForecastPerUnitValue">-</strong></div>
@@ -1008,15 +1094,10 @@
                             <div class="storage-summary-item">有销量月份总销量<strong id="storageForecastSoldValue">-</strong></div>
                             <div class="storage-summary-item">取用月日均库存<strong id="storageForecastAverageValue">-</strong></div>
                         </div>
-                        <div class="storage-replenishment" aria-label="补货建议">
-                            <div class="storage-replenishment-heading"><span class="term-tip" tabindex="0" data-tip="建议不会改写上方计划补货。它以不断货为前提，在每月售完后保留下一月计划销量的一定比例作为安全库存，并给出最小建议到仓量和提前下单月份。">补货建议</span></div>
-                            <div class="storage-replenishment-controls"><label>到仓提前期（月）<input id="storageLeadTimeMonths" type="number" min="1" step="1" value="1" oninput="updateStorageForecast()"></label><label>安全库存比例<input id="storageSafetyStockRatio" type="number" min="0" step="0.01" value="0.5" oninput="updateStorageForecast()"></label></div>
-                            <table class="storage-replenishment-table" aria-label="FBA 补货建议"><thead><tr><th>月份</th><th>建议到仓</th><th>建议下单</th><th>月末安全库存</th></tr></thead><tbody id="storageReplenishmentRows"></tbody></table>
-                        </div>
                         <p id="storageForecastStatus" class="storage-forecast-status"></p>
                     </details>
                     <details id="feeConfigPanel" class="storage-forecast-panel fee-config-panel" aria-label="FBA 费率设置">
-                        <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="feeConfigTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="本地版新增功能：2026 FBA 仓储费率、配送费阶梯、旺季附加费、体积重系数、加拿大系数全部可自定义。配送费按「类目 × 售价档位」切换编辑（普通商品/服装类/危险品 × &lt;$10/$10–$50/&gt;$50）。修改后自动保存到浏览器本地并立即生效，影响仓储预测、配送费估算与利润测算。">FBA 费率设置（本地版自定义）</span></summary>
+                        <summary class="storage-forecast-toggle fee-config-summary" hidden><span class="storage-forecast-heading"><span id="feeConfigTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="本地版新增功能：2026 FBA 仓储费率、配送费阶梯、旺季附加费、体积重系数、加拿大系数全部可自定义。配送费按「类目 × 售价档位」切换编辑（普通商品/服装类/危险品 × &lt;$10/$10–$50/&gt;$50）。修改后自动保存到浏览器本地并立即生效，影响仓储预测、配送费估算与利润测算。">FBA 费率设置（本地版自定义）</span></summary>
                         <div class="fee-config-body">
                             <div class="fee-config-scope">
                                 <label>配送费类目<select id="feeCategorySelect" onchange="onFeeScopeChange()"><option value="standard">普通商品（非服装/非危险品）</option><option value="apparel">服装类商品</option><option value="hazmat">危险品</option></select></label>
@@ -1089,13 +1170,13 @@
                     <div class="calculator-fields">
                         <label><span class="field-label term-tip" tabindex="0" data-tip="单件商品的销售价格。"><span id="adPriceLabel">售价</span><span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator(); updateCargoCheck()"></label>
                         <label><span class="field-label term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。"><span>CPC</span><span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数。"><span>月点击量</span><span class="field-hint">Clicks</span></span><input id="adClicks" type="number" min="0" step="1" placeholder="输入月点击量（选填）" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="由广告归因带来的订单数。"><span>广告订单量</span><span class="field-hint">Paid orders</span></span><input id="adOrders" type="number" min="0" step="1" placeholder="输入广告订单量（选填）" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数（选填）。填写后会按 CVR 自动推算广告订单量。"><span>月点击量</span><span class="field-hint">Clicks</span><span class="field-optional-tag">选填</span></span><input id="adClicks" class="is-optional" type="number" min="0" step="1" placeholder="输入月点击量（选填）" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="由广告归因带来的订单数（选填）。留空时如果已有月点击量与 CVR，会自动填充；手动填写或清空后不再自动覆盖。"><span>广告订单量</span><span class="field-hint">Paid orders</span><span class="field-optional-tag">选填</span></span><input id="adOrders" class="is-optional" type="number" min="0" step="1" placeholder="输入广告订单量（选填）" oninput="markOrdersEdited(); updateAdCalculator()"></label>
                         <label><span class="field-label term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"><span>CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于自动计算广告订单占比 POS。"><span>月销量</span><span class="field-hint">总订单</span></span><input id="adMonthlyUnits" type="number" min="0" step="1" placeholder="输入月销量（选填）" oninput="updateAdCalculator()"></label>
+                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于自动计算广告订单占比 POS。"><span>月销量</span><span class="field-hint">总订单</span><span class="field-optional-tag">选填</span></span><input id="adMonthlyUnits" class="is-optional" type="number" min="0" step="1" placeholder="输入月销量（选填）" oninput="updateAdCalculator()"></label>
                     </div>
                     <div class="metric-grid">
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位 CPA 所需输入"><strong id="adCpaValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="广告订单占比：广告订单量 ÷ 月销量。月销量未填写时无法计算。">POS</span><button class="metric-action" type="button" data-inputs="adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 POS 所需输入"><strong id="adPosMetricValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACOS 所需输入"><strong id="adAcosValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACoAS 所需输入"><strong id="adAcoasValue">-</strong></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位 CPA 所需输入"><strong id="adCpaValue">-</strong></button></div><div class="metric metric-pos"><span class="term-tip" tabindex="0" data-tip="广告订单占比 POS = 广告订单量 ÷ 月销量。可直接填写：月销量保持不变，自动反推广告订单量；月点击量、CVR 与 CPA 不受影响。月销量未填写时不可填写。">POS</span><span class="metric-action metric-pos-action" data-inputs="adPosInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();guideCalculationInputs(this);}" aria-label="定位 POS 所需输入"><span class="metric-pos-field"><input id="adPosInput" type="number" min="0" max="100" step="0.01" placeholder="先填月销量" aria-label="广告订单占比 POS（百分比）" onfocus="markPosEditing(true)" onblur="markPosEditing(false); updateAdCalculator()" onclick="event.stopPropagation()" oninput="markPosEditing(true); updateAdCalculator()"><span class="metric-pos-unit">%</span></span></span></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACOS 所需输入"><strong id="adAcosValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACoAS 所需输入"><strong id="adAcoasValue">-</strong></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ROAS 所需输入"><strong id="adRoasValue">-</strong></button></div>                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位混合广告费所需输入"><strong id="adBlendedCostValue">-</strong></button></div>
                     </div>
                     <div id="adVariantBlock" class="variant-ad-block" style="display:none">
@@ -1110,7 +1191,7 @@
             </div>
         </div>
         <div id="profitDetail" class="calculator-home embedded-calculator">
-            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><span id="projectStatus" class="project-status"></span></span></h2>
+            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><details id="compareDropdown" class="compare-dropdown"><summary class="project-btn compare-dropdown-toggle" id="compareDropdownToggle">对比产品<span id="compareCountBadge" class="compare-count-badge" hidden>0</span></summary><div class="compare-dropdown-body"><div class="compare-dropdown-list" id="compareProjectChecks"></div><div class="compare-dropdown-tools"><label class="storage-switch"><input id="compareToCny" type="checkbox" onchange="renderCompare()"><span class="term-tip" tabindex="0" data-tip="勾选后对比条形按各自汇率折算成人民币；利润率等百分比不受影响。">折算人民币</span></label><button type="button" onclick="clearCompare()">清空</button><button type="button" onclick="exportCompareCsv()">导出 CSV</button></div><div class="profit-compare-warning" id="profitCompareWarning" hidden></div></div></details><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><button type="button" class="project-btn" onclick="exportProjects()">导出</button><button type="button" class="project-btn" onclick="document.getElementById('projectImportInput').click()">导入</button><input id="projectImportInput" type="file" accept="application/json,.json" hidden onchange="importProjects(this)"><button type="button" class="project-btn" id="draftClearButton" hidden onclick="clearDraft()">清除草稿</button><span id="draftStatus" class="draft-status" title="利润测算 / 广告费换算 / 运费与仓储里的输入会自动保存在本浏览器，刷新或重开页面后自动恢复；不会上传到任何服务器。">自动保存已开启</span><span id="projectStatus" class="project-status"></span></span></h2>
             <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full">
                     <div class="profit-layout">
@@ -1128,9 +1209,13 @@
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="采购/件 = 含税采购成本 ×（1 − 退税/折扣比例）÷ 汇率；总采购成本 = 采购/件 × 月销量。">采购/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位采购成本所需输入"><span class="metric-money"><strong id="profitPurchaseValue">-</strong><span class="metric-rmb" id="profitPurchaseCnyValue">-</span></span><span class="metric-total" id="profitPurchaseTotalValue">总采购成本（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/每件）÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和 FBA 计费重对应的配送费；FBA 计费重取实重与 139 in³/lb 体积重的较大值。勾选旺季发货时会增加 2026 旺季平均增量；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 预测期 FBA 仓储总费 ÷ 预测期实际售出件数，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 预测期 FBA 仓储总费 ÷ 预测期实际售出件数，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。注意这里的分母是 12 个月计划表的销量，不是月销量：若两者不一致，仓储/件 × 月销量 会不等于计划期总仓储，请点《用月销量填充》保持一致。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件；总费用 = 广告/件 × 月销量。">广告/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位广告费所需输入"><span class="metric-money"><strong id="profitAdValue">-</strong><span class="metric-rmb" id="profitAdCnyValue">-</span></span><span class="metric-total" id="profitAdTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货；总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="佣金/件 = 售价 × 佣金率；日本站与欧洲/英国站按官方类目阶梯、最低佣金和消费税自动计算。总费用 = 佣金/件 × 月销量。">佣金/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitReferralRate,profitReferralCategory,profitJpReferralTax,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位佣金所需输入"><span class="metric-money"><strong id="profitReferralValue">-</strong><span class="metric-rmb" id="profitReferralCnyValue">-</span></span><span class="metric-total" id="profitReferralTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="入库配置/件 = 亚马逊把库存分配至入库地点时按件收取的费用，与 FBA 配送费不同；日本站为「其他每件 FBA/入仓费用」。总费用 = 入库配置/件 × 月销量。">入库配置/件</span><button class="metric-action" type="button" data-inputs="profitPlacementFee,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位入库配置费所需输入"><span class="metric-money"><strong id="profitPlacementValue">-</strong><span class="metric-rmb" id="profitPlacementCnyValue">-</span></span><span class="metric-total" id="profitPlacementTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="促销/件 = 售价 × 促销费率，用于估算优惠券、折扣等按销售额比例的费用。Coupon 兑现费等固定额费用请折算为比率后填入。总费用 = 促销/件 × 月销量。">促销/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPromoRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位促销费所需输入"><span class="metric-money"><strong id="profitPromoValue">-</strong><span class="metric-rmb" id="profitPromoCnyValue">-</span></span><span class="metric-total" id="profitPromoTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="退货/件 = 退货率 ×（售价 + 退货处理费）。退货处理费为亚马逊 Refund Administration Fee，等于佣金 × 20%，自动随售价与佣金率变化。该项含未实现的收入损失，所以总成本可能超过售价。">退货/件</span><button class="metric-action" type="button" data-inputs="profitReturnRate,profitReturnHandling,adPrice,profitReferralRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位退货成本所需输入"><span class="metric-money"><strong id="profitReturnValue">-</strong><span class="metric-rmb" id="profitReturnCnyValue">-</span></span><span class="metric-total" id="profitReturnTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货。其中「退货」里包含退货率对应的未实现销售收入，所以总成本/件可能超过售价，此时应先看「利润/件」是否为负。总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
                     </div>
@@ -2076,7 +2161,7 @@
         if (Number(price) > 50) return 'over50';
         return 'mid';
     }
-    const PRICE_BAND_LABELS = { under10: '售价 < $10', mid: '$10 – $50', over50: '售价 > $50' };
+    const PRICE_BAND_LABELS = { under10: '售价 < $10', mid: '$10 – $50', over50: '售价 > $50', lowprice: '低价 FBA', standard: '标准 FBA' };
     const CATEGORY_LABELS = { standard: '普通商品', apparel: '服装类商品', hazmat: '危险品' };
     function readProductCategory() {
         const el = typeof document !== 'undefined' ? document.getElementById('productCategory') : null;
@@ -2460,6 +2545,15 @@
         return data;
     }
     function applyProjectFields(data) {
+        // 站点必须先切：切换站点会按站点隔离恢复金额类字段（售价/CPC/入库配置费/退货处理费），
+        // 若在写入其余字段之后才切，这些字段会被目标站点的默认值覆盖。
+        if ('marketCountry' in data) {
+            const marketEl = document.getElementById('marketCountry');
+            if (marketEl && marketEl.value !== String(data.marketCountry)) {
+                marketEl.value = String(data.marketCountry);
+                updateMarketCountry();
+            }
+        }
         for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
             if (!(id in data)) continue;
             const el = document.getElementById(id);
@@ -2467,8 +2561,15 @@
             if (el.type === 'checkbox') el.checked = Boolean(data[id]);
             else el.value = String(data[id]);
         }
+        // 兜底：站点隔离的金额字段再写一次，避免任何站点恢复路径把它们改回默认值
+        for (const id of MARKET_MONEY_FIELDS) {
+            if (!(id in data)) continue;
+            const el = document.getElementById(id);
+            if (el) el.value = String(data[id] ?? '');
+        }
         if ('cargoDimensionInput' in data) syncCargoDimensionPair('cm');
         if ('cargoWeightInput' in data) syncCargoWeightPair('kg');
+        ordersManuallyEdited = false;
         if ('_variants' in data) {
             try {
                 const variantList = JSON.parse(data._variants);
@@ -2489,6 +2590,10 @@
         data._variantsEnabled = VARIANTS.enabled;
         data._variantsSameSpec = VARIANTS.sameSpec;
         data._variants = JSON.stringify(VARIANTS.list);
+        if (LAST_PROFIT_RESULT) {
+            const contextPrice = Number.isFinite(LAST_PROFIT_CONTEXT?.price) ? LAST_PROFIT_CONTEXT.price : Number(document.getElementById('adPrice')?.value) || 0;
+            data.result = buildProfitSnapshot(LAST_PROFIT_RESULT, contextPrice, LAST_PROFIT_CONTEXT?.fx ?? 0);
+        }
         const now = new Date();
         const pad = n => String(n).padStart(2, '0');
         const savedAt = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
@@ -2497,8 +2602,10 @@
         else PROJECTS.push({ name, savedAt, fields: data });
         saveProjectsToStorage();
         renderProjectSelect();
+        COMPARE_RECOMPUTE_CACHE.delete(name);
         document.getElementById('projectSelect').value = name;
         setProjectStatus('✅ 已保存「' + name + '」');
+        renderCompare();
     }
     function loadProject(name) {
         if (!name) return;
@@ -2515,17 +2622,481 @@
         if (!name) { setProjectStatus('⚠️ 请先选择要删除的产品', 3000); return; }
         if (!confirm('确定删除产品项目「' + name + '」？此操作不可恢复。')) return;
         PROJECTS = PROJECTS.filter(p => p.name !== name);
+        COMPARE_RECOMPUTE_CACHE.delete(name);
+        COMPARE_SELECTION = COMPARE_SELECTION.filter(item => item !== name);
+        saveCompareSelection();
         saveProjectsToStorage();
         renderProjectSelect();
         const nameEl = document.getElementById('projectName');
         if (nameEl) nameEl.value = '';
         setProjectStatus('🗑️ 已删除「' + name + '」');
+        renderCompare();
     }
     function saveProjectsToStorage() {
         try { localStorage.setItem(PROJECTS_KEY, JSON.stringify(PROJECTS)); } catch (error) { /* 隐私模式等场景忽略 */ }
     }
     function initProjects() {
         loadProjectsFromStorage();
+    }
+
+    // ===== 输入自动保存（本地草稿）=====
+    const DRAFT_KEY = 'LT_DRAFT_V1';
+    const DRAFT_SCOPE = ['#module-freight', '#module-adcalc', '#profitDetail'];
+    const DRAFT_DELAY_MS = 500;
+    let draftReady = false;
+    let draftTimer = null;
+    let draftResetTimer = null;
+    let draftUserEdited = false;
+
+    function draftInScope(target) {
+        return DRAFT_SCOPE.some(selector => target?.closest?.(selector));
+    }
+
+    function draftExtraState() {
+        return {
+            storageLeadTimeMonths: document.getElementById('storageLeadTimeMonths')?.value ?? '',
+            storageSafetyStockRatio: document.getElementById('storageSafetyStockRatio')?.value ?? '',
+            storageJpFashion: document.getElementById('storageJpFashion')?.checked === true,
+        };
+    }
+
+    function draftStoragePlan() {
+        const plan = {};
+        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+            plan[`sales${index}`] = document.getElementById(`storageSales${index}`)?.value ?? '';
+            plan[`restock${index}`] = document.getElementById(`storageRestock${index}`)?.value ?? '';
+        }
+        return plan;
+    }
+
+    function collectDraft() {
+        return {
+            version: 1,
+            savedAt: new Date().toISOString(),
+            fields: collectProjectFields(),
+            extra: draftExtraState(),
+            plan: draftStoragePlan(),
+            variants: { enabled: VARIANTS.enabled, sameSpec: VARIANTS.sameSpec, list: VARIANTS.list },
+        };
+    }
+
+    function draftTimeLabel() {
+        const now = new Date();
+        return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+    }
+
+    function setDraftStatus(text, dirty) {
+        const el = document.getElementById('draftStatus');
+        if (!el) return;
+        el.textContent = text;
+        el.classList.toggle('is-dirty', Boolean(dirty));
+    }
+
+    function updateDraftClearButton() {
+        const button = document.getElementById('draftClearButton');
+        if (!button) return;
+        let hasDraft = false;
+        try { hasDraft = Boolean(localStorage.getItem(DRAFT_KEY)); } catch (error) { hasDraft = false; }
+        // 首次访问自动存下的那份默认快照不算「草稿」，避免一进页面就出现清除按钮
+        button.hidden = !(hasDraft && draftUserEdited);
+    }
+
+    function saveDraft() {
+        if (!draftReady) return;
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(collectDraft()));
+        } catch (error) {
+            setDraftStatus('自动保存失败（浏览器存储不可用）', false);
+            return;
+        }
+        setDraftStatus('已自动保存 ' + draftTimeLabel(), false);
+        updateDraftClearButton();
+    }
+
+    function scheduleDraftSave() {
+        if (!draftReady) return;
+        draftUserEdited = true;
+        setDraftStatus('编辑中…', true);
+        if (draftTimer) clearTimeout(draftTimer);
+        if (draftResetTimer) clearTimeout(draftResetTimer);
+        draftTimer = setTimeout(saveDraft, DRAFT_DELAY_MS);
+    }
+
+    function flushDraftSave() {
+        if (!draftReady || !draftTimer) return;
+        clearTimeout(draftTimer);
+        draftTimer = null;
+        saveDraft();
+    }
+
+    function clearDraft() {
+        try { localStorage.removeItem(DRAFT_KEY); } catch (error) { /* 忽略 */ }
+        if (draftTimer) { clearTimeout(draftTimer); draftTimer = null; }
+        updateDraftClearButton();
+        setDraftStatus('已清除本地草稿，刷新后回到默认值', false);
+        if (draftResetTimer) clearTimeout(draftResetTimer);
+        draftResetTimer = setTimeout(() => setDraftStatus('自动保存已开启', false), 4000);
+    }
+
+    function applyDraft(draft) {
+        if (!draft || typeof draft !== 'object') return false;
+        const fields = draft.fields && typeof draft.fields === 'object' ? draft.fields : null;
+        if (!fields || !Object.keys(fields).length) return false;
+        const plan = draft.plan && typeof draft.plan === 'object' ? draft.plan : {};
+        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+            const sales = document.getElementById(`storageSales${index}`);
+            const restock = document.getElementById(`storageRestock${index}`);
+            if (sales && `sales${index}` in plan) sales.value = String(plan[`sales${index}`] ?? '');
+            if (restock && `restock${index}` in plan) restock.value = String(plan[`restock${index}`] ?? '');
+        }
+        const extra = draft.extra && typeof draft.extra === 'object' ? draft.extra : {};
+        const leadTime = document.getElementById('storageLeadTimeMonths');
+        const safety = document.getElementById('storageSafetyStockRatio');
+        const jpFashion = document.getElementById('storageJpFashion');
+        if (leadTime && 'storageLeadTimeMonths' in extra) leadTime.value = String(extra.storageLeadTimeMonths ?? '');
+        if (safety && 'storageSafetyStockRatio' in extra) safety.value = String(extra.storageSafetyStockRatio ?? '');
+        if (jpFashion && 'storageJpFashion' in extra) jpFashion.checked = Boolean(extra.storageJpFashion);
+        const variants = draft.variants && typeof draft.variants === 'object' ? draft.variants : null;
+        const payload = { ...fields };
+        if (variants && Array.isArray(variants.list) && variants.list.length) {
+            payload._variants = JSON.stringify(variants.list);
+            payload._variantsEnabled = Boolean(variants.enabled);
+            payload._variantsSameSpec = variants.sameSpec !== false;
+        }
+        applyProjectFields(payload);
+        return true;
+    }
+
+    function initDraft() {
+        let draft = null;
+        try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (error) { draft = null; }
+        let restored = false;
+        if (draft) {
+            try { restored = applyDraft(draft); } catch (error) { restored = false; }
+        }
+        draftReady = true;
+        if (restored) draftUserEdited = true;
+        updateDraftClearButton();
+        if (restored) {
+            const label = draft.savedAt ? String(draft.savedAt).slice(5, 16).replace('T', ' ') : '';
+            setDraftStatus(label ? `已恢复本地草稿（保存于 ${label}）` : '已恢复本地草稿', false);
+            if (draftResetTimer) clearTimeout(draftResetTimer);
+            draftResetTimer = setTimeout(() => setDraftStatus('已自动保存', false), 6000);
+        } else {
+            setDraftStatus('自动保存已开启', false);
+            saveDraft();
+        }
+    }
+
+    function installDraftAutosave() {
+        document.addEventListener('input', event => { if (draftInScope(event.target)) scheduleDraftSave(); }, true);
+        document.addEventListener('change', event => { if (draftInScope(event.target)) scheduleDraftSave(); }, true);
+        window.addEventListener('beforeunload', flushDraftSave);
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushDraftSave(); });
+    }
+
+    // ===== 结果对比 =====
+    const COMPARE_KEY = 'LT_COMPARE';
+    const COMPARE_MAX_SERIES = 3;
+    const COMPARE_METRICS = [
+        { key: 'price', label: '售价', kind: 'money' },
+        { key: 'purchase', label: '采购/件', kind: 'money' },
+        { key: 'freight', label: '头程/件', kind: 'money' },
+        { key: 'referral', label: '佣金/件', kind: 'money' },
+        { key: 'fba', label: 'FBA/件', kind: 'money' },
+        { key: 'placement', label: '入库配置/件', kind: 'money' },
+        { key: 'storage', label: '仓储/件', kind: 'money' },
+        { key: 'ad', label: '广告/件', kind: 'money' },
+        { key: 'promo', label: '促销/件', kind: 'money' },
+        { key: 'returns', label: '退货/件', kind: 'money' },
+        { key: 'totalCost', label: '总成本/件', kind: 'money' },
+        { key: 'profit', label: '利润/件', kind: 'money' },
+        { key: 'margin', label: '利润率', kind: 'percent' },
+        { key: 'breakEvenAcos', label: '保本 ACOS', kind: 'percent' },
+        { key: 'maxCpc', label: '最大 CPC', kind: 'money' },
+    ];
+    const COMPARE_RECOMPUTE_CACHE = new Map();
+    let COMPARE_SELECTION = [];
+
+    function compareCnyMode() {
+        return document.getElementById('compareToCny')?.checked === true;
+    }
+
+    function projectSnapshot(project) {
+        return project?.result || project?.fields?.result || null;
+    }
+
+    function compareProjectKey(project) {
+        return `${project.name}|${project.savedAt || ''}|${projectSnapshot(project) ? 'snapshot' : 'recompute'}`;
+    }
+
+    function captureFormState() {
+        const fields = {};
+        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            fields[id] = el.type === 'checkbox' ? el.checked : el.value;
+        }
+        return { fields, variants: { enabled: VARIANTS.enabled, sameSpec: VARIANTS.sameSpec, list: JSON.stringify(VARIANTS.list) } };
+    }
+
+    function restoreFormState(state) {
+        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
+            if (!(id in state.fields)) continue;
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = Boolean(state.fields[id]);
+            else el.value = String(state.fields[id] ?? '');
+        }
+        if ('cargoDimensionInput' in state.fields) syncCargoDimensionPair('cm');
+        if ('cargoWeightInput' in state.fields) syncCargoWeightPair('kg');
+        ordersManuallyEdited = false;
+        VARIANTS.enabled = state.variants.enabled;
+        VARIANTS.sameSpec = state.variants.sameSpec;
+        try {
+            const list = JSON.parse(state.variants.list);
+            if (Array.isArray(list) && list.length) VARIANTS.list = list;
+        } catch (error) { /* 忽略损坏数据 */ }
+        renderVariantList();
+        updateMarketCountry(); updateCargoCheck(); updateStorageForecast(); updateAdCalculator(); updateProfitCalculator();
+    }
+
+    function recomputeProjectSnapshot(project) {
+        const key = compareProjectKey(project);
+        const cached = COMPARE_RECOMPUTE_CACHE.get(project.name);
+        if (cached && cached.key === key) return cached.snap;
+        const originalState = captureFormState();
+        let snap = null;
+        compareBusy = true;
+        try {
+            applyProjectFields(project.fields);
+            if (LAST_PROFIT_RESULT) {
+                snap = buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0);
+            }
+        } catch (error) {
+            snap = null;
+        } finally {
+            restoreFormState(originalState);
+            compareBusy = false;
+        }
+        COMPARE_RECOMPUTE_CACHE.set(project.name, { key, snap });
+        return snap;
+    }
+
+    function compareSeries() {
+        const series = [];
+        if (LAST_PROFIT_RESULT) {
+            series.push({ key: '__current__', name: '当前', source: 'live', ...buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0) });
+        }
+        for (const name of COMPARE_SELECTION) {
+            const project = PROJECTS.find(p => p.name === name);
+            if (!project) continue;
+            let snap = projectSnapshot(project);
+            let source = 'snapshot';
+            if (!snap) {
+                snap = recomputeProjectSnapshot(project);
+                source = 'recomputed';
+            }
+            if (!snap) continue;
+            series.push({ key: name, name, source, ...snap });
+        }
+        return series;
+    }
+
+    function formatCompareValue(value, snap, kind) {
+        if (!Number.isFinite(value)) return '-';
+        if (kind === 'percent') return (value * 100).toFixed(2) + '%';
+        if (compareCnyMode()) {
+            const fx = Number.isFinite(snap.fx) ? snap.fx : 0;
+            return fx > 0 ? '¥ ' + (value * fx).toFixed(2) : '汇率缺失';
+        }
+        return (snap.currency || '') + ' ' + value.toFixed(2);
+    }
+
+    function updateCompareDropdown() {
+        const list = document.getElementById('compareProjectChecks');
+        const badge = document.getElementById('compareCountBadge');
+        const warning = document.getElementById('profitCompareWarning');
+        if (badge) {
+            badge.hidden = COMPARE_SELECTION.length === 0;
+            badge.textContent = String(COMPARE_SELECTION.length);
+        }
+        if (list) {
+            if (!PROJECTS.length) {
+                list.innerHTML = '<span class="compare-dropdown-empty">还没有保存的产品，先用「保存产品」。</span>';
+            } else {
+                list.innerHTML = PROJECTS.map(project => {
+                    const checked = COMPARE_SELECTION.includes(project.name) ? ' checked' : '';
+                    const disabled = !COMPARE_SELECTION.includes(project.name) && COMPARE_SELECTION.length >= COMPARE_MAX_SERIES ? ' disabled' : '';
+                    return `<label title="保存于 ${projectEscapeHtml(project.savedAt || '')}"><input type="checkbox" value="${projectEscapeHtml(project.name)}"${checked}${disabled} onchange="toggleCompareProject(this.value)"><span>${projectEscapeHtml(project.name)}</span></label>`;
+                }).join('');
+            }
+        }
+        if (warning) {
+            const series = compareSeries();
+            const currencies = [...new Set(series.map(item => item.currency).filter(Boolean))];
+            const showWarning = series.length > 1 && !compareCnyMode() && currencies.length > 1;
+            warning.hidden = !showWarning;
+            if (showWarning) warning.textContent = `对比项币种不同（${currencies.join(' / ')}），勾选「折算人民币」可统一口径。`;
+        }
+    }
+
+    function renderCompare() {
+        updateCompareDropdown();
+        renderProfitBars(LAST_PROFIT_CONTEXT?.price ?? 0);
+    }
+
+    // 对比直接落在「经营结果」每一行里：当前值一条，每个对比产品一条
+    function renderProfitBars(price) {
+        const series = compareSeries();
+        for (const [valueId, ratioId, key] of PROFIT_BAR_METRICS) {
+            const metric = document.getElementById(valueId)?.closest('.metric');
+            const stack = metric?.querySelector('.profit-bar-stack');
+            const current = series[0] ? series[0][key] : null;
+            setProfitBarRatio(ratioId, Number.isFinite(current) && Number.isFinite(price) && price > 0 ? current / price : null);
+            if (!stack) continue;
+            if (!series.length) { stack.innerHTML = ''; continue; }
+            const values = series.map(item => Number.isFinite(item[key]) ? item[key] : null);
+            const positives = values.filter(value => value !== null && value > 0);
+            const scale = positives.length ? Math.max(...positives) : 0;
+            const base = values[0];
+            const kind = key === 'margin' ? 'percent' : 'money';
+            stack.innerHTML = series.map((item, index) => {
+                const value = values[index];
+                const width = value !== null && value > 0 && scale > 0 ? Math.max(1, value / scale * 100) : 0;
+                const negative = value !== null && value < 0;
+                const text = value === null ? '-' : formatCompareValue(value, item, kind);
+                const label = index === 0 ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
+                const delta = index === 0 || base === null || value === null || !Number.isFinite(base) || base === 0
+                    ? ''
+                    : ` <em class="profit-compare-delta${value / base >= 1 ? ' is-up' : ' is-down'}">${((value / Math.abs(base) - 1) * 100).toFixed(0)}%</em>`;
+                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}"><i style="width:${width.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${projectEscapeHtml(text)}${delta}</b></span>`;
+            }).join('');
+        }
+    }
+
+    function toggleCompareProject(name) {
+        const index = COMPARE_SELECTION.indexOf(name);
+        if (index >= 0) COMPARE_SELECTION.splice(index, 1);
+        else {
+            if (COMPARE_SELECTION.length >= COMPARE_MAX_SERIES) { setProjectStatus(`对比最多 ${COMPARE_MAX_SERIES} 个产品`, 2500); return; }
+            COMPARE_SELECTION.push(name);
+        }
+        saveCompareSelection();
+        renderCompare();
+    }
+
+    function clearCompare() {
+        COMPARE_SELECTION = [];
+        saveCompareSelection();
+        renderCompare();
+    }
+
+    function sanitizeImportedProject(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        const name = String(raw.name || '').trim();
+        if (!name || !raw.fields || typeof raw.fields !== 'object') return null;
+        const fields = {};
+        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
+            if (!(id in raw.fields)) continue;
+            const value = raw.fields[id];
+            fields[id] = PROJECT_FIELD_TYPES[id] === 'checkbox' ? Boolean(value) : String(value ?? '');
+        }
+        if (!Object.keys(fields).length) return null;
+        const project = {
+            name,
+            savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : '',
+            fields,
+            result: (raw.result && typeof raw.result === 'object') ? raw.result : (raw.fields.result && typeof raw.fields.result === 'object' ? raw.fields.result : undefined),
+        };
+        // 变体配置不在 PROJECT_FIELD_TYPES 里，需要单独保留
+        if (typeof raw.fields._variants === 'string') {
+            project.fields._variants = raw.fields._variants;
+            project.fields._variantsEnabled = Boolean(raw.fields._variantsEnabled);
+            project.fields._variantsSameSpec = raw.fields._variantsSameSpec !== false;
+        }
+        return project;
+    }
+
+    function exportProjects() {
+        if (!PROJECTS.length) { setProjectStatus('⚠️ 还没有可导出的产品', 3000); return; }
+        const payload = { app: 'LT-TOOL', kind: 'projects', version: 1, exportedAt: new Date().toISOString(), projects: PROJECTS };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `LT-TOOL-产品-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        setProjectStatus(`✅ 已导出 ${PROJECTS.length} 个产品`);
+    }
+
+    function importProjects(input) {
+        const file = input?.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            let payload = null;
+            try { payload = JSON.parse(String(reader.result)); } catch (error) {
+                setProjectStatus('⚠️ 导入失败：文件不是有效 JSON', 4000);
+                input.value = '';
+                return;
+            }
+            const list = Array.isArray(payload) ? payload : Array.isArray(payload?.projects) ? payload.projects : null;
+            if (!list) { setProjectStatus('⚠️ 导入失败：未找到产品列表', 4000); input.value = ''; return; }
+            const imported = list.map(sanitizeImportedProject).filter(Boolean);
+            if (!imported.length) { setProjectStatus('⚠️ 导入失败：没有可识别的产品数据', 4000); input.value = ''; return; }
+            let added = 0;
+            let updated = 0;
+            for (const project of imported) {
+                const idx = PROJECTS.findIndex(p => p.name === project.name);
+                if (idx >= 0) { PROJECTS[idx] = project; updated += 1; }
+                else { PROJECTS.push(project); added += 1; }
+                COMPARE_RECOMPUTE_CACHE.delete(project.name);
+            }
+            saveProjectsToStorage();
+            renderProjectSelect();
+            setProjectStatus(`✅ 已导入：新增 ${added} 个，覆盖 ${updated} 个`, 4000);
+            renderCompare();
+            input.value = '';
+        };
+        reader.onerror = () => { setProjectStatus('⚠️ 导入失败：无法读取文件', 4000); input.value = ''; };
+        reader.readAsText(file);
+    }
+
+    function saveCompareSelection() {
+        try { localStorage.setItem(COMPARE_KEY, JSON.stringify(COMPARE_SELECTION)); } catch (error) { /* 隐私模式等场景忽略 */ }
+    }
+
+    function exportCompareCsv() {
+        const series = compareSeries();
+        if (series.length < 2) { setProjectStatus('请至少选择一个对比产品后再导出', 2500); return; }
+        const rows = [['产品', '站点', '币种', '数据来源', ...COMPARE_METRICS.map(m => m.label)]];
+        for (const item of series) {
+            rows.push([item.name, item.market, item.currency, item.source === 'recomputed' ? '重算' : item.source === 'snapshot' ? '快照' : '实时', ...COMPARE_METRICS.map(m => {
+                const value = item[m.key];
+                return Number.isFinite(value) ? (m.kind === 'percent' ? (value * 100).toFixed(2) + '%' : value.toFixed(2)) : '';
+            })]);
+        }
+        const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `LT-TOOL-结果对比-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        setProjectStatus('已导出对比 CSV');
+    }
+
+    function initCompare() {
+        COMPARE_SELECTION = [];
+        try {
+            const stored = JSON.parse(localStorage.getItem(COMPARE_KEY) || '[]');
+            if (Array.isArray(stored)) COMPARE_SELECTION = stored.slice(0, COMPARE_MAX_SERIES);
+        } catch (error) { COMPARE_SELECTION = []; }
+        COMPARE_SELECTION = COMPARE_SELECTION.filter(name => PROJECTS.some(p => p.name === name));
+        renderCompare();
     }
 
     function currentTheme() {
@@ -2973,6 +3544,8 @@
             setCargoText('fbaShippingWeightValue', '-');
             setCargoText('fbaTierValue', '-');
             setCargoText('fbaFeeValue', '-');
+            setCargoText('fbaFeeCnyValue', '');
+            setCargoText('fbaFeeMetaValue', '填写包装尺寸与实重后显示');
             setCargoText('cargoStorageRegularValue', '-');
             setCargoText('cargoStoragePeakValue', '-');
             syncCargoStorageRows();
@@ -2990,14 +3563,24 @@
             setCargoText('fbaShippingWeightValue', fmtNumber(metricWeight ? fba.shippingWeightKg : fba.shippingWeightLb));
             setCargoText('fbaTierValue', fba.tier);
             const marketCurrency = currentMarket().currency;
-            const feeText = fba.fee === null
-                ? '待手动配置'
-                : fba.market === 'JP'
-                    ? '日本站 · ' + fba.tier + '：JPY ' + fba.fee.toFixed(2)
-                    : fba.market === 'EU' || fba.market === 'UK'
-                        ? `${fba.tier} · ${fba.category === 'apparel' ? '服装类费率' : fba.category === 'hazmat' ? '危险品费率' : fba.priceBand === 'lowprice' ? '低价 FBA' : '标准 FBA'}：${marketCurrency} ${fba.fee.toFixed(2)}${fba.fuelSurcharge > 0 ? `（含 ${fba.fuelPct}% 燃油附加费 ${marketCurrency} ${fba.fuelSurcharge.toFixed(2)}）` : ''}${fba.peakShipping ? `（旺季 +${marketCurrency} ${fba.peakSurcharge.toFixed(2)}）` : ''}${fba.hazmatSurcharge > 0 ? `（危险品 +${marketCurrency} ${fba.hazmatSurcharge.toFixed(2)}）` : ''}`
-                        : (CATEGORY_LABELS[fba.category] || fba.category) + ' · ' + (PRICE_BAND_LABELS[fba.priceBand] || fba.priceBand) + '：' + marketCurrency + ' ' + fba.fee.toFixed(2) + (fba.fuelSurcharge > 0 ? `（含 ${fba.fuelPct || 3.5}% 燃油附加费 ${marketCurrency} ${fba.fuelSurcharge.toFixed(2)}）` : '') + (fba.peakShipping ? `（旺季 +${marketCurrency} ${fba.peakSurcharge.toFixed(2)}）` : '');
-            setCargoText('fbaFeeValue', feeText);
+            const heroFx = Math.max(0, Number(document.getElementById('profitFx')?.value) || 0);
+            if (fba.fee === null) {
+                setCargoText('fbaFeeValue', '待手动配置');
+                setCargoText('fbaFeeCnyValue', '');
+                setCargoText('fbaFeeMetaValue', fba.tier + ' · 该站点暂不自动估算，请在利润测算中按 Seller Central 实际费用填写。');
+            } else {
+                setCargoText('fbaFeeValue', marketCurrency + ' ' + fba.fee.toFixed(2));
+                setCargoText('fbaFeeCnyValue', heroFx > 0 ? '≈ ¥ ' + (fba.fee * heroFx).toFixed(2) : '');
+                const metaParts = [fba.tier];
+                const categoryLabel = CATEGORY_LABELS[fba.category] || fba.category;
+                if (categoryLabel) metaParts.push(categoryLabel);
+                const bandLabel = PRICE_BAND_LABELS[fba.priceBand] || fba.priceBand;
+                if (bandLabel) metaParts.push(bandLabel);
+                if (fba.fuelSurcharge > 0) metaParts.push(`含 ${fba.fuelPct || 3.5}% 燃油附加费 ${marketCurrency} ${fba.fuelSurcharge.toFixed(2)}`);
+                if (fba.peakShipping) metaParts.push(`旺季 +${marketCurrency} ${fba.peakSurcharge.toFixed(2)}`);
+                if (fba.hazmatSurcharge > 0) metaParts.push(`危险品 +${marketCurrency} ${fba.hazmatSurcharge.toFixed(2)}`);
+                setCargoText('fbaFeeMetaValue', metaParts.join(' · '));
+            }
             if (fba.market === 'JP') {
                 setFbaRuleSummary(`<div class="fba-basis-heading">Amazon 日本站 2026</div><div>按包装三边和、重量及售价是否不超过 JPY 1,000 自动匹配。</div>`);
                 setFbaTrigger(fba.fee === null ? '超出日本站内置尺寸或重量范围，请以 Seller Central 为准。' : `已匹配日本站 ${fba.tier}；配送费含 10% 消费税。`, fba.fee !== null);
@@ -3085,47 +3668,49 @@
     }
 
     const PROFIT_BAR_METRICS = Object.freeze([
-        ['profitPurchaseValue', 'profitPurchaseRatio', 'profitPurchaseBar'],
-        ['profitFreightValue', 'profitFreightRatio', 'profitFreightBar'],
-        ['profitFbaValue', 'profitFbaRatio', 'profitFbaBar'],
-        ['profitStorageValue', 'profitStorageRatio', 'profitStorageBar'],
-        ['profitAdValue', 'profitAdRatio', 'profitAdBar'],
-        ['profitTotalCostValue', 'profitTotalCostRatio', 'profitTotalCostBar'],
-        ['profitValue', 'profitProfitRatio', 'profitProfitBar'],
-        ['profitMarginValue', 'profitMarginRatio', 'profitMarginBar'],
+        ['profitPurchaseValue', 'profitPurchaseRatio', 'purchase'],
+        ['profitFreightValue', 'profitFreightRatio', 'freight'],
+        ['profitFbaValue', 'profitFbaRatio', 'fba'],
+        ['profitStorageValue', 'profitStorageRatio', 'storage'],
+        ['profitAdValue', 'profitAdRatio', 'ad'],
+        ['profitReferralValue', 'profitReferralRatio', 'referral'],
+        ['profitPlacementValue', 'profitPlacementRatio', 'placement'],
+        ['profitPromoValue', 'profitPromoRatio', 'promo'],
+        ['profitReturnValue', 'profitReturnRatio', 'returns'],
+        ['profitTotalCostValue', 'profitTotalCostRatio', 'totalCost'],
+        ['profitValue', 'profitProfitRatio', 'profit'],
+        ['profitMarginValue', 'profitMarginRatio', 'margin'],
     ]);
 
     function initProfitResultBars() {
-        for (const [valueId, ratioId, barId] of PROFIT_BAR_METRICS) {
+        for (const [valueId, ratioId] of PROFIT_BAR_METRICS) {
             const metric = document.getElementById(valueId)?.closest('.metric');
             const action = metric?.querySelector('.metric-action');
-            if (!metric || !action || document.getElementById(barId)) continue;
-            const track = document.createElement('span');
-            track.className = 'profit-bar-track';
-            track.setAttribute('aria-hidden', 'true');
-            const fill = document.createElement('i');
-            fill.id = barId;
-            track.appendChild(fill);
-            const ratio = document.createElement('strong');
-            ratio.className = 'profit-bar-ratio';
-            ratio.id = ratioId;
-            ratio.textContent = '-';
-            metric.insertBefore(track, action);
-            metric.insertBefore(ratio, action);
+            if (!metric || !action) continue;
+            if (!metric.querySelector('.profit-bar-stack')) {
+                const stack = document.createElement('span');
+                stack.className = 'profit-bar-stack';
+                stack.setAttribute('aria-hidden', 'true');
+                metric.insertBefore(stack, action);
+            }
+            if (!metric.querySelector('.profit-bar-ratio')) {
+                const ratio = document.createElement('strong');
+                ratio.className = 'profit-bar-ratio';
+                ratio.id = ratioId;
+                ratio.textContent = '-';
+                metric.insertBefore(ratio, action);
+            }
         }
     }
 
-    function setProfitBarRatio(ratioId, barId, ratio) {
+    function setProfitBarRatio(ratioId, ratio) {
         const ratioEl = document.getElementById(ratioId);
-        const barEl = document.getElementById(barId);
         const valid = Number.isFinite(ratio);
         if (ratioEl) ratioEl.textContent = valid ? `${(ratio * 100).toFixed(1)}%` : '-';
-        if (barEl) barEl.style.width = valid ? `${Math.max(0, Math.min(100, ratio * 100)).toFixed(1)}%` : '0%';
     }
 
-    function setProfitBarMetric(ratioId, barId, value, price) {
-        const ratio = Number.isFinite(value) && Number.isFinite(price) && price > 0 ? value / price : null;
-        setProfitBarRatio(ratioId, barId, ratio);
+    function setProfitBarMetric(ratioId, value, price) {
+        setProfitBarRatio(ratioId, Number.isFinite(value) && Number.isFinite(price) && price > 0 ? value / price : null);
     }
 
     function percent(value) {
@@ -3422,7 +4007,7 @@
         if (!startMonth || !rows) return;
         startMonth.innerHTML = Array.from({ length: 12 }, (_, index) => `<option value="${index + 1}">${index + 1}月</option>`).join('');
         startMonth.value = String(new Date().getMonth() + 1);
-        rows.innerHTML = Array.from({ length: US_FBA_STORAGE_2026.forecastMonths }, (_, index) => `<tr id="storageForecastRow${index}"><td class="storage-month" id="storageMonthLabel${index}">-</td><td><input id="storageSales${index}" type="number" min="0" step="1" placeholder="销量" oninput="updateStorageForecast()"></td><td><input id="storageRestock${index}" type="number" min="0" step="1" placeholder="补货" oninput="updateStorageForecast()"></td><td id="storageAverage${index}">-</td><td id="storageWeeks${index}">-</td><td class="storage-cost" id="storageCost${index}">-</td><td class="storage-status" id="storageStatus${index}">-</td></tr>`).join('');
+        rows.innerHTML = Array.from({ length: US_FBA_STORAGE_2026.forecastMonths }, (_, index) => `<tr id="storageForecastRow${index}"><td class="storage-month" id="storageMonthLabel${index}">-</td><td><input id="storageSales${index}" type="number" min="0" step="1" placeholder="销量" oninput="updateStorageForecast()"></td><td><input id="storageRestock${index}" type="number" min="0" step="1" placeholder="补货" oninput="updateStorageForecast()"></td><td class="storage-advice" id="storageAdvice${index}">-</td><td class="storage-order" id="storageOrder${index}">-</td><td id="storageAverage${index}">-</td><td id="storageWeeks${index}">-</td><td class="storage-cost" id="storageCost${index}">-</td><td class="storage-safety" id="storageSafety${index}">-</td><td class="storage-status" id="storageStatus${index}">-</td></tr>`).join('');
         updateStorageForecastLabels();
     }
 
@@ -3484,21 +4069,45 @@
     }
 
     function renderStorageReplenishment(forecast) {
-        const rows = document.getElementById('storageReplenishmentRows');
-        if (!rows || !forecast) return;
+        if (!forecast) return;
         const recommendation = calculateUsFbaReplenishmentPlan({
             openingUnits: inputNumber('storageOpeningUnits'),
             plan: forecast.rows.map(row => ({ sales: row.plannedSales })),
             leadTimeMonths: inputNumber('storageLeadTimeMonths', 1),
             safetyStockRatio: inputNumber('storageSafetyStockRatio', 0.5)
         });
-        rows.innerHTML = recommendation.rows.map(row => {
-            const month = storageMonthLabel(storageMonthNumber(inputNumber('storageStartMonth', new Date().getMonth() + 1), row.index));
-            const order = row.recommendedArrivalUnits <= 0 ? '-' : row.needsImmediateArrangement
-                ? '立即安排/已有在途'
-                : `第${row.orderMonthIndex + 1}月`;
-            return `<tr><td>${month}</td><td>${row.recommendedArrivalUnits > 0 ? `${fmtNumber(row.recommendedArrivalUnits)}件` : '-'}</td><td>${order}</td><td>${row.safetyStockUnits > 0 ? `${fmtNumber(row.safetyStockUnits)}件` : '-'}</td></tr>`;
-        }).join('');
+        const setCell = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+        recommendation.rows.forEach(row => {
+            const units = row.recommendedArrivalUnits;
+            const adviceHtml = units > 0
+                ? `<span class="storage-advice-units">${fmtNumber(units)}件</span><button class="storage-adopt-button" type="button" data-row-index="${row.index}" onclick="adoptStorageAdvice(${row.index})" aria-label="采纳第 ${row.index + 1} 月的建议到仓量">采纳</button>`
+                : '-';
+            const orderText = units <= 0 ? '-' : row.needsImmediateArrangement ? '立即安排/已有在途' : `第${row.orderMonthIndex + 1}月`;
+            setCell(`storageAdvice${row.index}`, adviceHtml);
+            setCell(`storageOrder${row.index}`, orderText);
+            setCell(`storageSafety${row.index}`, row.safetyStockUnits > 0 ? `${fmtNumber(row.safetyStockUnits)}件` : '-');
+        });
+    }
+
+    function adoptStorageAdvice(index) {
+        const rows = recommendRowsFromForecast();
+        const target = rows.find(row => row.index === index);
+        if (!target || target.recommendedArrivalUnits <= 0) return;
+        const restockEl = document.getElementById(`storageRestock${index}`);
+        if (!restockEl) return;
+        restockEl.value = String(Math.round(target.recommendedArrivalUnits));
+        updateStorageForecast();
+        setStorageForecastStatus(`已将第 ${index + 1} 月的建议到仓 ${fmtNumber(target.recommendedArrivalUnits)} 件写入该月补货。`);
+    }
+
+    function recommendRowsFromForecast() {
+        const recommendation = calculateUsFbaReplenishmentPlan({
+            openingUnits: inputNumber('storageOpeningUnits'),
+            plan: storageForecastPlanFromPage().map(entry => ({ sales: entry.sales })),
+            leadTimeMonths: inputNumber('storageLeadTimeMonths', 1),
+            safetyStockRatio: inputNumber('storageSafetyStockRatio', 0.5)
+        });
+        return recommendation.rows;
     }
 
     function updateStorageForecast() {
@@ -3513,6 +4122,39 @@
         const expanded = panel.open;
         button.textContent = expanded ? '收起明细' : '展开明细';
         button.setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleFeeConfigPanel(event) {
+        if (event) { event.preventDefault(); event.stopPropagation(); }
+        const panel = document.getElementById('feeConfigPanel');
+        if (!panel || panel.hidden) return;
+        panel.open = !panel.open;
+        updateFeeConfigToggle();
+        if (panel.open && typeof panel.scrollIntoView === 'function') panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateFeeConfigToggle() {
+        const panel = document.getElementById('feeConfigPanel');
+        const storagePanel = document.getElementById('storageForecastPanel');
+        const button = document.getElementById('feeConfigToggleButton');
+        const fallback = document.getElementById('feeConfigFallbackButton');
+        if (!panel) return;
+        const country = document.getElementById('marketCountry')?.value || 'US';
+        const panelSupported = country === 'US' || country === 'CA';
+        // 仓储明细面板只在 US/JP 显示；加拿大站等场景用标题栏的备用入口，避免费率设置不可达
+        const storageVisible = !storagePanel?.hidden && country !== 'CA';
+        if (button) {
+            const useHeadingButton = panelSupported && storageVisible;
+            button.hidden = !useHeadingButton;
+            button.textContent = panel.open ? '收起费率' : '费率设置';
+            button.setAttribute('aria-expanded', String(panel.open));
+        }
+        if (fallback) {
+            const useFallback = panelSupported && !storageVisible;
+            fallback.hidden = !useFallback;
+            fallback.textContent = panel.open ? '收起费率设置' : '费率设置';
+            fallback.setAttribute('aria-expanded', String(panel.open));
+        }
     }
 
     function toggleStorageForecast(event) {
@@ -3570,6 +4212,31 @@
         setStorageForecastStatus(`已将 ${changed} 批量填充到前 ${months} 个月；其余月份未修改，起始月、库存和历史销量未修改。`);
     }
 
+    function syncSalesFromMonthlyUnits() {
+        const monthlyUnits = Math.max(0, Math.round(inputNumber('adMonthlyUnits')));
+        const monthsEl = document.getElementById('storageBatchMonths');
+        const months = storageBatchMonthCount();
+        if (!Number.isFinite(months)) {
+            setStorageForecastStatus('填充月数必须是 1–12 的整数。');
+            return;
+        }
+        if (monthlyUnits <= 0) {
+            setStorageForecastStatus('请先在广告费换算模块填写月销量，再同步到计划表。');
+            const target = document.getElementById('adMonthlyUnits');
+            if (target) target.focus();
+            return;
+        }
+        for (let index = 0; index < months; index += 1) {
+            const sales = document.getElementById(`storageSales${index}`);
+            if (sales) sales.value = String(monthlyUnits);
+        }
+        if (monthsEl) monthsEl.value = String(months);
+        const batchSales = document.getElementById('storageBatchSales');
+        if (batchSales) batchSales.value = String(monthlyUnits);
+        updateStorageForecast();
+        setStorageForecastStatus(`已把月销量 ${fmtNumber(monthlyUnits)} 件/月写入前 ${months} 个月的计划销量；补货、起始月、库存和历史销量未修改。`);
+    }
+
     function clearStorageForecast() {
         for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
             const sales = document.getElementById(`storageSales${index}`);
@@ -3585,6 +4252,34 @@
         if (batchMonths) batchMonths.value = '';
         updateStorageForecast();
         setStorageForecastStatus('已清空 12 个月的计划销量、补货和批量填写框；起始月、库存和历史销量未修改。');
+    }
+
+    let LAST_PROFIT_RESULT = null;
+    let LAST_PROFIT_CONTEXT = null;
+    let compareBusy = false;
+
+    function buildProfitSnapshot(result, price, fx) {
+        const market = currentMarket();
+        return {
+            market: document.getElementById('marketCountry')?.value || 'US',
+            currency: market.currency,
+            fx: Number.isFinite(fx) && fx > 0 ? fx : Number(market.fx) || 0,
+            price: Number.isFinite(price) ? price : 0,
+            monthlyUnits: Math.max(0, inputNumber('adMonthlyUnits')),
+            purchase: result.purchase, freight: result.freight, referral: result.referral,
+            fba: result.fba, placement: result.placement, storage: result.storage, ad: result.ad,
+            promo: result.promo, returns: result.returns, totalCost: result.totalCost,
+            profit: result.profit, margin: result.margin, breakEvenAcos: result.breakEvenAcos,
+            maxCpc: result.maxCpc, maxPurchaseRmb: result.maxPurchaseRmb,
+        };
+    }
+
+    function rememberProfitResult(result, price, fx) {
+        LAST_PROFIT_RESULT = result;
+        LAST_PROFIT_CONTEXT = { price, fx };
+        if (compareBusy) return;
+        updateCompareDropdown();
+        renderProfitBars(price);
     }
 
     function calculateProfitMetrics(values) {
@@ -3620,17 +4315,77 @@
         return { purchase, freight, referral, fba, volumeFt3, storage, ad, promo, returns, placement, totalCost, profit, margin: price > 0 && profit !== null ? profit / price : null, breakEvenAcos, maxCpc: breakEvenAcos !== null ? price * breakEvenAcos * cvr : null, maxPurchaseRmb };
     }
 
+    let posDrivenOrders = false;
+    let posManualEditing = false;
+    let ordersManuallyEdited = false;
+
+    function markOrdersEdited() {
+        ordersManuallyEdited = true;
+    }
+
+    function markPosEditing(active) {
+        posManualEditing = Boolean(active);
+    }
+
+    // 有月点击量时，按 CVR 自动推算广告订单量（用户手动填过广告订单量后不再覆盖）
+    function autoFillOrdersFromClicks(clicks, cvr) {
+        if (ordersManuallyEdited) return false;
+        const ordersEl = document.getElementById('adOrders');
+        if (!ordersEl) return false;
+        if (String(ordersEl.value).trim() !== '') return false;
+        const clickCount = Number(clicks) > 0 ? Number(clicks) : 0;
+        const rate = Math.max(0, Number(cvr) || 0) / 100;
+        if (clickCount <= 0 || rate <= 0) return false;
+        ordersEl.value = String(Math.round(clickCount * rate));
+        return true;
+    }
+
+    function syncPosInput() {
+        const posEl = document.getElementById('adPosInput');
+        if (!posEl) return;
+        const monthlyUnits = inputNumber('adMonthlyUnits');
+        if (monthlyUnits <= 0) {
+            posEl.value = '';
+            posEl.disabled = true;
+            posEl.placeholder = '先填月销量';
+            return;
+        }
+        posEl.disabled = false;
+        posEl.placeholder = '反推订单量';
+        const ordersEl = document.getElementById('adOrders');
+        const editing = posManualEditing || document.activeElement === posEl;
+        if (editing) {
+            posDrivenOrders = true;
+            const raw = String(posEl.value).trim();
+            if (raw === '' || !ordersEl) return;
+            const entered = Number(raw);
+            if (!Number.isFinite(entered)) return;
+            const clamped = Math.min(100, Math.max(0, entered));
+            ordersEl.value = String(Math.round(clamped / 100 * monthlyUnits));
+            return;
+        }
+        if (ordersEl && String(ordersEl.value).trim() !== '') {
+            posEl.value = (inputNumber('adOrders') / monthlyUnits * 100).toFixed(2);
+        } else {
+            posEl.value = '';
+        }
+    }
+
     function updateAdCalculator() {
+        posDrivenOrders = false;
         const clicks = inputNumber('adClicks');
+        const posEl = document.getElementById('adPosInput');
+        const editingPos = posManualEditing || document.activeElement === posEl;
+        if (!editingPos) autoFillOrdersFromClicks(clicks, inputNumber('adCvr'));
+        syncPosInput();
         const monthlyUnits = inputNumber('adMonthlyUnits');
         const orders = inputNumber('adOrders');
-        if (clicks > 0 && orders >= 0 && inputNumber('adCvr') <= 0 && document.activeElement?.id !== 'adCvr') document.getElementById('adCvr').value = (Math.min(1, orders / clicks) * 100).toFixed(2);
+        if (clicks > 0 && orders >= 0 && inputNumber('adCvr') <= 0 && document.activeElement?.id !== 'adCvr' && !posDrivenOrders) document.getElementById('adCvr').value = (Math.min(1, orders / clicks) * 100).toFixed(2);
         const ad = calculateAdMetrics({
             cpc: inputNumber('adCpc'), clicks, orders, cvr: inputNumber('adCvr'), monthlyUnits,
             price: inputNumber('adPrice'),
         });
         document.getElementById('adCpaValue').textContent = money(ad.cpa);
-        document.getElementById('adPosMetricValue').textContent = monthlyUnits > 0 ? percent(ad.pos) : '-';
         document.getElementById('adAcosValue').textContent = percent(ad.acos);
         document.getElementById('adAcoasValue').textContent = percent(ad.acoas);
         document.getElementById('adRoasValue').textContent = ad.roas === null ? '-' : ad.roas.toFixed(2) + 'x';
@@ -3729,6 +4484,10 @@
         setProfitMoneyMetric('profitFbaValue', 'profitFbaCnyValue', autoFeesSupported ? result.fba : null, fx);
         setProfitMoneyMetric('profitStorageValue', 'profitStorageCnyValue', result.storage, fx);
         setProfitMoneyMetric('profitAdValue', 'profitAdCnyValue', result.ad, fx);
+        setProfitMoneyMetric('profitReferralValue', 'profitReferralCnyValue', result.referral, fx);
+        setProfitMoneyMetric('profitPlacementValue', 'profitPlacementCnyValue', result.placement, fx);
+        setProfitMoneyMetric('profitPromoValue', 'profitPromoCnyValue', result.promo, fx);
+        setProfitMoneyMetric('profitReturnValue', 'profitReturnCnyValue', result.returns, fx);
         setProfitMoneyMetric('profitTotalCostValue', 'profitTotalCostCnyValue', result.totalCost, fx);
         setProfitMoneyMetric('profitValue', 'profitCnyValue', result.profit, fx);
         setProfitTotalMetric('profitPurchaseTotalValue', result.purchase, fx, monthlyUnits);
@@ -3737,21 +4496,19 @@
         else document.getElementById('profitFbaTotalValue').textContent = '该站点暂不估算';
         setProfitTotalMetric('profitStorageTotalValue', result.storage, fx, monthlyUnits);
         setProfitTotalMetric('profitAdTotalValue', result.ad, fx, monthlyUnits);
+        setProfitTotalMetric('profitReferralTotalValue', result.referral, fx, monthlyUnits);
+        setProfitTotalMetric('profitPlacementTotalValue', result.placement, fx, monthlyUnits);
+        setProfitTotalMetric('profitPromoTotalValue', result.promo, fx, monthlyUnits);
+        setProfitTotalMetric('profitReturnTotalValue', result.returns, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalCostTotalValue', result.totalCost, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalValue', result.profit, fx, monthlyUnits, '总利润');
         document.getElementById('profitMarginValue').textContent = percent(result.margin);
-        setProfitBarMetric('profitPurchaseRatio', 'profitPurchaseBar', result.purchase, profitPrice);
-        setProfitBarMetric('profitFreightRatio', 'profitFreightBar', result.freight, profitPrice);
-        setProfitBarMetric('profitFbaRatio', 'profitFbaBar', autoFeesSupported ? result.fba : null, profitPrice);
-        setProfitBarMetric('profitStorageRatio', 'profitStorageBar', result.storage, profitPrice);
-        setProfitBarMetric('profitAdRatio', 'profitAdBar', result.ad, profitPrice);
-        setProfitBarMetric('profitTotalCostRatio', 'profitTotalCostBar', result.totalCost, profitPrice);
-        setProfitBarMetric('profitProfitRatio', 'profitProfitBar', result.profit, profitPrice);
-        setProfitBarRatio('profitMarginRatio', 'profitMarginBar', result.margin);
+        renderProfitBars(profitPrice);
         document.getElementById('profitBreakEvenAcosValue').textContent = percent(result.breakEvenAcos);
         setProfitMoneyMetric('profitMaxCpcValue', 'profitMaxCpcCnyValue', result.maxCpc, fx);
         setProfitMoneyMetric('profitMaxPurchaseValue', 'profitMaxPurchaseCnyValue', result.maxPurchaseRmb === null ? null : result.maxPurchaseRmb / fx, fx);
         document.getElementById('profitMetric').classList.toggle('negative', result.profit < 0);
+        rememberProfitResult(result, profitPrice, fx);
         const variantBlock = document.getElementById('profitVariantBlock');
         if (variantBlock) variantBlock.style.display = 'none';
     }
@@ -3815,6 +4572,9 @@
         const weightedFreight = items.reduce((sum, it) => sum + it.r.freight * it.share, 0);
         const weightedReferral = items.reduce((sum, it) => sum + it.r.referral * it.share, 0);
         const weightedAd = items.reduce((sum, it) => sum + it.r.ad * it.share, 0);
+        const weightedPlacement = items.reduce((sum, it) => sum + it.r.placement * it.share, 0);
+        const weightedPromo = items.reduce((sum, it) => sum + it.r.promo * it.share, 0);
+        const weightedReturns = items.reduce((sum, it) => sum + it.r.returns * it.share, 0);
         const weightedPurchase = items.reduce((sum, it) => sum + it.r.purchase * it.share, 0);
         const weightedTotalCost = items.reduce((sum, it) => sum + it.r.totalCost * it.share, 0);
         const weightedProfit = items.reduce((sum, it) => sum + it.r.profit * it.share, 0);
@@ -3834,6 +4594,10 @@
         setProfitMoneyMetric('profitFbaValue', 'profitFbaCnyValue', autoFeesSupported ? weightedFba : null, fx);
         setProfitMoneyMetric('profitStorageValue', 'profitStorageCnyValue', weightedStorage, fx);
         setProfitMoneyMetric('profitAdValue', 'profitAdCnyValue', weightedAd, fx);
+        setProfitMoneyMetric('profitReferralValue', 'profitReferralCnyValue', weightedReferral, fx);
+        setProfitMoneyMetric('profitPlacementValue', 'profitPlacementCnyValue', weightedPlacement, fx);
+        setProfitMoneyMetric('profitPromoValue', 'profitPromoCnyValue', weightedPromo, fx);
+        setProfitMoneyMetric('profitReturnValue', 'profitReturnCnyValue', weightedReturns, fx);
         setProfitMoneyMetric('profitTotalCostValue', 'profitTotalCostCnyValue', weightedTotalCost, fx);
         setProfitMoneyMetric('profitValue', 'profitCnyValue', weightedProfit, fx);
         setProfitTotalMetric('profitPurchaseTotalValue', weightedPurchase, fx, monthlyUnits);
@@ -3842,21 +4606,19 @@
         else document.getElementById('profitFbaTotalValue').textContent = '该站点暂不估算';
         setProfitTotalMetric('profitStorageTotalValue', weightedStorage, fx, monthlyUnits);
         setProfitTotalMetric('profitAdTotalValue', weightedAd, fx, monthlyUnits);
+        setProfitTotalMetric('profitReferralTotalValue', weightedReferral, fx, monthlyUnits);
+        setProfitTotalMetric('profitPlacementTotalValue', weightedPlacement, fx, monthlyUnits);
+        setProfitTotalMetric('profitPromoTotalValue', weightedPromo, fx, monthlyUnits);
+        setProfitTotalMetric('profitReturnTotalValue', weightedReturns, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalCostTotalValue', weightedTotalCost, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalValue', weightedProfit, fx, monthlyUnits, '总利润');
         document.getElementById('profitMarginValue').textContent = percent(weightedMargin);
-        setProfitBarMetric('profitPurchaseRatio', 'profitPurchaseBar', weightedPurchase, weightedPrice);
-        setProfitBarMetric('profitFreightRatio', 'profitFreightBar', weightedFreight, weightedPrice);
-        setProfitBarMetric('profitFbaRatio', 'profitFbaBar', autoFeesSupported ? weightedFba : null, weightedPrice);
-        setProfitBarMetric('profitStorageRatio', 'profitStorageBar', weightedStorage, weightedPrice);
-        setProfitBarMetric('profitAdRatio', 'profitAdBar', weightedAd, weightedPrice);
-        setProfitBarMetric('profitTotalCostRatio', 'profitTotalCostBar', weightedTotalCost, weightedPrice);
-        setProfitBarMetric('profitProfitRatio', 'profitProfitBar', weightedProfit, weightedPrice);
-        setProfitBarRatio('profitMarginRatio', 'profitMarginBar', weightedMargin);
+        renderProfitBars(weightedPrice);
         document.getElementById('profitBreakEvenAcosValue').textContent = percent(weightedBreakEven);
         setProfitMoneyMetric('profitMaxCpcValue', 'profitMaxCpcCnyValue', weightedMaxCpc, fx);
         setProfitMoneyMetric('profitMaxPurchaseValue', 'profitMaxPurchaseCnyValue', weightedMaxPurchaseRmb === null ? null : weightedMaxPurchaseRmb / fx, fx);
         document.getElementById('profitMetric').classList.toggle('negative', weightedProfit < 0);
+        rememberProfitResult({ purchase: weightedPurchase, freight: weightedFreight, referral: weightedReferral, fba: weightedFba, placement: weightedPlacement, storage: weightedStorage, ad: weightedAd, promo: weightedPromo, returns: weightedReturns, totalCost: weightedTotalCost, profit: weightedProfit, margin: weightedMargin, breakEvenAcos: weightedBreakEven, maxCpc: weightedMaxCpc, maxPurchaseRmb: weightedMaxPurchaseRmb }, weightedPrice, fx);
         // 明细表
         if (!block || !rows) return;
         block.style.display = '';
@@ -3908,7 +4670,7 @@
         document.getElementById('legacyStorageRateField').hidden = usesAutoStorage;
         document.getElementById('legacyStorageMonthsField').hidden = supportsDetailedStorage;
         const feeConfigPanel = document.getElementById('feeConfigPanel');
-        if (feeConfigPanel) feeConfigPanel.hidden = !(isUs || selectedCountry === 'CA');
+        if (feeConfigPanel) { feeConfigPanel.hidden = !(isUs || selectedCountry === 'CA'); if (feeConfigPanel.hidden) feeConfigPanel.open = false; }
         const usHistory = document.getElementById('storageUsHistoryField');
         const usNewSeller = document.getElementById('storageUsNewSellerField');
         const jpFashion = document.getElementById('storageJpFashionField');
@@ -3962,6 +4724,7 @@
         updateCargoCheck();
         updateAdCalculator();
         updateProfitExchangeRate();
+        updateFeeConfigToggle();
     }
 
     async function updateProfitExchangeRate() {
@@ -4036,19 +4799,6 @@
         if (!Number.isFinite(value) || value < 0) return;
         targetEl.value = fmtNumber(sourceUnit === 'lb' ? value * 0.45359237 : value / 0.45359237);
         updateCargoCheck();
-    }
-
-    function insertDimensionSeparator(targetId) {
-        const field = document.getElementById(targetId);
-        if (!field) return;
-        const start = Number.isInteger(field.selectionStart) ? field.selectionStart : field.value.length;
-        const end = Number.isInteger(field.selectionEnd) ? field.selectionEnd : start;
-        if (start === field.value.length && end === start) field.value += '×';
-        else field.value = field.value.slice(0, start) + '×' + field.value.slice(end);
-        field.focus();
-        const cursor = start + 1;
-        if (typeof field.setSelectionRange === 'function') field.setSelectionRange(cursor, cursor);
-        field.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     function convertLengthValues() {
@@ -4378,6 +5128,9 @@
     updateAdCalculator();
     initFeeConfig();
     initProjects();
+    initDraft();
+    installDraftAutosave();
+    initCompare();
     fetchRates();
 </script>
 
