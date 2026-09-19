@@ -3196,6 +3196,33 @@
         updatePdfList();
         document.getElementById('status-pdf').innerText = '';
     };
+    let pdfLibPromise = null;
+    function loadPdfLib() {
+        if (window.PDFLib) return Promise.resolve(window.PDFLib);
+        if (pdfLibPromise) return pdfLibPromise;
+        const sources = [
+            'vendor/pdf-lib.min.js',
+            'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
+            'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js'
+        ];
+        pdfLibPromise = new Promise((resolve, reject) => {
+            let idx = 0;
+            const tryNext = () => {
+                if (idx >= sources.length) {
+                    pdfLibPromise = null;
+                    reject(new Error('PDF 核心库加载失败，请检查网络（页面需能访问 vendor/pdf-lib.min.js 或 CDN）'));
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = sources[idx++];
+                s.onload = () => window.PDFLib ? resolve(window.PDFLib) : tryNext();
+                s.onerror = tryNext;
+                document.head.appendChild(s);
+            };
+            tryNext();
+        });
+        return pdfLibPromise;
+    }
     async function processPdf() {
         if(pdfFiles.length === 0) {
             document.getElementById('status-pdf').innerText = '请先添加文件';
@@ -3203,6 +3230,7 @@
         }
         document.getElementById('status-pdf').innerText = '正在聚合...';
         try {
+            const PDFLib = await loadPdfLib();
             const { PDFDocument } = PDFLib;
             const mergedPdf = await PDFDocument.create();
             for (let file of pdfFiles) {
@@ -3211,10 +3239,14 @@
                     const pdf = await PDFDocument.load(arrayBuffer);
                     const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                     pages.forEach(p => mergedPdf.addPage(p));
-                } else {
-                    let img = file.type === 'image/png' ? await mergedPdf.embedPng(arrayBuffer) : await mergedPdf.embedJpg(arrayBuffer);
+                } else if (file.type === 'image/png' || file.type === 'image/jpeg') {
+                    const img = file.type === 'image/png'
+                        ? await mergedPdf.embedPng(arrayBuffer)
+                        : await mergedPdf.embedJpg(arrayBuffer);
                     const page = mergedPdf.addPage([img.width, img.height]);
                     page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                } else {
+                    throw new Error(`暂不支持的文件类型: ${file.name}（${file.type || '未知'}），仅支持 PDF / PNG / JPG`);
                 }
             }
             const bytes = await mergedPdf.save();
