@@ -2946,31 +2946,57 @@
         renderProfitBars(LAST_PROFIT_CONTEXT?.price ?? 0);
     }
 
-    // 对比直接落在「经营结果」每一行里：当前值一条，每个对比产品一条
+    // 对比直接落在「经营结果」每一行里：当前值一条，每个对比产品一条。
+    // 数据条统一以「占售价比例」为刻度（0~100%）：同一行内各项可横向比较，
+    // 各成本项条长之和 = 总成本条长，总成本 + 利润 = 100%。
+    // 早前的实现用「本行最大值」做刻度，单条数据时最大值恒等于自身，于是每条都是 100%。
     function renderProfitBars(price) {
         const series = compareSeries();
-        for (const [valueId, ratioId, key] of PROFIT_BAR_METRICS) {
+        const fallbackPrice = Number.isFinite(price) && price > 0 ? price : 0;
+        for (const [valueId, ratioId, key, mode] of PROFIT_BAR_METRICS) {
             const metric = document.getElementById(valueId)?.closest('.metric');
-            const stack = metric?.querySelector('.profit-bar-stack');
-            const current = series[0] ? series[0][key] : null;
-            setProfitBarRatio(ratioId, Number.isFinite(current) && Number.isFinite(price) && price > 0 ? current / price : null);
+            if (!metric) continue;
+            const stack = metric.querySelector('.profit-bar-stack');
+            const ratioEl = document.getElementById(ratioId);
+            const head = series[0] || null;
+            const basePrice = Number.isFinite(head?.price) && head.price > 0 ? head.price : fallbackPrice;
+
+            if (mode === 'none') {
+                // 利润率这类比率指标不是费用构成，占比条没有意义：只留空占位保持列宽
+                if (ratioEl) ratioEl.textContent = '';
+                if (stack) stack.innerHTML = '';
+                continue;
+            }
+
+            const current = head ? head[key] : null;
+            if (ratioEl) {
+                const share = profitShareOfPrice(current, basePrice);
+                ratioEl.textContent = share === null ? '-' : `${(share * 100).toFixed(1)}%`;
+            }
             if (!stack) continue;
             if (!series.length) { stack.innerHTML = ''; continue; }
             const values = series.map(item => Number.isFinite(item[key]) ? item[key] : null);
-            const positives = values.filter(value => value !== null && value > 0);
-            const scale = positives.length ? Math.max(...positives) : 0;
             const base = values[0];
             const kind = key === 'margin' ? 'percent' : 'money';
+            const higherIsBetter = key === 'profit'; // 其余都是成本项，越低越好
             stack.innerHTML = series.map((item, index) => {
                 const value = values[index];
-                const width = value !== null && value > 0 && scale > 0 ? Math.max(1, value / scale * 100) : 0;
-                const negative = value !== null && value < 0;
+                const itemPrice = Number.isFinite(item.price) && item.price > 0 ? item.price : basePrice;
+                const share = profitShareOfPrice(value, itemPrice);
+                // 亏损时按亏损幅度画红条；总成本可能因退货超过售价，钳到 100% 防止溢出
+                const width = share === null ? 0 : Math.min(100, Math.abs(share) * 100);
+                const negative = share !== null && share < 0;
+                const barWidth = width > 0 && width < 1 ? 1 : width;
                 const text = value === null ? '-' : formatCompareValue(value, item, kind);
                 const label = index === 0 ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
-                const delta = index === 0 || base === null || value === null || !Number.isFinite(base) || base === 0
-                    ? ''
-                    : ` <em class="profit-compare-delta${value / base >= 1 ? ' is-up' : ' is-down'}">${((value / Math.abs(base) - 1) * 100).toFixed(0)}%</em>`;
-                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}"><i style="width:${width.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${projectEscapeHtml(text)}${delta}</b></span>`;
+                let delta = '';
+                if (index > 0 && base !== null && value !== null && Number.isFinite(base) && base !== 0) {
+                    const change = (value - base) / Math.abs(base) * 100;
+                    const better = change === 0 ? null : higherIsBetter ? change > 0 : change < 0;
+                    const className = better === null ? '' : better ? ' is-up' : ' is-down';
+                    delta = ` <em class="profit-compare-delta${className}">${change > 0 ? '+' : ''}${change.toFixed(0)}%</em>`;
+                }
+                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${projectEscapeHtml(text)}${delta}</b></span>`;
             }).join('');
         }
     }
@@ -3699,23 +3725,26 @@
 
     }
 
+    // mode: 'share' = 该项是售价的组成部分，数据条按「占售价比例」绘制并显示占比；
+    //       'none'  = 比率型派生指标（利润率等），不是费用构成，不画数据条、不显示占比。
+    // 只保留栅格占位，避免该行与其它行的列宽错位。
     const PROFIT_BAR_METRICS = Object.freeze([
-        ['profitPurchaseValue', 'profitPurchaseRatio', 'purchase'],
-        ['profitFreightValue', 'profitFreightRatio', 'freight'],
-        ['profitFbaValue', 'profitFbaRatio', 'fba'],
-        ['profitStorageValue', 'profitStorageRatio', 'storage'],
-        ['profitAdValue', 'profitAdRatio', 'ad'],
-        ['profitReferralValue', 'profitReferralRatio', 'referral'],
-        ['profitPlacementValue', 'profitPlacementRatio', 'placement'],
-        ['profitPromoValue', 'profitPromoRatio', 'promo'],
-        ['profitReturnValue', 'profitReturnRatio', 'returns'],
-        ['profitTotalCostValue', 'profitTotalCostRatio', 'totalCost'],
-        ['profitValue', 'profitProfitRatio', 'profit'],
-        ['profitMarginValue', 'profitMarginRatio', 'margin'],
+        ['profitPurchaseValue', 'profitPurchaseRatio', 'purchase', 'share'],
+        ['profitFreightValue', 'profitFreightRatio', 'freight', 'share'],
+        ['profitFbaValue', 'profitFbaRatio', 'fba', 'share'],
+        ['profitStorageValue', 'profitStorageRatio', 'storage', 'share'],
+        ['profitAdValue', 'profitAdRatio', 'ad', 'share'],
+        ['profitReferralValue', 'profitReferralRatio', 'referral', 'share'],
+        ['profitPlacementValue', 'profitPlacementRatio', 'placement', 'share'],
+        ['profitPromoValue', 'profitPromoRatio', 'promo', 'share'],
+        ['profitReturnValue', 'profitReturnRatio', 'returns', 'share'],
+        ['profitTotalCostValue', 'profitTotalCostRatio', 'totalCost', 'share'],
+        ['profitValue', 'profitProfitRatio', 'profit', 'share'],
+        ['profitMarginValue', 'profitMarginRatio', 'margin', 'none'],
     ]);
 
     function initProfitResultBars() {
-        for (const [valueId, ratioId] of PROFIT_BAR_METRICS) {
+        for (const [valueId, ratioId, , mode] of PROFIT_BAR_METRICS) {
             const metric = document.getElementById(valueId)?.closest('.metric');
             const action = metric?.querySelector('.metric-action');
             if (!metric || !action) continue;
@@ -3729,7 +3758,7 @@
                 const ratio = document.createElement('strong');
                 ratio.className = 'profit-bar-ratio';
                 ratio.id = ratioId;
-                ratio.textContent = '-';
+                ratio.textContent = mode === 'none' ? '' : '-';
                 metric.insertBefore(ratio, action);
             }
         }
@@ -3743,6 +3772,13 @@
 
     function setProfitBarMetric(ratioId, value, price) {
         setProfitBarRatio(ratioId, Number.isFinite(value) && Number.isFinite(price) && price > 0 ? value / price : null);
+    }
+
+    // 某项金额占售价的比例；售价缺失/为 0 时无法度量，返回 null
+    function profitShareOfPrice(value, price) {
+        if (!Number.isFinite(value) || !Number.isFinite(price) || price <= 0) return null;
+        const share = value / price;
+        return Number.isFinite(share) ? share : null;
     }
 
     function percent(value) {
