@@ -479,7 +479,9 @@
         .market-rate-update:hover:not(:disabled) { background: var(--neon-cyan); color: #000; }
         .market-rate-update:disabled { opacity: 0.55; cursor: wait; }
         .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; border: 1px solid var(--border-color); padding: 8px; }
-        .profit-grid { grid-template-columns: 1fr; }
+        /* 利润测算整体不再套外框：栅格与内部面板都去掉边框/底色，靠小节标题分段 */
+        .profit-grid { grid-template-columns: 1fr; border: 0; padding: 0; }
+        .profit-grid .calculator-panel { border: 0; background: transparent; padding: 0; }
         .freight-grid, .ad-calculator-grid { grid-template-columns: 1fr; }
         .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 9px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
@@ -539,8 +541,11 @@
         .profit-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 12px; align-items: start; }
         .profit-column { min-width: 0; }
         /* 广告费换算并入利润测算后，外层不再套 calculator-home（会带来 100vh 高度）与 calculator-grid（会带来额外边框） */
-        .profit-embedded-block { margin-bottom: 8px; }
-        .profit-embedded-block .profit-section-title { margin-top: 4px; }
+        /* 三个小节（广告费换算 / 成本费率 / 经营结果）统一：同一套标题样式、同一段块间距，且都不套外框 */
+        .profit-embedded-block { margin: 0 0 12px; }
+        .profit-embedded-block .ad-calculator-grid { display: grid; gap: 6px; }
+        .profit-embedded-block > .profit-section-title { margin-bottom: 6px; }
+        .profit-grid > .calculator-panel > .calculator-fields { margin: 0 0 12px; }
         .profit-section-title { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 1rem; font-weight: 700; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         .profit-breakdown { display: grid; gap: 6px; margin-top: 8px; }
         .profit-results .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -846,28 +851,32 @@
         .quick-cost-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
         .quick-cost-track { height: 8px; background: var(--surface-muted); overflow: hidden; }
         .quick-cost-track i { display: block; height: 100%; background: var(--accent); }
-        .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 2px; }
-        /* 结果行改为无边框的紧凑清单：去掉每项方框，用隔行底色区分行 */
+        .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 4px; }
+        /* 结果行改为无边框的紧凑清单：去掉每项方框，用隔行底色区分行，隔行间距统一为 4px */
         .profit-result-bars .metric {
             display: grid;
-            grid-template-columns: minmax(96px, 0.7fr) minmax(120px, 2fr) 58px minmax(240px, 1.3fr);
-            gap: 8px;
+            grid-template-columns: minmax(92px, 0.6fr) minmax(150px, 2fr) 84px minmax(220px, 1.2fr);
+            gap: 8px 14px;
             align-items: center;
             min-height: 0;
-            padding: 4px 8px;
+            padding: 5px 8px;
             border: 0;
             background: transparent;
             color: var(--text-muted);
             font-size: 1rem;
         }
         .profit-result-bars .metric:nth-child(even) { background: var(--surface-muted); }
+        .profit-result-bars .metric > * { min-width: 0; }
         .profit-result-bars .metric > .term-tip { font-size: 1rem; }
         .profit-result-bars .profit-bar-stack { width: 100%; }
         .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
-        .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1rem 'Share Tech Mono', monospace; text-align: right; white-space: nowrap; }
+        /* 占比左对齐，字号放大，与数据条之间留出更明显的间距 */
+        .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1.25rem 'Share Tech Mono', monospace; text-align: left; white-space: nowrap; }
         .profit-result-bars .metric-action { display: grid; gap: 2px; }
         .profit-result-bars .metric-money { justify-content: flex-start; gap: 10px; margin-top: 0; }
-        .profit-result-bars .metric-money strong { font-size: 1.08rem; }
+        .profit-result-bars .metric-money strong { font-size: 1.15rem; }
+        /* 利润率低于 10% 标红 */
+        .metric strong.is-low { color: var(--danger); }
         .profit-result-bars .metric-rmb { font-size: 0.9rem; }
         .profit-result-bars .metric-total { margin-top: 0; padding-top: 0; font-size: 0.86rem; }
         .profit-result-bars .metric.negative .profit-bar-ratio { color: var(--danger); }
@@ -1212,18 +1221,18 @@
                         <label><span id="profitPlacementLabel" class="term-tip" tabindex="0" data-tip="FBA 入库配置费（Inventory Placement Service Fee）是亚马逊将库存分配至入库地点时按件收取的费用，不是 FBA 配送费。请按 Send to Amazon 或结算报表中的每件实际费用填写；该项会单独计入总成本。">FBA 入库配置费（美元/件）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                     </div>
                     <div class="profit-breakdown profit-result-bars">
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="采购/件 = 含税采购成本 ×（1 − 退税/折扣比例）÷ 汇率；总采购成本 = 采购/件 × 月销量。">采购/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位采购成本所需输入"><span class="metric-money"><strong id="profitPurchaseValue">-</strong><span class="metric-rmb" id="profitPurchaseCnyValue">-</span></span><span class="metric-total" id="profitPurchaseTotalValue">总采购成本（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/每件）÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和 FBA 计费重对应的配送费；FBA 计费重取实重与 139 in³/lb 体积重的较大值。勾选旺季发货时会增加 2026 旺季平均增量；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong><span class="metric-rmb" id="profitFbaCnyValue">-</span></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 预测期 FBA 仓储总费 ÷ 预测期实际售出件数，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。注意这里的分母是 12 个月计划表的销量，不是月销量：若两者不一致，仓储/件 × 月销量 会不等于计划期总仓储，请点《用月销量填充》保持一致。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong><span class="metric-rmb" id="profitStorageCnyValue">-</span></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件；总费用 = 广告/件 × 月销量。">广告/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位广告费所需输入"><span class="metric-money"><strong id="profitAdValue">-</strong><span class="metric-rmb" id="profitAdCnyValue">-</span></span><span class="metric-total" id="profitAdTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="佣金/件 = 售价 × 佣金率；日本站与欧洲/英国站按官方类目阶梯、最低佣金和消费税自动计算。总费用 = 佣金/件 × 月销量。">佣金/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitReferralRate,profitReferralCategory,profitJpReferralTax,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位佣金所需输入"><span class="metric-money"><strong id="profitReferralValue">-</strong><span class="metric-rmb" id="profitReferralCnyValue">-</span></span><span class="metric-total" id="profitReferralTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="入库配置/件 = 亚马逊把库存分配至入库地点时按件收取的费用，与 FBA 配送费不同；日本站为「其他每件 FBA/入仓费用」。总费用 = 入库配置/件 × 月销量。">入库配置/件</span><button class="metric-action" type="button" data-inputs="profitPlacementFee,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位入库配置费所需输入"><span class="metric-money"><strong id="profitPlacementValue">-</strong><span class="metric-rmb" id="profitPlacementCnyValue">-</span></span><span class="metric-total" id="profitPlacementTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="促销/件 = 售价 × 促销费率，用于估算优惠券、折扣等按销售额比例的费用。Coupon 兑现费等固定额费用请折算为比率后填入。总费用 = 促销/件 × 月销量。">促销/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPromoRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位促销费所需输入"><span class="metric-money"><strong id="profitPromoValue">-</strong><span class="metric-rmb" id="profitPromoCnyValue">-</span></span><span class="metric-total" id="profitPromoTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="退货/件 = 退货率 ×（售价 + 退货处理费）。退货处理费为亚马逊 Refund Administration Fee，等于佣金 × 20%，自动随售价与佣金率变化。该项含未实现的收入损失，所以总成本可能超过售价。">退货/件</span><button class="metric-action" type="button" data-inputs="profitReturnRate,profitReturnHandling,adPrice,profitReferralRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位退货成本所需输入"><span class="metric-money"><strong id="profitReturnValue">-</strong><span class="metric-rmb" id="profitReturnCnyValue">-</span></span><span class="metric-total" id="profitReturnTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货。其中「退货」里包含退货率对应的未实现销售收入，所以总成本/件可能超过售价，此时应先看「利润/件」是否为负。总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
-                        <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
+                        <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货。其中「退货」里包含退货率对应的未实现销售收入，所以总成本/件可能超过售价，此时应先看「利润/件」是否为负。总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="采购/件 = 含税采购成本 ×（1 − 退税/折扣比例）÷ 汇率；总采购成本 = 采购/件 × 月销量。">采购/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位采购成本所需输入"><span class="metric-money"><strong id="profitPurchaseValue">-</strong></span><span class="metric-total" id="profitPurchaseTotalValue">总采购成本（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/每件）÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="FBA/件 = 当前站点、尺寸等级和 FBA 计费重对应的配送费；FBA 计费重取实重与 139 in³/lb 体积重的较大值。勾选旺季发货时会增加 2026 旺季平均增量；总费用 = FBA/件 × 月销量。">FBA/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位 FBA 配送费所需输入"><span class="metric-money"><strong id="profitFbaValue">-</strong></span><span class="metric-total" id="profitFbaTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="美国站仓储/件 = 预测期 FBA 仓储总费 ÷ 预测期实际售出件数，按日均库存、季节费率和滚动 13 周库存利用率计算；非美国站保留手动体积仓储估算。注意这里的分母是 12 个月计划表的销量，不是月销量：若两者不一致，仓储/件 × 月销量 会不等于计划期总仓储，请点《用月销量填充》保持一致。">仓储/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,storageOpeningUnits,storagePast13WeekSales,storageStartMonth" onclick="guideCalculationInputs(this)" aria-label="定位仓储所需输入"><span class="metric-money"><strong id="profitStorageValue">-</strong></span><span class="metric-total" id="profitStorageTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告/件 = 广告费换算模块的混合广告费/件；总费用 = 广告/件 × 月销量。">广告/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位广告费所需输入"><span class="metric-money"><strong id="profitAdValue">-</strong></span><span class="metric-total" id="profitAdTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="佣金/件 = 售价 × 佣金率；日本站与欧洲/英国站按官方类目阶梯、最低佣金和消费税自动计算。总费用 = 佣金/件 × 月销量。">佣金/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitReferralRate,profitReferralCategory,profitJpReferralTax,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位佣金所需输入"><span class="metric-money"><strong id="profitReferralValue">-</strong></span><span class="metric-total" id="profitReferralTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="入库配置/件 = 亚马逊把库存分配至入库地点时按件收取的费用，与 FBA 配送费不同；日本站为「其他每件 FBA/入仓费用」。总费用 = 入库配置/件 × 月销量。">入库配置/件</span><button class="metric-action" type="button" data-inputs="profitPlacementFee,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位入库配置费所需输入"><span class="metric-money"><strong id="profitPlacementValue">-</strong></span><span class="metric-total" id="profitPlacementTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="促销/件 = 售价 × 促销费率，用于估算优惠券、折扣等按销售额比例的费用。Coupon 兑现费等固定额费用请折算为比率后填入。总费用 = 促销/件 × 月销量。">促销/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPromoRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位促销费所需输入"><span class="metric-money"><strong id="profitPromoValue">-</strong></span><span class="metric-total" id="profitPromoTotalValue">总费用（请填写月销量）</span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="退货/件 = 退货率 ×（售价 + 退货处理费）。退货处理费为亚马逊 Refund Administration Fee，等于佣金 × 20%，自动随售价与佣金率变化。该项含未实现的收入损失，所以总成本可能超过售价。">退货/件</span><button class="metric-action" type="button" data-inputs="profitReturnRate,profitReturnHandling,adPrice,profitReferralRate,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位退货成本所需输入"><span class="metric-money"><strong id="profitReturnValue">-</strong></span><span class="metric-total" id="profitReturnTotalValue">总费用（请填写月销量）</span></button></div>
                     </div>
                     <div id="profitVariantBlock" class="profit-variant-block" style="display:none">
                         <div class="section-title">变体利润明细（按销量分布）</div>
@@ -1242,8 +1251,8 @@
                     </div>
                     <div class="profit-breakdown">
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="保本 ACOS = 扣除广告前的可用利润 ÷ 售价，是不亏损时可承受的广告成本占比。">保本 ACOS</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate" onclick="guideCalculationInputs(this)" aria-label="定位保本 ACOS 所需输入"><strong id="profitBreakEvenAcosValue">-</strong></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="最大 CPC = 售价 × 保本 ACOS × CVR。">最大 CPC</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位最大 CPC 所需输入"><span class="metric-money"><strong id="profitMaxCpcValue">-</strong><span class="metric-rmb" id="profitMaxCpcCnyValue">-</span></span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="目标采购上限 = 在目标利润率下可承受的最高采购成本，已考虑退税/折扣；下方同时显示站点币种和人民币。">目标采购上限</span><button class="metric-action" type="button" data-inputs="adPrice,profitTaxDiscount,profitReferralRate,profitPlacementFee,profitTargetMargin,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位目标采购上限所需输入"><span class="metric-money"><strong id="profitMaxPurchaseValue">-</strong><span class="metric-rmb" id="profitMaxPurchaseCnyValue">-</span></span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="最大 CPC = 售价 × 保本 ACOS × CVR。">最大 CPC</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位最大 CPC 所需输入"><span class="metric-money"><strong id="profitMaxCpcValue">-</strong></span></button></div>
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="目标采购上限 = 在目标利润率下可承受的最高采购成本，已考虑退税/折扣；下方同时显示站点币种和人民币。">目标采购上限</span><button class="metric-action" type="button" data-inputs="adPrice,profitTaxDiscount,profitReferralRate,profitPlacementFee,profitTargetMargin,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位目标采购上限所需输入"><span class="metric-money"><strong id="profitMaxPurchaseValue">-</strong></span></button></div>
                     </div>
                     <details id="variantPanel" class="storage-forecast-panel variant-panel" aria-labelledby="variantTitle">
                     <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="variantTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="同一产品可配置多个变体（如颜色/款式）。变体规格相同（仅售价不同）时共用上方尺寸/实重；规格不同时可单独填写尺寸与实重。广告费换算按销量分布分摊，利润测算按变体拆分计算并汇总。">产品变体（可选）</span></span><span class="storage-forecast-source">多 SKU 利润拆分</span></summary>
@@ -3737,11 +3746,19 @@
         return Number.isFinite(value) && Number.isFinite(fx) && fx > 0 ? '¥ ' + (value * fx).toFixed(2) : '-';
     }
 
+    // 结果行每行只显示一个价格：站点币种与人民币重复，统一只留人民币
     function setProfitMoneyMetric(valueId, rmbId, value, fx) {
         const valueEl = document.getElementById(valueId);
-        const rmbEl = document.getElementById(rmbId);
-        if (valueEl) valueEl.textContent = money(value);
-        if (rmbEl) rmbEl.textContent = rmbMoney(value, fx);
+        if (valueEl) valueEl.textContent = rmbMoney(value, fx);
+    }
+
+    // 利润率低于 10% 标红（亏损也在这个区间内）
+    const PROFIT_MARGIN_WARNING = 0.1;
+    function setProfitMarginMetric(valueId, margin) {
+        const el = document.getElementById(valueId);
+        if (!el) return;
+        el.textContent = percent(margin);
+        el.classList.toggle('is-low', Number.isFinite(margin) && margin < PROFIT_MARGIN_WARNING);
     }
 
     function setProfitTotalMetric(totalId, value, fx, units, label = '总费用') {
@@ -4605,7 +4622,7 @@
         setProfitTotalMetric('profitReturnTotalValue', result.returns, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalCostTotalValue', result.totalCost, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalValue', result.profit, fx, monthlyUnits, '总利润');
-        document.getElementById('profitMarginValue').textContent = percent(result.margin);
+        setProfitMarginMetric('profitMarginValue', result.margin);
         renderProfitBars(profitPrice);
         document.getElementById('profitBreakEvenAcosValue').textContent = percent(result.breakEvenAcos);
         setProfitMoneyMetric('profitMaxCpcValue', 'profitMaxCpcCnyValue', result.maxCpc, fx);
@@ -4715,7 +4732,7 @@
         setProfitTotalMetric('profitReturnTotalValue', weightedReturns, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalCostTotalValue', weightedTotalCost, fx, monthlyUnits);
         setProfitTotalMetric('profitTotalValue', weightedProfit, fx, monthlyUnits, '总利润');
-        document.getElementById('profitMarginValue').textContent = percent(weightedMargin);
+        setProfitMarginMetric('profitMarginValue', weightedMargin);
         renderProfitBars(weightedPrice);
         document.getElementById('profitBreakEvenAcosValue').textContent = percent(weightedBreakEven);
         setProfitMoneyMetric('profitMaxCpcValue', 'profitMaxCpcCnyValue', weightedMaxCpc, fx);
