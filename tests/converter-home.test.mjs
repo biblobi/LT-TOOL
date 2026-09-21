@@ -1061,7 +1061,8 @@ test('result rows lead with margin, then profit and total cost, and low margins 
 test('profit sections share one spacing rhythm, keep basic row borders and the module frame', () => {
   // 与「运费与仓储计算」同款外框：沿用 .calculator-grid 的边框与内边距
   assert.match(html, /\.profit-grid \{ grid-template-columns: 1fr; \}/);
-  assert.match(html, /\.profit-grid \.calculator-panel \{ border: 0; background: transparent; padding: 0; \}/);
+  assert.match(html, /\.profit-grid > \.calculator-panel \{ border: 0; background: transparent; padding: 8px; \}/);
+  assert.match(html, /\.profit-embedded-block \.calculator-panel \{ border: 0; background: transparent; padding: 0; \}/);
   assert.match(html, /\.profit-embedded-block \{ margin: 0 0 12px; \}/);
   assert.match(html, /\.profit-grid > \.calculator-panel > \.calculator-fields \{ margin: 0 0 12px; \}/);
   assert.match(html, /\.profit-results \.profit-breakdown\.profit-result-bars \{[^}]*gap: 4px;/);

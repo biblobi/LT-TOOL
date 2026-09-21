@@ -488,7 +488,10 @@
         /* 利润测算保留与「运费与仓储计算」相同的外框：.calculator-grid 的边框与内边距；
            内部面板不再额外套一层框，靠小节标题分段 */
         .profit-grid { grid-template-columns: 1fr; }
-        .profit-grid .calculator-panel { border: 0; background: transparent; padding: 0; }
+        /* 不套第二层外框，但内边距与运费模块的内层面板一致（栅格 8px + 面板 8px），内容不贴边 */
+        .profit-grid > .calculator-panel { border: 0; background: transparent; padding: 8px; }
+        /* 广告费换算自己的面板是嵌在外层面板里的，再留内边距会多缩进一层，这里清零 */
+        .profit-embedded-block .calculator-panel { border: 0; background: transparent; padding: 0; }
         .freight-grid, .ad-calculator-grid { grid-template-columns: 1fr; }
         .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 8px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
