@@ -385,11 +385,11 @@
             margin-top: 8px;
             font-size: 0.85rem;
         }
-        /* 与利润测算结果行同一形式：带基础边框的紧凑小格，隔行间距统一 4px */
+        /* 与利润测算结果行同一形式：带基础边框的紧凑小格，隔行间距统一 4px，内边距统一 6px 8px */
         .cargo-summary div {
             border: 1px solid var(--border-color);
             background: var(--surface-raised);
-            padding: 5px 8px;
+            padding: 6px 8px;
             font-size: 0.92rem;
             font-weight: 700;
         }
@@ -419,7 +419,7 @@
             margin: 0;
             border: 1px solid var(--border-color);
             background: var(--surface-raised);
-            padding: 8px 10px;
+            padding: 8px;
             font-size: 0.76rem;
             line-height: 1.55;
             color: #999;
@@ -437,7 +437,7 @@
             min-width: 0;
             border: 1px solid var(--border-color);
             background: var(--surface-raised);
-            padding: 5px 8px;
+            padding: 6px 8px;
         }
         .fba-rule-label { color: #aaa; font-size: 0.84rem; font-weight: 700; }
         .fba-rule-value { display: flex; flex-direction: column; gap: 2px; color: #aaa; font-family: 'Share Tech Mono', monospace; font-weight: 600; overflow-wrap: anywhere; }
@@ -466,7 +466,7 @@
         }
         @media (max-width: 560px) {
             .cargo-layout { grid-template-columns: 1fr; }
-            .fba-basis { padding: 8px 10px; }
+            .fba-basis { padding: 8px; }
         }
 
         .calculator-home { max-width: min(1400px, 100%); }
@@ -485,11 +485,12 @@
         .market-rate-update:hover:not(:disabled) { background: var(--neon-cyan); color: #000; }
         .market-rate-update:disabled { opacity: 0.55; cursor: wait; }
         .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; border: 1px solid var(--border-color); padding: 8px; }
-        /* 利润测算整体不再套外框：栅格与内部面板都去掉边框/底色，靠小节标题分段 */
-        .profit-grid { grid-template-columns: 1fr; border: 0; padding: 0; }
+        /* 利润测算保留与「运费与仓储计算」相同的外框：.calculator-grid 的边框与内边距；
+           内部面板不再额外套一层框，靠小节标题分段 */
+        .profit-grid { grid-template-columns: 1fr; }
         .profit-grid .calculator-panel { border: 0; background: transparent; padding: 0; }
         .freight-grid, .ad-calculator-grid { grid-template-columns: 1fr; }
-        .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 9px; min-width: 0; }
+        .calculator-panel { border: 1px solid #292929; background: #0b0b0b; padding: 8px; min-width: 0; }
         .calculator-panel.full { grid-column: 1 / -1; }
         :where([hidden]) { display: none !important; }
         .calculator-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 8px; }
@@ -507,11 +508,11 @@
         .term-tip:hover::after, .term-tip:focus::after, .term-tip.is-open::after { display: block; }
         .link-control { display: flex; align-items: center; gap: 8px; color: #bbb; font-size: 0.82rem; padding: 7px 0; }
         .link-control input { width: auto; accent-color: var(--neon-cyan); }
-        .metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+        .metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
         .ad-calculator-grid .metric-grid { margin-top: 8px; }
-        .metric { border: 1px solid #222; padding: 6px; min-height: 46px; color: #888; font-size: 0.78rem; font-weight: 600; }
+        .metric { border: 1px solid #222; padding: 6px 8px; min-height: 46px; color: #888; font-size: 0.78rem; font-weight: 600; }
         .metric > .term-tip { font-size: 0.8rem; font-weight: 700; }
-        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; font-weight: 700; margin-top: 3px; overflow-wrap: anywhere; }
+        .metric strong { display: block; color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; font-weight: 700; margin-top: 3px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
         .metric > .term-tip { white-space: nowrap; }
         .metric.negative strong { color: var(--neon-pink); }
         .metric-action { display: block; width: 100%; border: 0; margin: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -533,7 +534,7 @@
         .calculator-fields input.is-optional:focus { color: var(--text-primary); background: var(--input-bg); }
         .metric-money { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 3px; min-width: 0; }
         .metric-money strong { margin: 0; min-width: 0; white-space: nowrap; font-size: 0.82rem; }
-        .metric-rmb { flex: 0 0 auto; color: #aaa; font: 700 0.76rem 'Share Tech Mono', monospace; white-space: nowrap; }
+        .metric-rmb { flex: 0 0 auto; color: #aaa; font: 700 0.76rem 'Share Tech Mono', monospace; white-space: nowrap; font-variant-numeric: tabular-nums; }
         .metric.negative .metric-rmb { color: var(--neon-pink); }
         .metric-total { display: block; margin-top: 4px; padding-top: 4px; border-top: 1px solid #202020; color: #777; font: 700 0.84rem/1.35 'Share Tech Mono', monospace; overflow-wrap: anywhere; }
         .metric.negative .metric-total { color: var(--neon-pink); }
@@ -553,7 +554,7 @@
         .profit-embedded-block > .profit-section-title { margin-bottom: 6px; }
         .profit-grid > .calculator-panel > .calculator-fields { margin: 0 0 12px; }
         .profit-section-title { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 1rem; font-weight: 700; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
-        .profit-breakdown { display: grid; gap: 6px; margin-top: 8px; }
+        .profit-breakdown { display: grid; gap: 4px; margin-top: 6px; }
         .profit-results .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .profit-results .profit-breakdown { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .profit-targets .calculator-fields { grid-template-columns: 1fr; }
@@ -593,7 +594,7 @@
         .freight-grid .cargo-fields { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
         .freight-grid .cargo-summary { margin-top: 6px; gap: 4px 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .freight-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
-        .freight-grid .fba-basis { padding: 8px 10px; }
+        .freight-grid .fba-basis { padding: 8px; }
         .storage-forecast-panel { margin: 10px 0 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .fee-config-panel { margin-top: 2px; border-top: 1px dashed var(--border-strong); }
         .fee-config-summary[hidden] { display: none; }
@@ -628,7 +629,8 @@
         .project-btn:hover { background: var(--accent); color: var(--surface); }
         .project-btn-danger { border-color: #c0392b; color: #c0392b; }
         .project-btn-danger:hover { background: #c0392b; color: #fff; }
-        .project-status { color: var(--accent); font-size: 0.78rem; font-weight: 700; }
+        /* 保存提示放在左侧，右侧按钮组靠 margin-right:auto 顶到右边，提示出现/消失时按键不移动 */
+        .project-status { color: var(--accent); font-size: 0.78rem; font-weight: 700; margin-right: auto; white-space: nowrap; }
         .storage-forecast-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; padding: 0 2px 6px; color: var(--text-primary); cursor: pointer; list-style-position: inside; }
         .storage-forecast-toggle::marker { color: var(--accent); }
         .storage-forecast-toggle::-webkit-details-marker { color: var(--accent); }
@@ -865,7 +867,7 @@
             gap: 8px 14px;
             align-items: center;
             min-height: 0;
-            padding: 5px 8px;
+            padding: 6px 8px;
             border: 1px solid var(--border-color);
             background: var(--surface-raised);
             color: var(--text-muted);
@@ -876,10 +878,12 @@
         .profit-result-bars .profit-bar-stack { width: 100%; }
         .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
         /* 占比左对齐，字号放大，与数据条之间留出更明显的间距 */
-        .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1.25rem 'Share Tech Mono', monospace; text-align: left; white-space: nowrap; }
+        .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1.25rem 'Share Tech Mono', monospace; font-variant-numeric: tabular-nums; text-align: left; white-space: nowrap; }
         .profit-result-bars .metric-action { display: grid; gap: 2px; }
         .profit-result-bars .metric-money { justify-content: flex-start; gap: 10px; margin-top: 0; }
-        .profit-result-bars .metric-money strong { font-size: 1.15rem; }
+        .profit-result-bars .metric-money strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+        /* 整行可点（定位输入），悬停给出明确反馈 */
+        .profit-result-bars .metric:hover { border-color: var(--accent); }
         /* 利润率低于 10% 标红 */
         .metric strong.is-low { color: var(--danger); }
         .profit-result-bars .metric-rmb { font-size: 0.9rem; }
@@ -905,15 +909,15 @@
 <body>
 
     <div class="nav-deck">
-        <button class="nav-btn active" onclick="switchTab('profit')"><span class="nav-label">利润测算</span></button>
-        <button class="nav-btn" onclick="switchTab('converter')"><span class="nav-label">单位换算</span></button>
-        <button class="nav-btn" onclick="switchTab('pdf')"><span class="nav-label">PDF 聚合</span></button>
-        <button class="nav-btn" onclick="switchTab('image')"><span class="nav-label">格式转换</span></button>
-        <button class="nav-btn" onclick="switchTab('removebg')"><span class="nav-label">背景移除</span></button>
-        <button class="nav-btn" onclick="switchTab('currency')"><span class="nav-label">实时汇率</span></button>
-        <button class="nav-btn" onclick="switchTab('guide')"><span class="nav-label">功能说明</span></button>
+        <button class="nav-btn active" title="利润测算" onclick="switchTab('profit')"><span class="nav-label">利润测算</span></button>
+        <button class="nav-btn" title="单位换算" onclick="switchTab('converter')"><span class="nav-label">单位换算</span></button>
+        <button class="nav-btn" title="PDF 聚合" onclick="switchTab('pdf')"><span class="nav-label">PDF 聚合</span></button>
+        <button class="nav-btn" title="格式转换" onclick="switchTab('image')"><span class="nav-label">格式转换</span></button>
+        <button class="nav-btn" title="背景移除" onclick="switchTab('removebg')"><span class="nav-label">背景移除</span></button>
+        <button class="nav-btn" title="实时汇率" onclick="switchTab('currency')"><span class="nav-label">实时汇率</span></button>
+        <button class="nav-btn" title="功能说明" onclick="switchTab('guide')"><span class="nav-label">功能说明</span></button>
         <div class="nav-divider" aria-hidden="true"></div>
-        <button id="themeToggle" class="nav-btn theme-toggle" type="button" onclick="toggleTheme()" aria-pressed="false"><span class="nav-label">切换深色</span></button>
+        <button id="themeToggle" class="nav-btn theme-toggle" type="button" title="切换深浅主题" onclick="toggleTheme()" aria-pressed="false"><span class="nav-label">切换深色</span></button>
     </div>
 
     <!-- PDF 模块 -->
@@ -1178,7 +1182,7 @@
             </div>
         </div>
         <div id="profitDetail" class="calculator-home embedded-calculator">
-            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><details id="compareDropdown" class="compare-dropdown"><summary class="project-btn compare-dropdown-toggle" id="compareDropdownToggle">对比产品<span id="compareCountBadge" class="compare-count-badge" hidden>0</span></summary><div class="compare-dropdown-body"><div class="compare-dropdown-list" id="compareProjectChecks"></div><div class="compare-dropdown-tools"><label class="storage-switch"><input id="compareToCny" type="checkbox" onchange="renderCompare()"><span class="term-tip" tabindex="0" data-tip="勾选后对比条形按各自汇率折算成人民币；利润率等百分比不受影响。">折算人民币</span></label><button type="button" onclick="clearCompare()">清空</button><button type="button" onclick="exportCompareCsv()">导出 CSV</button></div><div class="profit-compare-warning" id="profitCompareWarning" hidden></div></div></details><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><button type="button" class="project-btn" onclick="exportProjects()">导出</button><button type="button" class="project-btn" onclick="document.getElementById('projectImportInput').click()">导入</button><input id="projectImportInput" type="file" accept="application/json,.json" hidden onchange="importProjects(this)"><button type="button" class="project-btn" id="draftClearButton" hidden onclick="clearDraft()">清除草稿</button><span id="draftStatus" class="draft-status" title="输入不会自动保存，也不会上传到任何服务器；需要留存请点「保存产品」，数据只写入本浏览器本地存储。">自动保存已开启</span><span id="projectStatus" class="project-status"></span></span></h2>
+            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span id="projectStatus" class="project-status"></span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><details id="compareDropdown" class="compare-dropdown"><summary class="project-btn compare-dropdown-toggle" id="compareDropdownToggle">对比产品<span id="compareCountBadge" class="compare-count-badge" hidden>0</span></summary><div class="compare-dropdown-body"><div class="compare-dropdown-list" id="compareProjectChecks"></div><div class="compare-dropdown-tools"><label class="storage-switch"><input id="compareToCny" type="checkbox" onchange="renderCompare()"><span class="term-tip" tabindex="0" data-tip="勾选后对比条形按各自汇率折算成人民币；利润率等百分比不受影响。">折算人民币</span></label><button type="button" onclick="clearCompare()">清空</button><button type="button" onclick="exportCompareCsv()">导出 CSV</button></div><div class="profit-compare-warning" id="profitCompareWarning" hidden></div></div></details><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><button type="button" class="project-btn" onclick="exportProjects()">导出</button><button type="button" class="project-btn" onclick="document.getElementById('projectImportInput').click()">导入</button><input id="projectImportInput" type="file" accept="application/json,.json" hidden onchange="importProjects(this)"></span></h2>
             <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full">
                     <div id="module-adcalc" class="profit-embedded-block">
@@ -1226,8 +1230,8 @@
                         <label><span id="profitPlacementLabel" class="term-tip" tabindex="0" data-tip="FBA 入库配置费（Inventory Placement Service Fee）是亚马逊将库存分配至入库地点时按件收取的费用，不是 FBA 配送费。请按 Send to Amazon 或结算报表中的每件实际费用填写；该项会单独计入总成本。">FBA 入库配置费（美元/件）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                     </div>
                     <div class="profit-breakdown profit-result-bars">
+                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价；低于 10% 显示为红色。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
                         <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货。其中「退货」里包含退货率对应的未实现销售收入，所以总成本/件可能超过售价，此时应先看「利润/件」是否为负。总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="采购/件 = 含税采购成本 ×（1 − 退税/折扣比例）÷ 汇率；总采购成本 = 采购/件 × 月销量。">采购/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位采购成本所需输入"><span class="metric-money"><strong id="profitPurchaseValue">-</strong><span class="metric-rmb" id="profitPurchaseCnyValue">-</span></span><span class="metric-total" id="profitPurchaseTotalValue">总采购成本（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="头程/件 = 头程单价（人民币/每件）÷ 汇率；总费用 = 头程/件 × 月销量。">头程/件</span><button class="metric-action" type="button" data-inputs="cargoDimensionInput,cargoWeightInput,profitFreightRate,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位头程所需输入"><span class="metric-money"><strong id="profitFreightValue">-</strong><span class="metric-rmb" id="profitFreightCnyValue">-</span></span><span class="metric-total" id="profitFreightTotalValue">总费用（请填写月销量）</span></button></div>

@@ -15,8 +15,10 @@ test('profit calculator is the default home module and first navigation item', (
   assert.match(html, /<link rel="icon" href="data:,">/);
   assert.match(
     html,
-    /<button class="nav-btn active" onclick="switchTab\('profit'\)"><span class="nav-label">利润测算<\/span><\/button>/,
+    /<button class="nav-btn active" title="利润测算" onclick="switchTab\('profit'\)"><span class="nav-label">利润测算<\/span><\/button>/,
   );
+  // 方块按钮文字只有两字，靠 title 补全可读性与可访问性
+  assert.equal((html.match(/<button class="nav-btn[^"]*" title="[^"]+" onclick="switchTab\('/g) ?? []).length, 7);
   // 导航按钮是正方形，文字用 .nav-label 锁成每行两个字
   assert.match(html, /\.nav-label \{[^}]*width: 2\.4em/);
   assert.match(html, /\.nav-btn,\s*\n\s*\.converter-jump \{[\s\S]*?aspect-ratio: 1 \/ 1;/);
@@ -928,8 +930,16 @@ test('draft autosave is off by default and products are stored locally only', ()
     'function draftInScope', 'function draftStoragePlan', 'function collectDraft',
     'function saveDraft', 'function scheduleDraftSave', 'function flushDraftSave',
     'function clearDraft', 'function applyDraft', 'function initDraft', 'function installDraftAutosave',
-    'id="draftStatus"', 'id="draftClearButton"', 'initDraft();', 'installDraftAutosave();',
+    'initDraft();', 'installDraftAutosave();',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  // 工具栏不再显示自动保存相关内容
+  assert.doesNotMatch(html, /id="draftStatus"/);
+  assert.doesNotMatch(html, /id="draftClearButton"/);
+  assert.doesNotMatch(html, /onclick="clearDraft\(\)"/);
+  // 保存提示放在左侧，出现/消失时不推动右侧按钮
+  assert.match(html, /\.project-status \{[^}]*margin-right: auto;/);
+  assert.ok(html.indexOf('id="projectStatus"') < html.indexOf('class="project-toolbar"'));
 
   // 实时草稿默认关闭，改回 true 即可恢复（函数都保留着）
   assert.match(html, /const DRAFT_AUTOSAVE = false;/);
@@ -1034,12 +1044,12 @@ test('profit module consolidates ad inputs and cost rates, with variants on the 
   assert.match(html, /\.profit-result-bars \.metric \{[^}]*border: 1px solid var\(--border-color\);/s);
 });
 
-test('result rows lead with profit, margin and total cost, and low margins are flagged red', () => {
+test('result rows lead with margin, then profit and total cost, and low margins are flagged red', () => {
   const profitMarkup = html.slice(html.indexOf('id="profitDetail"'), html.indexOf('<!-- 格式转换 -->'));
   const at = id => profitMarkup.indexOf(`id="${id}"`);
 
-  assert.ok(at('profitValue') < at('profitMarginValue'), 'profit per unit is the first row');
-  assert.ok(at('profitMarginValue') < at('profitTotalCostValue'), 'margin comes before total cost');
+  assert.ok(at('profitMarginValue') < at('profitValue'), 'margin is the first row');
+  assert.ok(at('profitValue') < at('profitTotalCostValue'), 'profit comes before total cost');
   assert.ok(at('profitTotalCostValue') < at('profitPurchaseValue'), 'total cost leads the cost breakdown');
 
   assert.match(html, /const PROFIT_MARGIN_WARNING = 0\.1;/);
@@ -1048,8 +1058,9 @@ test('result rows lead with profit, margin and total cost, and low margins are f
   assert.equal((html.match(/setProfitMarginMetric\('profitMarginValue'/g) ?? []).length, 2);
 });
 
-test('profit sections share one spacing rhythm, keep basic row borders and drop the extra frames', () => {
-  assert.match(html, /\.profit-grid \{ grid-template-columns: 1fr; border: 0; padding: 0; \}/);
+test('profit sections share one spacing rhythm, keep basic row borders and the module frame', () => {
+  // 与「运费与仓储计算」同款外框：沿用 .calculator-grid 的边框与内边距
+  assert.match(html, /\.profit-grid \{ grid-template-columns: 1fr; \}/);
   assert.match(html, /\.profit-grid \.calculator-panel \{ border: 0; background: transparent; padding: 0; \}/);
   assert.match(html, /\.profit-embedded-block \{ margin: 0 0 12px; \}/);
   assert.match(html, /\.profit-grid > \.calculator-panel > \.calculator-fields \{ margin: 0 0 12px; \}/);
@@ -1058,6 +1069,16 @@ test('profit sections share one spacing rhythm, keep basic row borders and drop 
   // 结果行保留基础边框
   assert.match(html, /\.profit-result-bars \.metric \{[^}]*border: 1px solid var\(--border-color\);/s);
   assert.match(html, /\.profit-result-bars \.metric \{[^}]*background: var\(--surface-raised\);/s);
+  // 同类元素的间距统一：结果行/空指标格 4px，共用 .metric 内边距
+  assert.match(html, /\.metric-grid \{ display: grid;[^}]*gap: 4px; \}/);
+  assert.match(html, /\.profit-breakdown \{ display: grid; gap: 4px; margin-top: 6px; \}/);
+  assert.match(html, /\.metric \{ border: 1px solid #222; padding: 6px 8px;/);
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*padding: 6px 8px;/s);
+  assert.match(html, /\.cargo-summary div \{[^}]*padding: 6px 8px;/s);
+  assert.match(html, /\.fba-rule-row \{[^}]*padding: 6px 8px;/s);
+  assert.match(html, /\.calculator-panel \{ border: 1px solid #292929; background: #0b0b0b; padding: 8px;/);
+  // 数字等宽，纵向可对齐
+  assert.match(html, /\.metric strong \{[^}]*font-variant-numeric: tabular-nums;/s);
 });
 
 test('freight and storage detail rows match the profit row form', () => {
