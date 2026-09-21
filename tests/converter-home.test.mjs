@@ -1030,9 +1030,8 @@ test('profit module consolidates ad inputs and cost rates, with variants on the 
   assert.ok(variantAt > targetsAt, 'variant panel belongs to the right column, after the target section');
   assert.ok(!html.slice(0, profitStart).includes('id="variantPanel"'), 'variant panel left the freight module');
 
-  // 结果行改成紧凑清单：去掉每项方框
-  assert.match(html, /\.profit-result-bars \.metric \{[^}]*border:\s*0;/s);
-  assert.match(html, /\.profit-result-bars \.metric:nth-child\(even\) \{ background: var\(--surface-muted\); \}/);
+  // 结果行保持基础边框，紧凑但不裸奔
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*border: 1px solid var\(--border-color\);/s);
 });
 
 test('result rows lead with profit, margin and total cost, and low margins are flagged red', () => {
@@ -1049,32 +1048,49 @@ test('result rows lead with profit, margin and total cost, and low margins are f
   assert.equal((html.match(/setProfitMarginMetric\('profitMarginValue'/g) ?? []).length, 2);
 });
 
-test('profit sections share one spacing rhythm and drop the extra frames', () => {
+test('profit sections share one spacing rhythm, keep basic row borders and drop the extra frames', () => {
   assert.match(html, /\.profit-grid \{ grid-template-columns: 1fr; border: 0; padding: 0; \}/);
   assert.match(html, /\.profit-grid \.calculator-panel \{ border: 0; background: transparent; padding: 0; \}/);
   assert.match(html, /\.profit-embedded-block \{ margin: 0 0 12px; \}/);
   assert.match(html, /\.profit-grid > \.calculator-panel > \.calculator-fields \{ margin: 0 0 12px; \}/);
   assert.match(html, /\.profit-results \.profit-breakdown\.profit-result-bars \{[^}]*gap: 4px;/);
   assert.match(html, /\.profit-result-bars \.profit-bar-ratio \{[^}]*1\.25rem[^}]*text-align: left;/);
+  // 结果行保留基础边框
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*border: 1px solid var\(--border-color\);/s);
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*background: var\(--surface-raised\);/s);
 });
 
-test('profit results show one CNY price per row, and monthly totals still add USD', () => {
+test('freight and storage detail rows match the profit row form', () => {
+  assert.match(html, /\.cargo-summary \{[^}]*gap: 4px 8px;/s);
+  assert.match(html, /\.cargo-summary div \{[^}]*border: 1px solid var\(--border-color\);/s);
+  assert.match(html, /\.fba-rule-list \{[^}]*gap: 4px;/s);
+  assert.match(html, /\.fba-rule-row \{[^}]*border: 1px solid var\(--border-color\);/s);
+  assert.match(html, /\.fba-basis \{[^}]*border: 1px solid var\(--border-color\);/s);
+});
+
+test('profit results show market currency plus CNY, and the bar rows never repeat the price', () => {
   for (const required of [
-    'id="profitPurchaseValue"', 'id="profitPurchaseTotalValue"',
-    'id="profitFreightValue"', 'id="profitFbaValue"', 'id="profitStorageValue"', 'id="profitAdValue"',
-    'id="profitTotalCostValue"', 'id="profitValue"', 'id="profitMaxCpcValue"', 'id="profitMaxPurchaseValue"',
+    'id="profitPurchaseValue"', 'id="profitPurchaseCnyValue"', 'id="profitPurchaseTotalValue"',
+    'id="profitFreightCnyValue"', 'id="profitFbaCnyValue"', 'id="profitStorageCnyValue"', 'id="profitAdCnyValue"',
+    'id="profitTotalCostCnyValue"', 'id="profitCnyValue"', 'id="profitMaxCpcCnyValue"', 'id="profitMaxPurchaseCnyValue"',
     'id="profitFreightTotalValue"', 'id="profitFbaTotalValue"', 'id="profitStorageTotalValue"', 'id="profitAdTotalValue"', 'id="profitTotalCostTotalValue"', 'id="profitTotalValue"',
     'class="metric-money"', 'class="metric-total"', 'function rmbMoney', 'function setProfitMoneyMetric', 'function setProfitTotalMetric',
     'class="profit-breakdown profit-result-bars"', 'function initProfitResultBars', 'function setProfitBarRatio', 'function setProfitBarMetric',
     'const PROFIT_BAR_METRICS', "'profitPurchaseRatio'", "'profitProfitRatio'", "'profitMarginRatio'",
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
-  // 每行只保留一个价格：站点币种列已移除
-  assert.doesNotMatch(html, /class="metric-rmb" id="profit\w+CnyValue"/);
-  assert.doesNotMatch(html.slice(html.indexOf('id="profitDetail"'), html.indexOf('<!-- 格式转换 -->')), /class="metric-rmb"/);
+  // 右侧金额保留 站点币种 + 人民币 双显示
   const moneySrc = extractFunctionSource('setProfitMoneyMetric');
-  assert.match(moneySrc, /rmbMoney\(value, fx\)/);
-  assert.doesNotMatch(moneySrc, /money\(value\)/);
+  assert.match(moneySrc, /valueEl\.textContent = money\(value\)/);
+  assert.match(moneySrc, /rmbEl\.textContent = rmbMoney\(value, fx\)/);
+
+  // 重复的是数据条上的美元文案：条上只留涨跌幅，完整数值放悬停提示
+  const barsSrc = extractFunctionSource('renderProfitBars');
+  assert.match(barsSrc, /<b>\$\{delta\}<\/b>/);
+  assert.doesNotMatch(barsSrc, /<b>\$\{projectEscapeHtml\(text\)\}/);
+  assert.match(barsSrc, /title="\$\{projectEscapeHtml\(label\)\}：\$\{projectEscapeHtml\(text\)\}"/);
+  const dupCount = (barsSrc.match(/formatCompareValue\(value, item, kind\)/g) ?? []).length;
+  assert.equal(dupCount, 1, 'the formatted price is only used for the hover tooltip');
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
   assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);

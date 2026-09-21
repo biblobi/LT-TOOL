@@ -127,6 +127,7 @@ test('marketplace UI exposes UK/EU automatic fees and official sources', () => {
 test('profit breakdown exposes purchase per unit and total purchase cost', () => {
   for (const required of [
     'id="profitPurchaseValue"',
+    'id="profitPurchaseCnyValue"',
     'id="profitPurchaseTotalValue"',
     "setProfitTotalMetric('profitPurchaseTotalValue', result.purchase, fx, monthlyUnits)",
     "setProfitTotalMetric('profitPurchaseTotalValue', weightedPurchase, fx, monthlyUnits)",
