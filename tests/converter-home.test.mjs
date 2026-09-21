@@ -15,8 +15,11 @@ test('profit calculator is the default home module and first navigation item', (
   assert.match(html, /<link rel="icon" href="data:,">/);
   assert.match(
     html,
-    /<button class="nav-btn active" onclick="switchTab\('profit'\)">利润测算<\/button>/,
+    /<button class="nav-btn active" onclick="switchTab\('profit'\)"><span class="nav-label">利润测算<\/span><\/button>/,
   );
+  // 导航按钮是正方形，文字用 .nav-label 锁成每行两个字
+  assert.match(html, /\.nav-label \{[^}]*width: 2\.4em/);
+  assert.match(html, /\.nav-btn,\s*\n\s*\.converter-jump \{[\s\S]*?aspect-ratio: 1 \/ 1;/);
   assert.match(html, /<div id="module-profit" class="container converter-home active">/);
   assert.match(html, /<div id="module-converter" class="container converter-home">/);
   assert.doesNotMatch(html, /<div id="module-pdf" class="container active">/);
@@ -355,15 +358,17 @@ test('FBA basis stays side-by-side until a phone-width breakpoint', () => {
   assert.match(html, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.cargo-layout\s*\{\s*grid-template-columns:\s*1fr/s);
 });
 
-test('FBA and cargo inputs are statically located in the freight calculator before advertising', () => {
+test('FBA and cargo inputs are statically located in the freight calculator above the profit module', () => {
   const cargoStart = html.indexOf('id="cargo-check"');
   const freightStart = html.indexOf('id="module-freight"');
-  const adStart = html.indexOf('id="module-adcalc"');
   const profitStart = html.indexOf('id="profitDetail"');
-  const freightEnd = html.indexOf('<div id="module-adcalc"', freightStart);
+  const adStart = html.indexOf('id="module-adcalc"');
   assert.equal((html.match(/id="cargo-check"/g) ?? []).length, 1);
-  assert.ok(cargoStart > freightStart && cargoStart < freightEnd);
-  assert.ok(freightStart < adStart && adStart < profitStart);
+  assert.ok(cargoStart > freightStart && cargoStart < profitStart, 'cargo inputs stay inside the freight module');
+  assert.ok(freightStart < profitStart, 'freight module stays above the profit module');
+  // 广告费换算已并入利润测算模块内部
+  assert.ok(adStart > profitStart, 'advertising calculator is nested inside the profit module');
+  assert.ok(html.indexOf('class="profit-layout"') > adStart, 'ad block sits above the profit result layout');
   assert.doesNotMatch(html, /function moveCargoCheckIntoProfit/);
 });
 
@@ -822,7 +827,7 @@ test('POS is editable and back-solves ad orders without touching monthly units',
 
 test('ad price is the first advertising input and tax discount defaults to zero', () => {
   const adStart = html.indexOf('id="module-adcalc"');
-  const adEnd = html.indexOf('id="profitDetail"', adStart);
+  const adEnd = html.indexOf('<!-- /module-adcalc -->', adStart);
   const adMarkup = html.slice(adStart, adEnd);
   assert.ok(adMarkup.indexOf('id="adPrice"') < adMarkup.indexOf('id="adCpc"'));
   assert.match(html, /id="profitTaxDiscount"[^>]*value="0"/);
@@ -830,7 +835,7 @@ test('ad price is the first advertising input and tax discount defaults to zero'
 
 test('PPC explanations use the complete field label as the hover and keyboard target', () => {
   const adStart = html.indexOf('id="module-adcalc"');
-  const adEnd = html.indexOf('id="profitDetail"', adStart);
+  const adEnd = html.indexOf('<!-- /module-adcalc -->', adStart);
   const adMarkup = html.slice(adStart, adEnd);
   const tooltipLabels = adMarkup.match(/class="field-label term-tip" tabindex="0" data-tip="[^"]+"/g) ?? [];
 
@@ -841,7 +846,7 @@ test('PPC explanations use the complete field label as the hover and keyboard ta
 
 test('advertising inputs and outputs share one calculation panel', () => {
   const adStart = html.indexOf('id="module-adcalc"');
-  const adEnd = html.indexOf('id="profitDetail"', adStart);
+  const adEnd = html.indexOf('<!-- /module-adcalc -->', adStart);
   const adMarkup = html.slice(adStart, adEnd);
 
   assert.equal((adMarkup.match(/<section class="calculator-panel">/g) ?? []).length, 1);
@@ -917,7 +922,7 @@ test('optional advertising inputs are visually de-emphasised and can be auto-der
   assert.match(html, /if \(!editingPos\) autoFillOrdersFromClicks\(clicks, inputNumber\('adCvr'\)\);/);
 });
 
-test('inputs are auto-saved to a browser-local draft and restored on reload', () => {
+test('draft autosave is off by default and products are stored locally only', () => {
   for (const required of [
     'DRAFT_KEY', 'LT_DRAFT_V1', 'DRAFT_SCOPE', 'DRAFT_DELAY_MS',
     'function draftInScope', 'function draftStoragePlan', 'function collectDraft',
@@ -926,13 +931,31 @@ test('inputs are auto-saved to a browser-local draft and restored on reload', ()
     'id="draftStatus"', 'id="draftClearButton"', 'initDraft();', 'installDraftAutosave();',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
-  // 只在相关模块范围内触发，避免汇率换算等模块的输入也写草稿
+  // 实时草稿默认关闭，改回 true 即可恢复（函数都保留着）
+  assert.match(html, /const DRAFT_AUTOSAVE = false;/);
+  assert.match(extractFunctionSource('installDraftAutosave'), /if \(!DRAFT_AUTOSAVE\) return;/);
+
+  // 关闭分支：不写初始快照、不自动恢复
+  const initSrc = extractFunctionSource('initDraft');
+  const guardAt = initSrc.indexOf('if (!DRAFT_AUTOSAVE)');
+  assert.ok(guardAt > -1, 'initDraft should branch on the autosave switch');
+  const offBranch = initSrc.slice(guardAt, initSrc.indexOf('return;', guardAt));
+  assert.ok(initSrc.indexOf('updateDraftClearButton()') < guardAt, 'clear button refresh must run before the guard');
+  assert.ok(!offBranch.includes('saveDraft()'), 'disabled path must not write a snapshot');
+  assert.ok(!offBranch.includes('applyDraft('), 'disabled path must not restore a draft');
+
+  // 清除按钮只看浏览器里有没有旧草稿，不再依赖「用户是否编辑过」
+  assert.match(html, /button\.hidden = !draftExists\(\);/);
+
+  // 保存链路只写 localStorage，没有任何上传
+  assert.match(extractFunctionSource('saveProjectsToStorage'), /localStorage\.setItem\(PROJECTS_KEY/);
+  for (const fn of ['saveProject', 'saveProjectsToStorage', 'exportProjects']) {
+    const src = extractFunctionSource(fn);
+    assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon/.test(src), `${fn} must not talk to a server`);
+  }
+
+  // 草稿数据结构仍然覆盖 12 个月计划表，而不只是 PROJECT_FIELD_TYPES 里的字段
   assert.match(html, /const DRAFT_SCOPE = \['#module-freight', '#module-adcalc', '#profitDetail'\];/);
-  assert.match(html, /window\.addEventListener\('beforeunload', flushDraftSave\)/);
-  assert.match(html, /addEventListener\('visibilitychange', \(\) => \{ if \(document\.visibilityState === 'hidden'\) flushDraftSave\(\); \}\)/);
-  // 首次访问存下的默认快照不算草稿，清除按钮不应立刻出现
-  assert.match(html, /button\.hidden = !\(hasDraft && draftUserEdited\);/);
-  // 草稿要覆盖 12 个月计划表，而不只是 PROJECT_FIELD_TYPES 里的字段
   assert.match(html, /plan\[`sales\$\{index\}`\] = document\.getElementById\(`storageSales\$\{index\}`\)\?\.value \?\? '';/);
 });
 
@@ -974,9 +997,10 @@ test('FBA inputs expose editable centimetre-inch and kilogram-pound pairs', () =
   assert.doesNotMatch(html, /setLabel\('profitFbaLabel'/);
 });
 
-test('calculator module headings are siblings and freight owns the market selector', () => {
+test('module headings: freight owns the market selector and advertising is a section inside profit', () => {
   assert.match(html, /<h2 class="calculator-module-title"><span>运费与仓储计算<\/span><span class="heading-controls">[\s\S]*?id="marketCountry"[\s\S]*?id="profitFx"[\s\S]*?id="profitRateUpdate"/);
-  assert.match(html, /<h2 class="calculator-module-title"><span class="term-tip"[^>]*>广告费换算<\/span><\/h2>/);
+  // 广告费换算已并入利润测算，降级为模块内小节标题（不再是与运费/利润并列的 h2）
+  assert.match(html, /<div class="profit-section-title"><span class="term-tip"[^>]*>广告费换算<\/span><\/div>/);
   assert.match(html, /<h2 class="calculator-module-title"><span class="term-tip"[^>]*>利润测算<\/span>[\s\S]*?<\/h2>/);
   assert.match(html, /\.calculator-module-title\s*\{[\s\S]*?font:\s*700\s+1rem/s);
   assert.equal((html.match(/id="marketCountry"/g) ?? []).length, 1);
@@ -988,6 +1012,27 @@ test('calculator module headings are siblings and freight owns the market select
   assert.match(html, /\.fba-rule-value \.metric-value\s*\{\s*color:\s*#aaa/);
   assert.doesNotMatch(html, /重货\/抛货判断|头程、仓储与 FBA|Amazon FBA · 2026 美国站估算/);
   assert.match(html, /\.freight-grid \.cargo-check\s*\{[^}]*border:\s*0/s);
+});
+
+test('profit module consolidates ad inputs and cost rates, with variants on the right column', () => {
+  const profitStart = html.indexOf('id="profitDetail"');
+  const profitEnd = html.indexOf('<!-- 格式转换 -->', profitStart);
+  const profitMarkup = html.slice(profitStart, profitEnd);
+  const layoutAt = profitMarkup.indexOf('class="profit-layout"');
+  const targetsAt = profitMarkup.indexOf('class="profit-column profit-targets"');
+  const variantAt = profitMarkup.indexOf('id="variantPanel"');
+
+  assert.ok(layoutAt > -1 && targetsAt > -1 && variantAt > -1);
+  assert.ok(profitMarkup.includes('id="module-adcalc"'), 'ad calculator merged into the profit module');
+  assert.ok(profitMarkup.indexOf('id="module-adcalc"') < layoutAt, 'ad block sits above the result layout');
+  assert.ok(profitMarkup.indexOf('id="profitFreightRate"') < layoutAt, 'freight rate input moved into the profit module');
+  assert.ok(profitMarkup.indexOf('id="profitReturnRate"') < layoutAt, 'return rate input moved into the profit module');
+  assert.ok(variantAt > targetsAt, 'variant panel belongs to the right column, after the target section');
+  assert.ok(!html.slice(0, profitStart).includes('id="variantPanel"'), 'variant panel left the freight module');
+
+  // 结果行改成紧凑清单：去掉每项方框
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*border:\s*0;/s);
+  assert.match(html, /\.profit-result-bars \.metric:nth-child\(even\) \{ background: var\(--surface-muted\); \}/);
 });
 
 test('profit results show per-unit market-currency and CNY values, and monthly totals add USD', () => {

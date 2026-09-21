@@ -131,16 +131,24 @@
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-            min-height: 40px;
-            padding: 8px;
+            min-height: 0;
+            padding: 4px;
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.84rem;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
             text-transform: uppercase;
-            text-align: left;
+            text-align: center;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
+        /* 标签宽度锁在两个字，中文按字换行，形成 2×2 的方块文字 */
+        .nav-label { display: block; width: 2.4em; margin: 0 auto; line-height: 1.15; text-align: center; }
 
         .nav-btn:hover, .nav-btn.active,
         .converter-jump:hover, .converter-jump:focus-visible {
@@ -530,6 +538,9 @@
         .source-note { color: #666; font-size: 0.72rem; line-height: 1.45; margin: 8px 0 0; border-top: 1px solid #202020; padding-top: 7px; }
         .profit-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 12px; align-items: start; }
         .profit-column { min-width: 0; }
+        /* 广告费换算并入利润测算后，外层不再套 calculator-home（会带来 100vh 高度）与 calculator-grid（会带来额外边框） */
+        .profit-embedded-block { margin-bottom: 8px; }
+        .profit-embedded-block .profit-section-title { margin-top: 4px; }
         .profit-section-title { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 1rem; font-weight: 700; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         .profit-breakdown { display: grid; gap: 6px; margin-top: 8px; }
         .profit-results .calculator-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -835,28 +846,30 @@
         .quick-cost-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
         .quick-cost-track { height: 8px; background: var(--surface-muted); overflow: hidden; }
         .quick-cost-track i { display: block; height: 100%; background: var(--accent); }
-        .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 8px; }
+        .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 2px; }
+        /* 结果行改为无边框的紧凑清单：去掉每项方框，用隔行底色区分行 */
         .profit-result-bars .metric {
             display: grid;
-            grid-template-columns: minmax(100px, 0.7fr) minmax(120px, 2fr) 64px minmax(240px, 1.3fr);
-            gap: 10px;
+            grid-template-columns: minmax(96px, 0.7fr) minmax(120px, 2fr) 58px minmax(240px, 1.3fr);
+            gap: 8px;
             align-items: center;
             min-height: 0;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            background: var(--surface-raised);
+            padding: 4px 8px;
+            border: 0;
+            background: transparent;
             color: var(--text-muted);
             font-size: 1rem;
         }
+        .profit-result-bars .metric:nth-child(even) { background: var(--surface-muted); }
         .profit-result-bars .metric > .term-tip { font-size: 1rem; }
         .profit-result-bars .profit-bar-stack { width: 100%; }
         .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
         .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1rem 'Share Tech Mono', monospace; text-align: right; white-space: nowrap; }
-        .profit-result-bars .metric-action { display: grid; gap: 3px; }
+        .profit-result-bars .metric-action { display: grid; gap: 2px; }
         .profit-result-bars .metric-money { justify-content: flex-start; gap: 10px; margin-top: 0; }
-        .profit-result-bars .metric-money strong { font-size: 1.15rem; }
-        .profit-result-bars .metric-rmb { font-size: 0.95rem; }
-        .profit-result-bars .metric-total { margin-top: 1px; padding-top: 3px; font-size: 0.9rem; }
+        .profit-result-bars .metric-money strong { font-size: 1.08rem; }
+        .profit-result-bars .metric-rmb { font-size: 0.9rem; }
+        .profit-result-bars .metric-total { margin-top: 0; padding-top: 0; font-size: 0.86rem; }
         .profit-result-bars .metric.negative .profit-bar-ratio { color: var(--danger); }
         .quick-risk-list { margin: 0; padding-left: 20px; color: var(--text-muted); display: grid; gap: 7px; }
         .quick-risk-list .warning { color: var(--danger); }
@@ -878,15 +891,15 @@
 <body>
 
     <div class="nav-deck">
-        <button class="nav-btn active" onclick="switchTab('profit')">利润测算</button>
-        <button class="nav-btn" onclick="switchTab('converter')">单位换算</button>
-        <button class="nav-btn" onclick="switchTab('pdf')">PDF 聚合</button>
-        <button class="nav-btn" onclick="switchTab('image')">格式转换</button>
-        <button class="nav-btn" onclick="switchTab('removebg')">背景移除</button>
-        <button class="nav-btn" onclick="switchTab('currency')">实时汇率</button>
-        <button class="nav-btn" onclick="switchTab('guide')">功能说明</button>
+        <button class="nav-btn active" onclick="switchTab('profit')"><span class="nav-label">利润测算</span></button>
+        <button class="nav-btn" onclick="switchTab('converter')"><span class="nav-label">单位换算</span></button>
+        <button class="nav-btn" onclick="switchTab('pdf')"><span class="nav-label">PDF 聚合</span></button>
+        <button class="nav-btn" onclick="switchTab('image')"><span class="nav-label">格式转换</span></button>
+        <button class="nav-btn" onclick="switchTab('removebg')"><span class="nav-label">背景移除</span></button>
+        <button class="nav-btn" onclick="switchTab('currency')"><span class="nav-label">实时汇率</span></button>
+        <button class="nav-btn" onclick="switchTab('guide')"><span class="nav-label">功能说明</span></button>
         <div class="nav-divider" aria-hidden="true"></div>
-        <button id="themeToggle" class="nav-btn theme-toggle" type="button" onclick="toggleTheme()" aria-pressed="false">切换深色</button>
+        <button id="themeToggle" class="nav-btn theme-toggle" type="button" onclick="toggleTheme()" aria-pressed="false"><span class="nav-label">切换深色</span></button>
     </div>
 
     <!-- PDF 模块 -->
@@ -1051,16 +1064,6 @@
                             <div class="fba-basis"><div class="section-title fba-basis-heading">尺寸分级依据（实际 / 上限）</div><div id="fbaRuleSummary">-</div><div id="fbaTriggerValue" class="fba-trigger">-</div></div>
                         </div>
                     </div>
-                    <details id="variantPanel" class="storage-forecast-panel variant-panel" aria-labelledby="variantTitle">
-                        <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="variantTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="同一产品可配置多个变体（如颜色/款式）。变体规格相同（仅售价不同）时共用上方尺寸/实重；规格不同时可单独填写尺寸与实重。广告费换算按销量分布分摊，利润测算按变体拆分计算并汇总。">产品变体（可选）</span></span><span class="storage-forecast-source">多 SKU 利润拆分</span></summary>
-                        <div class="variant-controls">
-                            <label class="storage-switch"><input id="variantsEnabled" type="checkbox" onchange="onVariantsToggle()"><span class="term-tip" tabindex="0" data-tip="开启后按变体计算：各变体独立售价与销量占比，广告与利润按销量分布分摊；主变体售价取运费模块的售价输入。关闭后为单产品模式。">启用多变体</span></label>
-                            <label class="storage-switch"><input id="variantsSameSpec" type="checkbox" checked onchange="onVariantsToggle()"><span class="term-tip" tabindex="0" data-tip="勾选：所有变体共用上方填写的尺寸与实重（仅售价不同）。取消：每个变体可单独填写尺寸与实重，配送费按各自规格与售价档位计算。">所有变体规格相同</span></label>
-                            <button id="variantAddButton" type="button" onclick="addVariant()">+ 添加变体</button>
-                        </div>
-                        <div id="variantList"></div>
-                        <p id="variantStatus" class="storage-forecast-status"></p>
-                    </details>
                     <details id="storageForecastPanel" class="storage-forecast-panel" aria-labelledby="storageForecastTitle">
                         <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="storageForecastTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="美国站非危险品 FBA 月度仓储：按日均库存体积、月份费率和滚动 13 周库存利用率估算。22 周以上为库存利用率附加费，不是单批货物库龄费。">仓储费每月详细计算（美国）</span><button id="storageExpandButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="storageForecastPanel" onclick="toggleStorageForecast(event)">展开明细</button><button id="feeConfigToggleButton" class="storage-expand-button" type="button" aria-expanded="false" aria-controls="feeConfigPanel" onclick="toggleFeeConfigPanel(event)">费率设置</button></span><span class="storage-forecast-source">2026 美国站非危险品费率参考</span></summary>
                         <div class="storage-control-grid">
@@ -1157,43 +1160,46 @@
                             </div>
                         </div>
                     </details>
-                    <div class="calculator-fields">
-                        <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label id="legacyStorageRateField"><span id="profitStorageLabel" class="term-tip" tabindex="0" data-tip="非美国站仓储/件 = 包装体积（立方米）× 35.3147 × 仓储单价 × 平均库存月数。">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><label id="legacyStorageMonthsField"><span class="term-tip" tabindex="0" data-tip="非美国站使用手动平均库存月数估算仓储成本。">平均库存月数</span><input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="退货率用于估算售价损失；退货处理费按每件退货额外计入成本。两者共同影响退货成本和利润。">退货率 %</span><input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel" class="term-tip" tabindex="0" data-tip="亚马逊 Refund Administration Fee：退货处理费 = 售价 × 平台佣金率 × 20%（亚马逊退还佣金的 80%，卖家承担 20%）。自动计算，随售价与佣金率变化，按退货率折算后计入退货成本。">退货处理费（目标币/件·自动）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" readonly oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
-                    </div>
-                </section>
-            </div>
-        </div>
-        <div id="module-adcalc" class="calculator-home embedded-calculator">
-            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">广告费换算</span></h2>
-            <div class="calculator-grid ad-calculator-grid">
-                <section class="calculator-panel">
-                    <div class="calculator-fields">
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="单件商品的销售价格。"><span id="adPriceLabel">售价</span><span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator(); updateCargoCheck()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。"><span>CPC</span><span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数（选填）。填写后会按 CVR 自动推算广告订单量。"><span>月点击量</span><span class="field-hint">Clicks</span><span class="field-optional-tag">选填</span></span><input id="adClicks" class="is-optional" type="number" min="0" step="1" placeholder="输入月点击量（选填）" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="由广告归因带来的订单数（选填）。留空时如果已有月点击量与 CVR，会自动填充；手动填写或清空后不再自动覆盖。"><span>广告订单量</span><span class="field-hint">Paid orders</span><span class="field-optional-tag">选填</span></span><input id="adOrders" class="is-optional" type="number" min="0" step="1" placeholder="输入广告订单量（选填）" oninput="markOrdersEdited(); updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"><span>CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
-                        <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于自动计算广告订单占比 POS。"><span>月销量</span><span class="field-hint">总订单</span><span class="field-optional-tag">选填</span></span><input id="adMonthlyUnits" class="is-optional" type="number" min="0" step="1" placeholder="输入月销量（选填）" oninput="updateAdCalculator()"></label>
-                    </div>
-                    <div class="metric-grid">
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位 CPA 所需输入"><strong id="adCpaValue">-</strong></button></div><div class="metric metric-pos"><span class="term-tip" tabindex="0" data-tip="广告订单占比 POS = 广告订单量 ÷ 月销量。可直接填写：月销量保持不变，自动反推广告订单量；月点击量、CVR 与 CPA 不受影响。月销量未填写时不可填写。">POS</span><span class="metric-action metric-pos-action" data-inputs="adPosInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();guideCalculationInputs(this);}" aria-label="定位 POS 所需输入"><span class="metric-pos-field"><input id="adPosInput" type="number" min="0" max="100" step="0.01" placeholder="先填月销量" aria-label="广告订单占比 POS（百分比）" onfocus="markPosEditing(true)" onblur="markPosEditing(false); updateAdCalculator()" onclick="event.stopPropagation()" oninput="markPosEditing(true); updateAdCalculator()"><span class="metric-pos-unit">%</span></span></span></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACOS 所需输入"><strong id="adAcosValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACoAS 所需输入"><strong id="adAcoasValue">-</strong></button></div>
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ROAS 所需输入"><strong id="adRoasValue">-</strong></button></div>                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位混合广告费所需输入"><strong id="adBlendedCostValue">-</strong></button></div>
-                    </div>
-                    <div id="adVariantBlock" class="variant-ad-block" style="display:none">
-                        <div class="section-title">变体销量分布</div>
-                        <table class="variant-table" aria-label="变体销量分布">
-                            <thead><tr><th>变体</th><th>售价</th><th>销量占比</th><th>预估月销量</th><th>广告成本/件</th></tr></thead>
-                            <tbody id="adVariantRows"></tbody>
-                        </table>
-                        <div class="variant-summary">加权平均售价：<strong id="adWeightedPrice">-</strong><span id="adWeightedAcosWrap">加权 ACOS：<strong id="adWeightedAcos">-</strong></span><span id="adWeightedBlendedWrap">加权混合广告费/件：<strong id="adWeightedBlended">-</strong></span></div>
-                    </div>
                 </section>
             </div>
         </div>
         <div id="profitDetail" class="calculator-home embedded-calculator">
-            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><details id="compareDropdown" class="compare-dropdown"><summary class="project-btn compare-dropdown-toggle" id="compareDropdownToggle">对比产品<span id="compareCountBadge" class="compare-count-badge" hidden>0</span></summary><div class="compare-dropdown-body"><div class="compare-dropdown-list" id="compareProjectChecks"></div><div class="compare-dropdown-tools"><label class="storage-switch"><input id="compareToCny" type="checkbox" onchange="renderCompare()"><span class="term-tip" tabindex="0" data-tip="勾选后对比条形按各自汇率折算成人民币；利润率等百分比不受影响。">折算人民币</span></label><button type="button" onclick="clearCompare()">清空</button><button type="button" onclick="exportCompareCsv()">导出 CSV</button></div><div class="profit-compare-warning" id="profitCompareWarning" hidden></div></div></details><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><button type="button" class="project-btn" onclick="exportProjects()">导出</button><button type="button" class="project-btn" onclick="document.getElementById('projectImportInput').click()">导入</button><input id="projectImportInput" type="file" accept="application/json,.json" hidden onchange="importProjects(this)"><button type="button" class="project-btn" id="draftClearButton" hidden onclick="clearDraft()">清除草稿</button><span id="draftStatus" class="draft-status" title="利润测算 / 广告费换算 / 运费与仓储里的输入会自动保存在本浏览器，刷新或重开页面后自动恢复；不会上传到任何服务器。">自动保存已开启</span><span id="projectStatus" class="project-status"></span></span></h2>
+            <h2 class="calculator-module-title"><span class="term-tip" tabindex="0" data-tip="利润 = 售价 − 采购 − 头程 − FBA 配送费 − FBA 入库配置费 − 仓储 − 广告 − 佣金 − 促销 − 退货。售价与广告成本统一取自广告费换算模块；仓储按体积、单价和库存月数估算。点击下方自动结果可定位仍需填写的输入。">利润测算</span><span class="project-toolbar"><input id="projectName" type="text" class="project-name-input" placeholder="输入产品名…" onkeydown="if(event.key==='Enter')saveProject()"><select id="projectSelect" class="project-select" onchange="loadProject(this.value)"><option value="">选择已保存产品…</option></select><details id="compareDropdown" class="compare-dropdown"><summary class="project-btn compare-dropdown-toggle" id="compareDropdownToggle">对比产品<span id="compareCountBadge" class="compare-count-badge" hidden>0</span></summary><div class="compare-dropdown-body"><div class="compare-dropdown-list" id="compareProjectChecks"></div><div class="compare-dropdown-tools"><label class="storage-switch"><input id="compareToCny" type="checkbox" onchange="renderCompare()"><span class="term-tip" tabindex="0" data-tip="勾选后对比条形按各自汇率折算成人民币；利润率等百分比不受影响。">折算人民币</span></label><button type="button" onclick="clearCompare()">清空</button><button type="button" onclick="exportCompareCsv()">导出 CSV</button></div><div class="profit-compare-warning" id="profitCompareWarning" hidden></div></div></details><button type="button" class="project-btn" onclick="saveProject()">保存产品</button><button type="button" class="project-btn project-btn-danger" onclick="deleteProject()">删除</button><button type="button" class="project-btn" onclick="exportProjects()">导出</button><button type="button" class="project-btn" onclick="document.getElementById('projectImportInput').click()">导入</button><input id="projectImportInput" type="file" accept="application/json,.json" hidden onchange="importProjects(this)"><button type="button" class="project-btn" id="draftClearButton" hidden onclick="clearDraft()">清除草稿</button><span id="draftStatus" class="draft-status" title="输入不会自动保存，也不会上传到任何服务器；需要留存请点「保存产品」，数据只写入本浏览器本地存储。">自动保存已开启</span><span id="projectStatus" class="project-status"></span></span></h2>
             <div class="calculator-grid profit-grid">
                 <section class="calculator-panel full">
+                    <div id="module-adcalc" class="profit-embedded-block">
+                    <div class="profit-section-title"><span class="term-tip" tabindex="0" data-tip="PPC 输入用于估算点击广告成本；POS、ACOS 与 ACoAS 由输入数据计算。">广告费换算</span></div>
+                    <div class="ad-calculator-grid">
+                    <section class="calculator-panel">
+                    <div class="calculator-fields">
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="单件商品的销售价格。"><span id="adPriceLabel">售价</span><span class="field-hint" id="adPriceUnit">美元</span></span><input id="adPrice" type="number" min="0" step="0.01" value="29.99" oninput="updateAdCalculator(); updateCargoCheck()"></label>
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="每次点击成本：广告花费 ÷ 广告点击量。"><span>CPC</span><span class="field-hint" id="adCpcUnit">美元/点击</span></span><input id="adCpc" type="number" min="0" step="0.01" value="0.80" oninput="updateAdCalculator()"></label>
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的广告点击总数（选填）。填写后会按 CVR 自动推算广告订单量。"><span>月点击量</span><span class="field-hint">Clicks</span><span class="field-optional-tag">选填</span></span><input id="adClicks" class="is-optional" type="number" min="0" step="1" placeholder="输入月点击量（选填）" oninput="updateAdCalculator()"></label>
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="由广告归因带来的订单数（选填）。留空时如果已有月点击量与 CVR，会自动填充；手动填写或清空后不再自动覆盖。"><span>广告订单量</span><span class="field-hint">Paid orders</span><span class="field-optional-tag">选填</span></span><input id="adOrders" class="is-optional" type="number" min="0" step="1" placeholder="输入广告订单量（选填）" oninput="markOrdersEdited(); updateAdCalculator()"></label>
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="广告转化率：广告订单量 ÷ 广告点击量；请按实际投放数据填写。"><span>CVR</span></span><input id="adCvr" type="number" min="0" max="100" step="0.01" value="10" oninput="updateAdCalculator()"></label>
+                    <label><span class="field-label term-tip" tabindex="0" data-tip="统计周期内的总订单量，用于自动计算广告订单占比 POS。"><span>月销量</span><span class="field-hint">总订单</span><span class="field-optional-tag">选填</span></span><input id="adMonthlyUnits" class="is-optional" type="number" min="0" step="1" placeholder="输入月销量（选填）" oninput="updateAdCalculator()"></label>
+                    </div>
+                    <div class="metric-grid">
+                    <div class="metric"><span class="term-tip" tabindex="0" data-tip="每个广告订单成本：每次点击成本 ÷ 广告转化率。">CPA</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位 CPA 所需输入"><strong id="adCpaValue">-</strong></button></div><div class="metric metric-pos"><span class="term-tip" tabindex="0" data-tip="广告订单占比 POS = 广告订单量 ÷ 月销量。可直接填写：月销量保持不变，自动反推广告订单量；月点击量、CVR 与 CPA 不受影响。月销量未填写时不可填写。">POS</span><span class="metric-action metric-pos-action" data-inputs="adPosInput,adMonthlyUnits" onclick="guideCalculationInputs(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();guideCalculationInputs(this);}" aria-label="定位 POS 所需输入"><span class="metric-pos-field"><input id="adPosInput" type="number" min="0" max="100" step="0.01" placeholder="先填月销量" aria-label="广告订单占比 POS（百分比）" onfocus="markPosEditing(true)" onblur="markPosEditing(false); updateAdCalculator()" onclick="event.stopPropagation()" oninput="markPosEditing(true); updateAdCalculator()"><span class="metric-pos-unit">%</span></span></span></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACOS（Advertising Cost of Sales）：广告费 ÷ 广告归因销售额，当前按 CPA ÷ 售价估算。">ACOS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACOS 所需输入"><strong id="adAcosValue">-</strong></button></div><div class="metric"><span class="term-tip" tabindex="0" data-tip="ACoAS（Advertising Cost of All Sales）：广告费 ÷ 全部销售额，按混合广告费/件 ÷ 售价估算。">ACoAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ACoAS 所需输入"><strong id="adAcoasValue">-</strong></button></div>
+                    <div class="metric"><span class="term-tip" tabindex="0" data-tip="广告投入产出比：商品销售额 ÷ 广告费。">ROAS</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位 ROAS 所需输入"><strong id="adRoasValue">-</strong></button></div>                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="混合广告费/件：按广告订单占比折算到每个总销量商品上的平均广告成本，即 CPA × POS。">混合广告费/件</span><button class="metric-action" type="button" data-inputs="adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位混合广告费所需输入"><strong id="adBlendedCostValue">-</strong></button></div>
+                    </div>
+                    <div id="adVariantBlock" class="variant-ad-block" style="display:none">
+                    <div class="section-title">变体销量分布</div>
+                    <table class="variant-table" aria-label="变体销量分布">
+                    <thead><tr><th>变体</th><th>售价</th><th>销量占比</th><th>预估月销量</th><th>广告成本/件</th></tr></thead>
+                    <tbody id="adVariantRows"></tbody>
+                    </table>
+                    <div class="variant-summary">加权平均售价：<strong id="adWeightedPrice">-</strong><span id="adWeightedAcosWrap">加权 ACOS：<strong id="adWeightedAcos">-</strong></span><span id="adWeightedBlendedWrap">加权混合广告费/件：<strong id="adWeightedBlended">-</strong></span></div>
+                    </div>
+                    </section>
+                    </div>
+                    </div>
+                    <!-- /module-adcalc -->
+                    <div class="profit-section-title">成本费率</div>
+                    <div class="calculator-fields">
+                    <label>头程（人民币/计费千克）<input id="profitFreightRate" type="number" min="0" step="0.01" value="8" oninput="updateProfitCalculator()"></label><label id="legacyStorageRateField"><span id="profitStorageLabel" class="term-tip" tabindex="0" data-tip="非美国站仓储/件 = 包装体积（立方米）× 35.3147 × 仓储单价 × 平均库存月数。">仓储（美元/立方英尺/月）</span><input id="profitStorageRate" data-market-default="1" type="number" min="0" step="0.001" value="0.78" oninput="this.dataset.marketDefault='0'; updateProfitCalculator()"></label><label id="legacyStorageMonthsField"><span class="term-tip" tabindex="0" data-tip="非美国站使用手动平均库存月数估算仓储成本。">平均库存月数</span><input id="profitInventoryMonths" type="number" min="0" step="0.01" value="1" oninput="updateProfitCalculator()"></label><label><span class="term-tip" tabindex="0" data-tip="退货率用于估算售价损失；退货处理费按每件退货额外计入成本。两者共同影响退货成本和利润。">退货率 %</span><input id="profitReturnRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label><label><span id="profitReturnLabel" class="term-tip" tabindex="0" data-tip="亚马逊 Refund Administration Fee：退货处理费 = 售价 × 平台佣金率 × 20%（亚马逊退还佣金的 80%，卖家承担 20%）。自动计算，随售价与佣金率变化，按退货率折算后计入退货成本。">退货处理费（目标币/件·自动）</span><input id="profitReturnHandling" type="number" min="0" step="0.01" value="0" readonly oninput="updateProfitCalculator()"></label><label>促销费 %<input id="profitPromoRate" type="number" min="0" max="100" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
+                    </div>
+
                     <div class="profit-layout">
                     <section class="profit-column profit-results" aria-labelledby="profitResultsHeading">
                     <div id="profitResultsHeading" class="profit-section-title">经营结果</div>
@@ -1239,6 +1245,16 @@
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="最大 CPC = 售价 × 保本 ACOS × CVR。">最大 CPC</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCvr" onclick="guideCalculationInputs(this)" aria-label="定位最大 CPC 所需输入"><span class="metric-money"><strong id="profitMaxCpcValue">-</strong><span class="metric-rmb" id="profitMaxCpcCnyValue">-</span></span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="目标采购上限 = 在目标利润率下可承受的最高采购成本，已考虑退税/折扣；下方同时显示站点币种和人民币。">目标采购上限</span><button class="metric-action" type="button" data-inputs="adPrice,profitTaxDiscount,profitReferralRate,profitPlacementFee,profitTargetMargin,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位目标采购上限所需输入"><span class="metric-money"><strong id="profitMaxPurchaseValue">-</strong><span class="metric-rmb" id="profitMaxPurchaseCnyValue">-</span></span></button></div>
                     </div>
+                    <details id="variantPanel" class="storage-forecast-panel variant-panel" aria-labelledby="variantTitle">
+                    <summary class="storage-forecast-toggle"><span class="storage-forecast-heading"><span id="variantTitle" class="storage-forecast-title term-tip" tabindex="0" data-tip="同一产品可配置多个变体（如颜色/款式）。变体规格相同（仅售价不同）时共用上方尺寸/实重；规格不同时可单独填写尺寸与实重。广告费换算按销量分布分摊，利润测算按变体拆分计算并汇总。">产品变体（可选）</span></span><span class="storage-forecast-source">多 SKU 利润拆分</span></summary>
+                    <div class="variant-controls">
+                    <label class="storage-switch"><input id="variantsEnabled" type="checkbox" onchange="onVariantsToggle()"><span class="term-tip" tabindex="0" data-tip="开启后按变体计算：各变体独立售价与销量占比，广告与利润按销量分布分摊；主变体售价取运费模块的售价输入。关闭后为单产品模式。">启用多变体</span></label>
+                    <label class="storage-switch"><input id="variantsSameSpec" type="checkbox" checked onchange="onVariantsToggle()"><span class="term-tip" tabindex="0" data-tip="勾选：所有变体共用上方填写的尺寸与实重（仅售价不同）。取消：每个变体可单独填写尺寸与实重，配送费按各自规格与售价档位计算。">所有变体规格相同</span></label>
+                    <button id="variantAddButton" type="button" onclick="addVariant()">+ 添加变体</button>
+                    </div>
+                    <div id="variantList"></div>
+                    <p id="variantStatus" class="storage-forecast-status"></p>
+                    </details>
                     </section>
                     </div>
                 </section>
@@ -2639,7 +2655,10 @@
         loadProjectsFromStorage();
     }
 
-    // ===== 输入自动保存（本地草稿）=====
+    // ===== 输入草稿（仅本地）=====
+    // 实时自动保存默认关闭：产品只在点「保存产品」时写入本浏览器，不随输入实时保存，也不上传。
+    // 想恢复实时草稿把 DRAFT_AUTOSAVE 改成 true 即可，相关函数都保留着。
+    const DRAFT_AUTOSAVE = false;
     const DRAFT_KEY = 'LT_DRAFT_V1';
     const DRAFT_SCOPE = ['#module-freight', '#module-adcalc', '#profitDetail'];
     const DRAFT_DELAY_MS = 500;
@@ -2692,13 +2711,19 @@
         el.classList.toggle('is-dirty', Boolean(dirty));
     }
 
+    function draftExists() {
+        try { return Boolean(localStorage.getItem(DRAFT_KEY)); } catch (error) { return false; }
+    }
+
+    function draftIdleStatus() {
+        return DRAFT_AUTOSAVE ? '自动保存已开启' : '自动保存已关闭';
+    }
+
     function updateDraftClearButton() {
         const button = document.getElementById('draftClearButton');
         if (!button) return;
-        let hasDraft = false;
-        try { hasDraft = Boolean(localStorage.getItem(DRAFT_KEY)); } catch (error) { hasDraft = false; }
-        // 首次访问自动存下的那份默认快照不算「草稿」，避免一进页面就出现清除按钮
-        button.hidden = !(hasDraft && draftUserEdited);
+        // 自动保存关闭后不再判断「用户是否编辑过」：只要浏览器里还留着旧草稿就给清除入口
+        button.hidden = !draftExists();
     }
 
     function saveDraft() {
@@ -2735,7 +2760,7 @@
         updateDraftClearButton();
         setDraftStatus('已清除本地草稿，刷新后回到默认值', false);
         if (draftResetTimer) clearTimeout(draftResetTimer);
-        draftResetTimer = setTimeout(() => setDraftStatus('自动保存已开启', false), 4000);
+        draftResetTimer = setTimeout(() => setDraftStatus(draftIdleStatus(), false), 4000);
     }
 
     function applyDraft(draft) {
@@ -2768,6 +2793,12 @@
     }
 
     function initDraft() {
+        updateDraftClearButton();
+        if (!DRAFT_AUTOSAVE) {
+            // 不自动保存、不自动恢复；只留清除入口，方便清掉旧版本遗留的草稿
+            setDraftStatus(draftExists() ? '自动保存已关闭（旧草稿可清除）' : draftIdleStatus(), false);
+            return;
+        }
         let draft = null;
         try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (error) { draft = null; }
         let restored = false;
@@ -2783,12 +2814,13 @@
             if (draftResetTimer) clearTimeout(draftResetTimer);
             draftResetTimer = setTimeout(() => setDraftStatus('已自动保存', false), 6000);
         } else {
-            setDraftStatus('自动保存已开启', false);
+            setDraftStatus(draftIdleStatus(), false);
             saveDraft();
         }
     }
 
     function installDraftAutosave() {
+        if (!DRAFT_AUTOSAVE) return;
         document.addEventListener('input', event => { if (draftInScope(event.target)) scheduleDraftSave(); }, true);
         document.addEventListener('change', event => { if (draftInScope(event.target)) scheduleDraftSave(); }, true);
         window.addEventListener('beforeunload', flushDraftSave);
@@ -3137,7 +3169,10 @@
         const button = document.getElementById('themeToggle');
         if (!button) return;
         const dark = currentTheme() === 'dark';
-        button.textContent = dark ? '切换浅色' : '切换深色';
+        const text = dark ? '切换浅色' : '切换深色';
+        // 按钮文字包在 .nav-label 里（方块两字换行），不能整体覆盖 textContent
+        const label = button.querySelector('.nav-label');
+        if (label) label.textContent = text; else button.textContent = text;
         button.setAttribute('aria-pressed', String(dark));
         button.setAttribute('aria-label', dark ? '当前为深色主题，切换到浅色主题' : '当前为浅色主题，切换到深色主题');
     }
