@@ -1090,6 +1090,38 @@ test('freight and storage detail rows match the profit row form', () => {
   assert.match(html, /\.fba-basis \{[^}]*border: 1px solid var\(--border-color\);/s);
 });
 
+test('comparison deltas are percentage points of the price share, not raw money deltas', () => {
+  const barsSrc = extractFunctionSource('renderProfitBars');
+
+  // 每个系列先算占售价比例，涨跌用同一口径相减
+  assert.match(barsSrc, /const shares = series\.map\(\(item, index\) => \{/);
+  assert.match(barsSrc, /return profitShareOfPrice\(values\[index\], itemPrice\);/);
+  assert.match(barsSrc, /const change = \(share - baseShare\) \* 100;/);
+  assert.match(barsSrc, /toFixed\(1\)\}pp<\/em>/);
+
+  // 不再出现「绝对金额相减再除」的旧口径
+  assert.doesNotMatch(barsSrc, /\(value - base\) \/ Math\.abs\(base\)/);
+  assert.doesNotMatch(barsSrc, /higherIsBetter/);
+  assert.doesNotMatch(barsSrc, /is-up|is-down/);
+
+  // 涨跌与所在数据条同色
+  for (let i = 0; i < 4; i += 1) {
+    assert.match(html, new RegExp(`\\.cmp-series-${i} \\.profit-compare-delta \\{ color: var\\(--${i === 0 ? 'accent' : `series-${i}`}\\); \\}`));
+  }
+  assert.doesNotMatch(html, /\.profit-compare-delta\.is-(up|down)/);
+});
+
+test('the margin row reuses the ratio column so it lines up with the rows below', () => {
+  assert.match(html, /<div class="metric is-ratio-only">[\s\S]{0,700}id="profitMarginValue"/);
+  assert.match(html, /\.profit-result-bars \.metric\.is-ratio-only \.profit-bar-stack,\s*\n\s*\.profit-result-bars \.metric\.is-ratio-only \.profit-bar-ratio \{ display: none; \}/);
+  assert.match(html, /\.profit-result-bars \.metric\.is-ratio-only \.metric-action \{ grid-column: 3 \/ 5; \}/);
+  // 字号与行高与下方占比一致（1.25rem / line-height 1.2）
+  assert.match(html, /\.profit-result-bars \.metric\.is-ratio-only \.metric-action strong \{\s*\n\s*font: 700 1\.25rem 'Share Tech Mono', monospace;\s*\n\s*font-variant-numeric: tabular-nums;\s*\n\s*line-height: 1\.2;/);
+  assert.match(html, /\.profit-result-bars \.metric\.is-ratio-only \.metric-action strong\.is-low \{ color: var\(--danger\); \}/);
+  // 行高统一，利润率那行不再矮一截
+  assert.match(html, /\.profit-result-bars \.metric \{[^}]*min-height: 46px;/s);
+});
+
 test('profit results show market currency plus CNY, and the bar rows never repeat the price', () => {
   for (const required of [
     'id="profitPurchaseValue"', 'id="profitPurchaseCnyValue"', 'id="profitPurchaseTotalValue"',
@@ -1110,7 +1142,7 @@ test('profit results show market currency plus CNY, and the bar rows never repea
   const barsSrc = extractFunctionSource('renderProfitBars');
   assert.match(barsSrc, /<b>\$\{delta\}<\/b>/);
   assert.doesNotMatch(barsSrc, /<b>\$\{projectEscapeHtml\(text\)\}/);
-  assert.match(barsSrc, /title="\$\{projectEscapeHtml\(label\)\}：\$\{projectEscapeHtml\(text\)\}"/);
+  assert.match(barsSrc, /title="\$\{projectEscapeHtml\(label\)\}：\$\{projectEscapeHtml\(text\)\}（占售价 \$\{projectEscapeHtml\(shareText\)\}）"/);
   const dupCount = (barsSrc.match(/formatCompareValue\(value, item, kind\)/g) ?? []).length;
   assert.equal(dupCount, 1, 'the formatted price is only used for the hover tooltip');
 

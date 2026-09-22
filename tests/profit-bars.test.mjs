@@ -112,7 +112,8 @@ test('missing price or missing value yields no bar', () => {
 test('renderProfitBars never scales by the row maximum', () => {
   const source = extractFunctionSource('renderProfitBars');
   assert.ok(!/Math\.max\(\.\.\.positives\)/.test(source), 'row-maximum scaling makes every bar 100%');
-  assert.ok(source.includes('profitShareOfPrice(value, itemPrice)'), 'bars must be measured against the price');
+  assert.ok(source.includes('profitShareOfPrice(values[index], itemPrice)'), 'bars must be measured against the price');
+  assert.ok(!/profitShareOfPrice\(value, itemPrice\)/.test(source), 'series shares are computed once up front, not per cell');
   assert.ok(source.includes('mode === \'none\''), 'ratio metrics must be skipped explicitly');
   assert.ok(/Math\.min\(100,/.test(source), 'bar width must be clamped to the track');
 });

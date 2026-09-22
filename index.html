@@ -585,12 +585,15 @@
         .profit-bar-stack-row > b { text-align: right; font: 700 0.72rem 'Share Tech Mono', monospace; color: var(--text-muted); white-space: nowrap; }
         .profit-bar-stack-row.is-current > b { color: var(--text-primary); }
         .profit-compare-delta { font: 600 0.7rem Roboto, sans-serif; font-style: normal; }
-        .profit-compare-delta.is-up { color: var(--success); }
-        .profit-compare-delta.is-down { color: var(--danger); }
         .cmp-series-0 > i { background: var(--accent); }
         .cmp-series-1 > i { background: var(--series-1); }
         .cmp-series-2 > i { background: var(--series-2); }
         .cmp-series-3 > i { background: var(--series-3); }
+        /* 涨跌与所在数据条同色，条长和数字一一对应，不用再去数第几条 */
+        .cmp-series-0 .profit-compare-delta { color: var(--accent); }
+        .cmp-series-1 .profit-compare-delta { color: var(--series-1); }
+        .cmp-series-2 .profit-compare-delta { color: var(--series-2); }
+        .cmp-series-3 .profit-compare-delta { color: var(--series-3); }
         .freight-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
         .freight-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
         .freight-grid .cargo-title { margin-bottom: 7px; }
@@ -863,13 +866,13 @@
         .quick-cost-track { height: 8px; background: var(--surface-muted); overflow: hidden; }
         .quick-cost-track i { display: block; height: 100%; background: var(--accent); }
         .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 4px; }
-        /* 结果行保留基础边框：紧凑但不裸奔，隔行间距统一 4px */
+        /* 结果行保留基础边框：紧凑但不裸奔，隔行间距统一 4px，行高统一避免利润率那行矮一截 */
         .profit-result-bars .metric {
             display: grid;
             grid-template-columns: minmax(92px, 0.6fr) minmax(150px, 2fr) 84px minmax(220px, 1.2fr);
             gap: 8px 14px;
             align-items: center;
-            min-height: 0;
+            min-height: 46px;
             padding: 6px 8px;
             border: 1px solid var(--border-color);
             background: var(--surface-raised);
@@ -877,6 +880,17 @@
             font-size: 1rem;
         }
         .profit-result-bars .metric > * { min-width: 0; }
+        /* 利润率不是费用构成，没有数据条；数值直接落在占比列，与下方占比同位置、同字号行高 */
+        .profit-result-bars .metric.is-ratio-only .profit-bar-stack,
+        .profit-result-bars .metric.is-ratio-only .profit-bar-ratio { display: none; }
+        .profit-result-bars .metric.is-ratio-only .metric-action { grid-column: 3 / 5; }
+        .profit-result-bars .metric.is-ratio-only .metric-action strong {
+            font: 700 1.25rem 'Share Tech Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.2;
+            color: var(--accent);
+        }
+        .profit-result-bars .metric.is-ratio-only .metric-action strong.is-low { color: var(--danger); }
         .profit-result-bars .metric > .term-tip { font-size: 1rem; }
         .profit-result-bars .profit-bar-stack { width: 100%; }
         .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
@@ -1233,7 +1247,7 @@
                         <label><span id="profitPlacementLabel" class="term-tip" tabindex="0" data-tip="FBA 入库配置费（Inventory Placement Service Fee）是亚马逊将库存分配至入库地点时按件收取的费用，不是 FBA 配送费。请按 Send to Amazon 或结算报表中的每件实际费用填写；该项会单独计入总成本。">FBA 入库配置费（美元/件）</span><input id="profitPlacementFee" type="number" min="0" step="0.01" value="0" oninput="updateProfitCalculator()"></label>
                     </div>
                     <div class="profit-breakdown profit-result-bars">
-                        <div class="metric"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价；低于 10% 显示为红色。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
+                        <div class="metric is-ratio-only"><span class="term-tip" tabindex="0" data-tip="利润率 = 利润/件 ÷ 售价；低于 10% 显示为红色。">利润率</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润率所需输入"><strong id="profitMarginValue">-</strong></button></div>
                         <div class="metric" id="profitMetric"><span class="term-tip" tabindex="0" data-tip="利润/件 = 售价 − 总成本/件；总利润 = 利润/件 × 月销量。">利润/件</span><button class="metric-action" type="button" data-inputs="adPrice,profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位利润所需输入"><span class="metric-money"><strong id="profitValue">-</strong><span class="metric-rmb" id="profitCnyValue">-</span></span><span class="metric-total" id="profitTotalValue">总利润（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="总成本/件 = 采购 + 头程 + 佣金 + FBA 配送费 + FBA 入库配置费 + 仓储 + 广告 + 促销 + 退货。其中「退货」里包含退货率对应的未实现销售收入，所以总成本/件可能超过售价，此时应先看「利润/件」是否为负。总费用 = 总成本/件 × 月销量。">总成本/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitReferralRate,profitPlacementFee,cargoDimensionInput,cargoWeightInput,profitFreightRate,profitStorageRate,profitInventoryMonths,profitReturnRate,profitReturnHandling,profitPromoRate,adCpc,adCvr,adOrders,adMonthlyUnits,adPrice" onclick="guideCalculationInputs(this)" aria-label="定位总成本所需输入"><span class="metric-money"><strong id="profitTotalCostValue">-</strong><span class="metric-rmb" id="profitTotalCostCnyValue">-</span></span><span class="metric-total" id="profitTotalCostTotalValue">总费用（请填写月销量）</span></button></div>
                         <div class="metric"><span class="term-tip" tabindex="0" data-tip="采购/件 = 含税采购成本 ×（1 − 退税/折扣比例）÷ 汇率；总采购成本 = 采购/件 × 月销量。">采购/件</span><button class="metric-action" type="button" data-inputs="profitPurchaseRmb,profitTaxDiscount,profitFx,adMonthlyUnits" onclick="guideCalculationInputs(this)" aria-label="定位采购成本所需输入"><span class="metric-money"><strong id="profitPurchaseValue">-</strong><span class="metric-rmb" id="profitPurchaseCnyValue">-</span></span><span class="metric-total" id="profitPurchaseTotalValue">总采购成本（请填写月销量）</span></button></div>
@@ -3029,28 +3043,32 @@
             if (!stack) continue;
             if (!series.length) { stack.innerHTML = ''; continue; }
             const values = series.map(item => Number.isFinite(item[key]) ? item[key] : null);
-            const base = values[0];
             const kind = key === 'margin' ? 'percent' : 'money';
-            const higherIsBetter = key === 'profit'; // 其余都是成本项，越低越好
+            // 占售价比例：条的刻度就是它，涨跌也用同一个口径
+            const shares = series.map((item, index) => {
+                const itemPrice = Number.isFinite(item.price) && item.price > 0 ? item.price : basePrice;
+                return profitShareOfPrice(values[index], itemPrice);
+            });
+            const baseShare = shares[0];
             stack.innerHTML = series.map((item, index) => {
                 const value = values[index];
-                const itemPrice = Number.isFinite(item.price) && item.price > 0 ? item.price : basePrice;
-                const share = profitShareOfPrice(value, itemPrice);
+                const share = shares[index];
                 // 亏损时按亏损幅度画红条；总成本可能因退货超过售价，钳到 100% 防止溢出
                 const width = share === null ? 0 : Math.min(100, Math.abs(share) * 100);
                 const negative = share !== null && share < 0;
                 const barWidth = width > 0 && width < 1 ? 1 : width;
                 const text = value === null ? '-' : formatCompareValue(value, item, kind);
+                const shareText = share === null ? '-' : `${(share * 100).toFixed(1)}%`;
                 const label = index === 0 ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
                 let delta = '';
-                if (index > 0 && base !== null && value !== null && Number.isFinite(base) && base !== 0) {
-                    const change = (value - base) / Math.abs(base) * 100;
-                    const better = change === 0 ? null : higherIsBetter ? change > 0 : change < 0;
-                    const className = better === null ? '' : better ? ' is-up' : ' is-down';
-                    delta = ` <em class="profit-compare-delta${className}">${change > 0 ? '+' : ''}${change.toFixed(0)}%</em>`;
+                // 跨产品比每件金额没有意义（售价与包装都不同），改用占售价比例的百分点差，
+                // 这样条长差多少，数字就是多少 pp
+                if (index > 0 && share !== null && baseShare !== null) {
+                    const change = (share - baseShare) * 100;
+                    delta = ` <em class="profit-compare-delta">${change > 0 ? '+' : ''}${change.toFixed(1)}pp</em>`;
                 }
-                // 条上不再重复金额（右侧已有 站点币种 + 人民币），只在对比项后缀涨跌幅；完整数值保留在悬停提示里
-                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${delta}</b></span>`;
+                // 条上不再重复金额（右侧已有 站点币种 + 人民币），只留涨跌；完整数值与占比放悬停提示
+                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}（占售价 ${projectEscapeHtml(shareText)}）"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${delta}</b></span>`;
             }).join('');
         }
     }
