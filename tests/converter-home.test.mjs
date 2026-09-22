@@ -927,7 +927,7 @@ test('optional advertising inputs are visually de-emphasised and can be auto-der
 test('draft autosave is off by default and products are stored locally only', () => {
   for (const required of [
     'DRAFT_KEY', 'LT_DRAFT_V1', 'DRAFT_SCOPE', 'DRAFT_DELAY_MS',
-    'function draftInScope', 'function draftStoragePlan', 'function collectDraft',
+    'function draftInScope', 'function collectStoragePlan', 'function collectDraft',
     'function saveDraft', 'function scheduleDraftSave', 'function flushDraftSave',
     'function clearDraft', 'function applyDraft', 'function initDraft', 'function installDraftAutosave',
     'initDraft();', 'installDraftAutosave();',
@@ -972,10 +972,78 @@ test('draft autosave is off by default and products are stored locally only', ()
 test('project fields are applied after switching market so market-scoped money fields survive', () => {
   const applySrc = extractFunctionSource('applyProjectFields');
   const marketSwitchAt = applySrc.indexOf("'marketCountry' in data");
-  const fieldLoopAt = applySrc.indexOf('for (const id of Object.keys(PROJECT_FIELD_TYPES))');
+  const fieldLoopAt = applySrc.indexOf('writeProjectFieldValues(data);');
   assert.ok(marketSwitchAt > -1, 'applyProjectFields should switch the market first');
   assert.ok(marketSwitchAt < fieldLoopAt, 'market switch must run before writing the other fields');
-  assert.match(applySrc, /for \(const id of MARKET_MONEY_FIELDS\)/);
+  // 站点隔离的金额字段在写字段时再兜一次
+  assert.match(extractFunctionSource('writeProjectFieldValues'), /for \(const id of MARKET_MONEY_FIELDS\)/);
+});
+
+test('saved products carry every input the profit maths needs, so comparison is reproducible', () => {
+  // 这些输入参与广告费/仓储费/佣金的计算，却不在 PROJECT_FIELD_TYPES 里
+  for (const id of ['adClicks', 'adPosInput', 'profitReferralCategory', 'profitJpReferralTax',
+    'storageLeadTimeMonths', 'storageSafetyStockRatio', 'storageJpFashion']) {
+    assert.ok(html.includes(`'${id}'`), `${id} must be part of the saved payload`);
+  }
+  assert.match(html, /const PROJECT_EXTRA_FIELDS = Object\.freeze\(\[/);
+  assert.match(html, /function collectExtraInputs\(\)/);
+  assert.match(html, /function applyExtraInputs\(extra\)/);
+  assert.match(html, /function collectStoragePlan\(\)/);
+  assert.match(html, /function applyStoragePlan\(plan\)/);
+
+  const saveSrc = extractFunctionSource('saveProject');
+  assert.match(saveSrc, /data\._extra = collectExtraInputs\(\);/);
+  assert.match(saveSrc, /data\._plan = collectStoragePlan\(\);/);
+  // 保存前先算一遍，避免「刚打开页面就保存」导致快照缺失
+  assert.ok(saveSrc.indexOf('updateProfitCalculator();') < saveSrc.indexOf('collectProjectFields()'));
+
+  const applySrc = extractFunctionSource('applyProjectFields');
+  assert.match(applySrc, /applyExtraInputs\(data\._extra\);/);
+  assert.match(applySrc, /applyStoragePlan\(data\._plan\);/);
+
+  // 对比时捕获/恢复也要带上，否则重算一次就把当前表单改掉了
+  assert.match(extractFunctionSource('captureFormState'), /extra: collectExtraInputs\(\),/);
+  assert.match(extractFunctionSource('captureFormState'), /plan: collectStoragePlan\(\),/);
+  const restoreSrc = extractFunctionSource('restoreFormState');
+  assert.match(restoreSrc, /applyExtraInputs\(state\.extra\);/);
+  assert.match(restoreSrc, /applyStoragePlan\(state\.plan\);/);
+  // 站点切换会按站点缓存恢复金额字段，所以字段要写两遍
+  assert.ok((restoreSrc.match(/writeProjectFieldValues\(state\.fields\);/g) ?? []).length === 2);
+
+  // 导入导出不能丢这两块
+  assert.match(extractFunctionSource('sanitizeImportedProject'), /project\.fields\._extra = raw\.fields\._extra;/);
+  assert.match(extractFunctionSource('sanitizeImportedProject'), /project\.fields\._plan = raw\.fields\._plan;/);
+});
+
+test('comparison never silently falls back to the live form, and failed recomputes are not cached', () => {
+  const recomputeSrc = extractFunctionSource('recomputeProjectSnapshot');
+
+  // 重算后先核对哨兵字段真的写进去了，再取结果
+  assert.match(recomputeSrc, /if \(projectFieldsApplied\(project\.fields\) && LAST_PROFIT_RESULT\) \{/);
+  assert.match(recomputeSrc, /if \(isUsableSnapshot\(candidate\)\) snap = candidate;/);
+  assert.match(recomputeSrc, /if \(snap\) COMPARE_RECOMPUTE_CACHE\.set\(project\.name, \{ key, snap \}\);/);
+  assert.match(recomputeSrc, /else COMPARE_RECOMPUTE_CACHE\.delete\(project\.name\);/);
+
+  assert.match(html, /const PROJECT_APPLY_SENTINELS = \[/);
+  assert.match(extractFunctionSource('projectFieldsApplied'), /want === got/);
+
+  // 快照可用性判定：要有售价且至少一项能算出来
+  const usableSrc = extractFunctionSource('isUsableSnapshot');
+  assert.match(usableSrc, /Number\.isFinite\(snap\.price\)/);
+  assert.match(html, /const SNAPSHOT_VALUE_KEYS = \['purchase', 'freight', 'referral', 'fba', 'placement', 'storage', 'ad', 'promo', 'returns', 'totalCost', 'profit', 'margin'\];/);
+
+  // 「当前」以 isCurrent 标记为准，不再假设 series[0] 是当前
+  const barsSrc = extractFunctionSource('renderProfitBars');
+  assert.match(barsSrc, /series\.find\(item => item\.isCurrent\)/);
+  assert.doesNotMatch(barsSrc, /const head = series\[0\]/);
+
+  const seriesSrc = extractFunctionSource('compareSeries');
+  assert.match(seriesSrc, /isCurrent: true/);
+  assert.match(seriesSrc, /source: 'unavailable', unavailable: true/);
+
+  // 不可用的对比项要写明原因，不留空白
+  assert.match(barsSrc, /缺少输入/);
+  assert.match(html, /\.profit-bar-stack-row > b\.is-unavailable \{ color: var\(--danger\);/);
 });
 
 test('projects can be exported and imported as JSON including variant config', () => {

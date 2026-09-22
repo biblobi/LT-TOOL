@@ -584,6 +584,8 @@
         .profit-bar-stack-row > i[data-negative="1"] { background: var(--danger); }
         .profit-bar-stack-row > b { text-align: right; font: 700 0.72rem 'Share Tech Mono', monospace; color: var(--text-muted); white-space: nowrap; }
         .profit-bar-stack-row.is-current > b { color: var(--text-primary); }
+        /* 对比项算不出来时，明确写出原因，而不是留一行空白 */
+        .profit-bar-stack-row > b.is-unavailable { color: var(--danger); font-family: Roboto, sans-serif; font-size: 0.72rem; }
         .profit-compare-delta { font: 600 0.7rem Roboto, sans-serif; font-style: normal; }
         .cmp-series-0 > i { background: var(--accent); }
         .cmp-series-1 > i { background: var(--series-1); }
@@ -2595,6 +2597,70 @@
         }
         return data;
     }
+
+    // 参与利润/仓储计算、但不在 PROJECT_FIELD_TYPES 里的输入。
+    // 不随项目一起保存的话，对比重算会跟着当前表单走，出现「各产品数据一样」的假象。
+    const PROJECT_EXTRA_FIELDS = Object.freeze([
+        'adClicks', 'adPosInput', 'profitReferralCategory', 'profitJpReferralTax',
+        'storageLeadTimeMonths', 'storageSafetyStockRatio', 'storageJpFashion',
+    ]);
+    function collectExtraInputs() {
+        const extra = {};
+        for (const id of PROJECT_EXTRA_FIELDS) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            extra[id] = el.type === 'checkbox' ? el.checked : el.value;
+        }
+        return extra;
+    }
+    function applyExtraInputs(extra) {
+        if (!extra || typeof extra !== 'object') return;
+        for (const id of PROJECT_EXTRA_FIELDS) {
+            if (!(id in extra)) continue;
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = Boolean(extra[id]);
+            else el.value = String(extra[id] ?? '');
+        }
+    }
+    // 12 个月仓储计划表：仓储/件 按它计算，必须跟着项目走
+    function collectStoragePlan() {
+        const plan = {};
+        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+            plan[`sales${index}`] = document.getElementById(`storageSales${index}`)?.value ?? '';
+            plan[`restock${index}`] = document.getElementById(`storageRestock${index}`)?.value ?? '';
+        }
+        return plan;
+    }
+    function applyStoragePlan(plan) {
+        if (!plan || typeof plan !== 'object') return;
+        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+            const sales = document.getElementById(`storageSales${index}`);
+            const restock = document.getElementById(`storageRestock${index}`);
+            if (sales && `sales${index}` in plan) sales.value = String(plan[`sales${index}`] ?? '');
+            if (restock && `restock${index}` in plan) restock.value = String(plan[`restock${index}`] ?? '');
+        }
+    }
+
+    // 把一组字段写回表单；站点切换会按站点缓存恢复金额类字段，所以这些要写两遍（见 restoreFormState）
+    function writeProjectFieldValues(data) {
+        if (!data || typeof data !== 'object') return;
+        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
+            if (!(id in data)) continue;
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = Boolean(data[id]);
+            else el.value = String(data[id] ?? '');
+        }
+        for (const id of MARKET_MONEY_FIELDS) {
+            if (!(id in data)) continue;
+            const el = document.getElementById(id);
+            if (el) el.value = String(data[id] ?? '');
+        }
+        if ('cargoDimensionInput' in data) syncCargoDimensionPair('cm');
+        if ('cargoWeightInput' in data) syncCargoWeightPair('kg');
+    }
+
     function applyProjectFields(data) {
         // 站点必须先切：切换站点会按站点隔离恢复金额类字段（售价/CPC/入库配置费/退货处理费），
         // 若在写入其余字段之后才切，这些字段会被目标站点的默认值覆盖。
@@ -2605,21 +2671,9 @@
                 updateMarketCountry();
             }
         }
-        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
-            if (!(id in data)) continue;
-            const el = document.getElementById(id);
-            if (!el) continue;
-            if (el.type === 'checkbox') el.checked = Boolean(data[id]);
-            else el.value = String(data[id]);
-        }
-        // 兜底：站点隔离的金额字段再写一次，避免任何站点恢复路径把它们改回默认值
-        for (const id of MARKET_MONEY_FIELDS) {
-            if (!(id in data)) continue;
-            const el = document.getElementById(id);
-            if (el) el.value = String(data[id] ?? '');
-        }
-        if ('cargoDimensionInput' in data) syncCargoDimensionPair('cm');
-        if ('cargoWeightInput' in data) syncCargoWeightPair('kg');
+        writeProjectFieldValues(data);
+        applyExtraInputs(data._extra);
+        applyStoragePlan(data._plan);
         ordersManuallyEdited = false;
         if ('_variants' in data) {
             try {
@@ -2637,10 +2691,15 @@
         const nameEl = document.getElementById('projectName');
         const name = (nameEl.value || '').trim();
         if (!name) { setProjectStatus('⚠️ 请先输入产品名', 3000); if (nameEl) nameEl.focus(); return; }
+        // 先把结果算一遍，避免「刚打开页面就保存」导致快照缺失
+        updateProfitCalculator();
         const data = collectProjectFields();
         data._variantsEnabled = VARIANTS.enabled;
         data._variantsSameSpec = VARIANTS.sameSpec;
         data._variants = JSON.stringify(VARIANTS.list);
+        // 点击量、仓储计划等也属于计算输入，必须一起存，否则对比重算会跟着当前表单变
+        data._extra = collectExtraInputs();
+        data._plan = collectStoragePlan();
         if (LAST_PROFIT_RESULT) {
             const contextPrice = Number.isFinite(LAST_PROFIT_CONTEXT?.price) ? LAST_PROFIT_CONTEXT.price : Number(document.getElementById('adPrice')?.value) || 0;
             data.result = buildProfitSnapshot(LAST_PROFIT_RESULT, contextPrice, LAST_PROFIT_CONTEXT?.fx ?? 0);
@@ -2655,7 +2714,11 @@
         renderProjectSelect();
         COMPARE_RECOMPUTE_CACHE.delete(name);
         document.getElementById('projectSelect').value = name;
-        setProjectStatus('✅ 已保存「' + name + '」');
+        setProjectStatus(
+            isUsableSnapshot(data.result)
+                ? '✅ 已保存「' + name + '」'
+                : '⚠️ 已保存「' + name + '」，但尺寸/重量等必填项不足，暂时算不出成本利润'
+        , isUsableSnapshot(data.result) ? 2500 : 6000);
         renderCompare();
     }
     function loadProject(name) {
@@ -2706,30 +2769,13 @@
         return DRAFT_SCOPE.some(selector => target?.closest?.(selector));
     }
 
-    function draftExtraState() {
-        return {
-            storageLeadTimeMonths: document.getElementById('storageLeadTimeMonths')?.value ?? '',
-            storageSafetyStockRatio: document.getElementById('storageSafetyStockRatio')?.value ?? '',
-            storageJpFashion: document.getElementById('storageJpFashion')?.checked === true,
-        };
-    }
-
-    function draftStoragePlan() {
-        const plan = {};
-        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
-            plan[`sales${index}`] = document.getElementById(`storageSales${index}`)?.value ?? '';
-            plan[`restock${index}`] = document.getElementById(`storageRestock${index}`)?.value ?? '';
-        }
-        return plan;
-    }
-
     function collectDraft() {
         return {
             version: 1,
             savedAt: new Date().toISOString(),
             fields: collectProjectFields(),
-            extra: draftExtraState(),
-            plan: draftStoragePlan(),
+            extra: collectExtraInputs(),
+            plan: collectStoragePlan(),
             variants: { enabled: VARIANTS.enabled, sameSpec: VARIANTS.sameSpec, list: VARIANTS.list },
         };
     }
@@ -2802,20 +2848,8 @@
         if (!draft || typeof draft !== 'object') return false;
         const fields = draft.fields && typeof draft.fields === 'object' ? draft.fields : null;
         if (!fields || !Object.keys(fields).length) return false;
-        const plan = draft.plan && typeof draft.plan === 'object' ? draft.plan : {};
-        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
-            const sales = document.getElementById(`storageSales${index}`);
-            const restock = document.getElementById(`storageRestock${index}`);
-            if (sales && `sales${index}` in plan) sales.value = String(plan[`sales${index}`] ?? '');
-            if (restock && `restock${index}` in plan) restock.value = String(plan[`restock${index}`] ?? '');
-        }
-        const extra = draft.extra && typeof draft.extra === 'object' ? draft.extra : {};
-        const leadTime = document.getElementById('storageLeadTimeMonths');
-        const safety = document.getElementById('storageSafetyStockRatio');
-        const jpFashion = document.getElementById('storageJpFashion');
-        if (leadTime && 'storageLeadTimeMonths' in extra) leadTime.value = String(extra.storageLeadTimeMonths ?? '');
-        if (safety && 'storageSafetyStockRatio' in extra) safety.value = String(extra.storageSafetyStockRatio ?? '');
-        if (jpFashion && 'storageJpFashion' in extra) jpFashion.checked = Boolean(extra.storageJpFashion);
+        applyStoragePlan(draft.plan);
+        applyExtraInputs(draft.extra);
         const variants = draft.variants && typeof draft.variants === 'object' ? draft.variants : null;
         const payload = { ...fields };
         if (variants && Array.isArray(variants.list) && variants.list.length) {
@@ -2893,6 +2927,32 @@
         return project?.result || project?.fields?.result || null;
     }
 
+    const SNAPSHOT_VALUE_KEYS = ['purchase', 'freight', 'referral', 'fba', 'placement', 'storage', 'ad', 'promo', 'returns', 'totalCost', 'profit', 'margin'];
+    // 一份能拿来对比的快照：有售价，且至少有一个成本/利润项算得出来。
+    // 尺寸重量缺失、站点不支持自动费率时，calculateProfitMetrics 会把 totalCost/profit 返回 null，
+    // 这种快照直接拿来对比就是一片空白，必须先识别出来并解释，而不是静默留空。
+    function isUsableSnapshot(snap) {
+        if (!snap || typeof snap !== 'object') return false;
+        if (!Number.isFinite(snap.price) || snap.price <= 0) return false;
+        return SNAPSHOT_VALUE_KEYS.some(key => Number.isFinite(snap[key]));
+    }
+
+    // 重算前核对哨兵字段是否真的写进了表单。
+    // 不一致说明这次 apply 没生效（例如被站点缓存的默认值覆盖），
+    // 此时宁可判定失败，也不能拿当前表单的数字冒充别的产品。
+    const PROJECT_APPLY_SENTINELS = ['marketCountry', 'adPrice', 'cargoDimensionInput', 'profitPurchaseRmb', 'profitFreightRate', 'adMonthlyUnits', 'adCpc'];
+    function projectFieldsApplied(fields) {
+        if (!fields || typeof fields !== 'object') return false;
+        return PROJECT_APPLY_SENTINELS.every(id => {
+            if (!(id in fields)) return true;
+            const el = document.getElementById(id);
+            if (!el) return true;
+            const want = el.type === 'checkbox' ? Boolean(fields[id]) : String(fields[id] ?? '');
+            const got = el.type === 'checkbox' ? el.checked : String(el.value);
+            return want === got;
+        });
+    }
+
     function compareProjectKey(project) {
         return `${project.name}|${project.savedAt || ''}|${projectSnapshot(project) ? 'snapshot' : 'recompute'}`;
     }
@@ -2904,19 +2964,18 @@
             if (!el) continue;
             fields[id] = el.type === 'checkbox' ? el.checked : el.value;
         }
-        return { fields, variants: { enabled: VARIANTS.enabled, sameSpec: VARIANTS.sameSpec, list: JSON.stringify(VARIANTS.list) } };
+        return {
+            fields,
+            extra: collectExtraInputs(),
+            plan: collectStoragePlan(),
+            variants: { enabled: VARIANTS.enabled, sameSpec: VARIANTS.sameSpec, list: JSON.stringify(VARIANTS.list) },
+        };
     }
 
     function restoreFormState(state) {
-        for (const id of Object.keys(PROJECT_FIELD_TYPES)) {
-            if (!(id in state.fields)) continue;
-            const el = document.getElementById(id);
-            if (!el) continue;
-            if (el.type === 'checkbox') el.checked = Boolean(state.fields[id]);
-            else el.value = String(state.fields[id] ?? '');
-        }
-        if ('cargoDimensionInput' in state.fields) syncCargoDimensionPair('cm');
-        if ('cargoWeightInput' in state.fields) syncCargoWeightPair('kg');
+        writeProjectFieldValues(state.fields);
+        applyExtraInputs(state.extra);
+        applyStoragePlan(state.plan);
         ordersManuallyEdited = false;
         VARIANTS.enabled = state.variants.enabled;
         VARIANTS.sameSpec = state.variants.sameSpec;
@@ -2925,7 +2984,13 @@
             if (Array.isArray(list) && list.length) VARIANTS.list = list;
         } catch (error) { /* 忽略损坏数据 */ }
         renderVariantList();
-        updateMarketCountry(); updateCargoCheck(); updateStorageForecast(); updateAdCalculator(); updateProfitCalculator();
+        updateMarketCountry();
+        // updateMarketCountry() 会按站点缓存恢复金额类字段，这里再写一次，
+        // 保证恢复的是捕获时的值（否则对比一次就把当前表单改掉了）
+        writeProjectFieldValues(state.fields);
+        applyExtraInputs(state.extra);
+        applyStoragePlan(state.plan);
+        updateCargoCheck(); updateStorageForecast(); updateAdCalculator(); updateProfitCalculator();
     }
 
     function recomputeProjectSnapshot(project) {
@@ -2937,8 +3002,10 @@
         compareBusy = true;
         try {
             applyProjectFields(project.fields);
-            if (LAST_PROFIT_RESULT) {
-                snap = buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0);
+            // 先确认项目字段真的写进去了，再取结果；否则拿到的会是当前表单的数字
+            if (projectFieldsApplied(project.fields) && LAST_PROFIT_RESULT) {
+                const candidate = buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0);
+                if (isUsableSnapshot(candidate)) snap = candidate;
             }
         } catch (error) {
             snap = null;
@@ -2946,25 +3013,32 @@
             restoreFormState(originalState);
             compareBusy = false;
         }
-        COMPARE_RECOMPUTE_CACHE.set(project.name, { key, snap });
+        // 失败不写缓存：否则一次失败会被永久记住，之后无论怎么改表单都是空的
+        if (snap) COMPARE_RECOMPUTE_CACHE.set(project.name, { key, snap });
+        else COMPARE_RECOMPUTE_CACHE.delete(project.name);
         return snap;
     }
 
     function compareSeries() {
         const series = [];
         if (LAST_PROFIT_RESULT) {
-            series.push({ key: '__current__', name: '当前', source: 'live', ...buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0) });
+            series.push({ key: '__current__', name: '当前', source: 'live', isCurrent: true, ...buildProfitSnapshot(LAST_PROFIT_RESULT, LAST_PROFIT_CONTEXT?.price ?? 0, LAST_PROFIT_CONTEXT?.fx ?? 0) });
         }
         for (const name of COMPARE_SELECTION) {
             const project = PROJECTS.find(p => p.name === name);
             if (!project) continue;
             let snap = projectSnapshot(project);
             let source = 'snapshot';
-            if (!snap) {
+            if (!isUsableSnapshot(snap)) {
+                // 老项目可能没存快照，或存的快照算不出成本利润 → 按项目自己的输入重算一次
                 snap = recomputeProjectSnapshot(project);
                 source = 'recomputed';
             }
-            if (!snap) continue;
+            if (!isUsableSnapshot(snap)) {
+                // 重算也拿不到：把这个项目标成不可用，界面会说明原因，而不是留一整行空白
+                series.push({ key: name, name, source: 'unavailable', unavailable: true });
+                continue;
+            }
             series.push({ key: name, name, source, ...snap });
         }
         return series;
@@ -3025,8 +3099,9 @@
             if (!metric) continue;
             const stack = metric.querySelector('.profit-bar-stack');
             const ratioEl = document.getElementById(ratioId);
-            const head = series[0] || null;
-            const basePrice = Number.isFinite(head?.price) && head.price > 0 ? head.price : fallbackPrice;
+            // 「当前」以标记为准：当前表单没算出来时，不能把第一个对比产品当成当前值显示
+            const currentSeries = series.find(item => item.isCurrent) || null;
+            const basePrice = Number.isFinite(currentSeries?.price) && currentSeries.price > 0 ? currentSeries.price : fallbackPrice;
 
             if (mode === 'none') {
                 // 利润率这类比率指标不是费用构成，占比条没有意义：只留空占位保持列宽
@@ -3035,9 +3110,9 @@
                 continue;
             }
 
-            const current = head ? head[key] : null;
+            const currentValue = currentSeries ? currentSeries[key] : null;
             if (ratioEl) {
-                const share = profitShareOfPrice(current, basePrice);
+                const share = profitShareOfPrice(currentValue, basePrice);
                 ratioEl.textContent = share === null ? '-' : `${(share * 100).toFixed(1)}%`;
             }
             if (!stack) continue;
@@ -3049,8 +3124,15 @@
                 const itemPrice = Number.isFinite(item.price) && item.price > 0 ? item.price : basePrice;
                 return profitShareOfPrice(values[index], itemPrice);
             });
-            const baseShare = shares[0];
+            const baseShare = shares.find((share, index) => share !== null && series[index].isCurrent) ?? null;
             stack.innerHTML = series.map((item, index) => {
+                const isCurrent = Boolean(item.isCurrent);
+                const seriesClass = `cmp-series-${Math.min(index, 3)}${isCurrent ? ' is-current' : ''}`;
+                const label = isCurrent ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
+                if (item.unavailable) {
+                    // 重算也拿不到数据：说清楚原因，不留一行空白让人以为坏了
+                    return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：该项目缺少尺寸/重量等必填项，无法估算"><i style="width:0"></i><b class="is-unavailable">缺少输入</b></span>`;
+                }
                 const value = values[index];
                 const share = shares[index];
                 // 亏损时按亏损幅度画红条；总成本可能因退货超过售价，钳到 100% 防止溢出
@@ -3059,16 +3141,15 @@
                 const barWidth = width > 0 && width < 1 ? 1 : width;
                 const text = value === null ? '-' : formatCompareValue(value, item, kind);
                 const shareText = share === null ? '-' : `${(share * 100).toFixed(1)}%`;
-                const label = index === 0 ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
                 let delta = '';
                 // 跨产品比每件金额没有意义（售价与包装都不同），改用占售价比例的百分点差，
                 // 这样条长差多少，数字就是多少 pp
-                if (index > 0 && share !== null && baseShare !== null) {
+                if (!isCurrent && share !== null && baseShare !== null) {
                     const change = (share - baseShare) * 100;
                     delta = ` <em class="profit-compare-delta">${change > 0 ? '+' : ''}${change.toFixed(1)}pp</em>`;
                 }
                 // 条上不再重复金额（右侧已有 站点币种 + 人民币），只留涨跌；完整数值与占比放悬停提示
-                return `<span class="profit-bar-stack-row cmp-series-${Math.min(index, 3)}${index === 0 ? ' is-current' : ''}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}（占售价 ${projectEscapeHtml(shareText)}）"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${delta}</b></span>`;
+                return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}（占售价 ${projectEscapeHtml(shareText)}）"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${delta}</b></span>`;
             }).join('');
         }
     }
@@ -3113,6 +3194,9 @@
             project.fields._variantsEnabled = Boolean(raw.fields._variantsEnabled);
             project.fields._variantsSameSpec = raw.fields._variantsSameSpec !== false;
         }
+        // 同理保留点击量、仓储计划等计算输入，否则导入后对比重算会跟着当前表单走
+        if (raw.fields._extra && typeof raw.fields._extra === 'object') project.fields._extra = raw.fields._extra;
+        if (raw.fields._plan && typeof raw.fields._plan === 'object') project.fields._plan = raw.fields._plan;
         return project;
     }
 
@@ -3171,7 +3255,7 @@
         if (series.length < 2) { setProjectStatus('请至少选择一个对比产品后再导出', 2500); return; }
         const rows = [['产品', '站点', '币种', '数据来源', ...COMPARE_METRICS.map(m => m.label)]];
         for (const item of series) {
-            rows.push([item.name, item.market, item.currency, item.source === 'recomputed' ? '重算' : item.source === 'snapshot' ? '快照' : '实时', ...COMPARE_METRICS.map(m => {
+            rows.push([item.name, item.market || '', item.currency || '', item.source === 'recomputed' ? '重算' : item.source === 'snapshot' ? '快照' : '实时', ...COMPARE_METRICS.map(m => {
                 const value = item[m.key];
                 return Number.isFinite(value) ? (m.kind === 'percent' ? (value * 100).toFixed(2) + '%' : value.toFixed(2)) : '';
             })]);
