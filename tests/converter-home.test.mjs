@@ -1046,6 +1046,39 @@ test('comparison never silently falls back to the live form, and failed recomput
   assert.match(html, /\.profit-bar-stack-row > b\.is-unavailable \{ color: var\(--danger\);/);
 });
 
+test('a project never inherits the live form for inputs it did not save', () => {
+  // 缺某一项输入时按「未提供」处理（清空/取消勾选），绝不沿用当前表单的值
+  const baselineSrc = extractFunctionSource('applyMissingExtraAsBaseline');
+  assert.match(baselineSrc, /for \(const id of PROJECT_EXTRA_FIELDS\) \{/);
+  assert.match(baselineSrc, /if \(extra && id in extra\) continue;/);
+  assert.match(baselineSrc, /if \(el\.type === 'checkbox'\) el\.checked = false;/);
+  assert.ok(baselineSrc.includes('sales.value = \'\''), 'missing storage plan must be cleared');
+  assert.match(extractFunctionSource('applyProjectFields'), /applyMissingExtraAsBaseline\(data\);/);
+  // 先清空再写入，顺序不能反
+  const applySrc = extractFunctionSource('applyProjectFields');
+  assert.ok(applySrc.indexOf('applyMissingExtraAsBaseline(data);') < applySrc.indexOf('applyExtraInputs(data._extra);'));
+
+  // 旧存档要能被识别出来
+  const completeSrc = extractFunctionSource('isCompleteProjectPayload');
+  assert.match(completeSrc, /if \(!fields\._extra \|\| typeof fields\._extra !== 'object'\) return false;/);
+  assert.match(completeSrc, /if \(!fields\._plan \|\| typeof fields\._plan !== 'object'\) return false;/);
+
+  // 旧存档 + 快照不可用 → 不给失真数字，直接说明并提示重存
+  const seriesSrc = extractFunctionSource('compareSeries');
+  assert.match(seriesSrc, /const partial = !isCompleteProjectPayload\(project\.fields\);/);
+  assert.match(seriesSrc, /if \(partial\) \{/);
+  assert.match(seriesSrc, /unavailable: true, partial \}\);/);
+  // 存档完整才允许重算
+  assert.ok(seriesSrc.indexOf('if (partial) {') < seriesSrc.indexOf('recomputeProjectSnapshot(project)'));
+
+  // 下拉里标出旧存档，方便逐个重存
+  assert.match(html, /class="compare-stale-chip"/);
+  assert.match(html, /\.compare-stale-chip \{ margin-left: auto; padding: 0 4px; border: 1px solid var\(--danger\);/);
+  assert.match(extractFunctionSource('updateCompareDropdown'), /isCompleteProjectPayload\(project\.fields\)/);
+  // 行内明确写出该做什么
+  assert.match(extractFunctionSource('renderProfitBars'), /旧存档·请重存/);
+});
+
 test('projects can be exported and imported as JSON including variant config', () => {
   for (const required of [
     'id="projectImportInput"', 'onclick="exportProjects()"', 'onchange="importProjects(this)"',

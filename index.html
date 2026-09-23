@@ -574,6 +574,8 @@
         .compare-dropdown-list label:hover { background: var(--surface-muted); }
         .compare-dropdown-list input { width: auto; margin: 0; accent-color: var(--accent); }
         .compare-dropdown-empty { color: var(--text-subtle); font-size: 0.82rem; font-weight: 600; }
+        /* 旧存档标记：提醒这个产品的部分输入没记录，对比前先重新保存 */
+        .compare-stale-chip { margin-left: auto; padding: 0 4px; border: 1px solid var(--danger); color: var(--danger); font: 600 0.68rem Roboto, sans-serif; font-style: normal; white-space: nowrap; }
         .compare-dropdown-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--border-color); }
         .compare-dropdown-tools button { padding: 3px 8px; border: 1px solid var(--border-strong); background: var(--input-bg); color: var(--text-primary); font: 600 0.78rem Roboto, sans-serif; cursor: pointer; }
         .compare-dropdown-tools .storage-switch { font-size: 0.8rem; }
@@ -2661,6 +2663,34 @@
         if ('cargoWeightInput' in data) syncCargoWeightPair('kg');
     }
 
+    // 项目里没有某项输入时，绝不能沿用当前表单的值 —— 那等于把当前产品的情况算到别的产品头上。
+    // 统一按「未提供」处理（清空 / 取消勾选），保证对比结果只由所选产品自己的存档决定。
+    function applyMissingExtraAsBaseline(fields) {
+        const extra = fields && typeof fields._extra === 'object' ? fields._extra : null;
+        for (const id of PROJECT_EXTRA_FIELDS) {
+            if (extra && id in extra) continue;
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = false;
+            else el.value = '';
+        }
+        if (fields && typeof fields._plan === 'object') return;
+        for (let index = 0; index < US_FBA_STORAGE_2026.forecastMonths; index += 1) {
+            const sales = document.getElementById(`storageSales${index}`);
+            const restock = document.getElementById(`storageRestock${index}`);
+            if (sales) sales.value = '';
+            if (restock) restock.value = '';
+        }
+    }
+
+    // 老版本保存的产品没有 _extra / _plan，重算时这部分无从复原，界面要如实标出来
+    function isCompleteProjectPayload(fields) {
+        if (!fields || typeof fields !== 'object') return false;
+        if (!fields._extra || typeof fields._extra !== 'object') return false;
+        if (!fields._plan || typeof fields._plan !== 'object') return false;
+        return true;
+    }
+
     function applyProjectFields(data) {
         // 站点必须先切：切换站点会按站点隔离恢复金额类字段（售价/CPC/入库配置费/退货处理费），
         // 若在写入其余字段之后才切，这些字段会被目标站点的默认值覆盖。
@@ -2672,6 +2702,7 @@
             }
         }
         writeProjectFieldValues(data);
+        applyMissingExtraAsBaseline(data);
         applyExtraInputs(data._extra);
         applyStoragePlan(data._plan);
         ordersManuallyEdited = false;
@@ -3027,19 +3058,27 @@
         for (const name of COMPARE_SELECTION) {
             const project = PROJECTS.find(p => p.name === name);
             if (!project) continue;
+            // 老版本保存的产品缺 _extra/_plan，这部分无法复原，界面要标出来提示重新保存
+            const partial = !isCompleteProjectPayload(project.fields);
             let snap = projectSnapshot(project);
             let source = 'snapshot';
             if (!isUsableSnapshot(snap)) {
-                // 老项目可能没存快照，或存的快照算不出成本利润 → 按项目自己的输入重算一次
+                if (partial) {
+                    // 快照不可用又要靠重算，而旧存档缺输入 —— 重算出来的广告费/仓储费必然失真。
+                    // 宁可说清楚，也不给一个看着像真的、其实是错成本的数字。
+                    series.push({ key: name, name, source: 'unavailable', unavailable: true, partial });
+                    continue;
+                }
+                // 存档完整 → 按项目自己的输入重算，结果可信
                 snap = recomputeProjectSnapshot(project);
                 source = 'recomputed';
             }
             if (!isUsableSnapshot(snap)) {
                 // 重算也拿不到：把这个项目标成不可用，界面会说明原因，而不是留一整行空白
-                series.push({ key: name, name, source: 'unavailable', unavailable: true });
+                series.push({ key: name, name, source: 'unavailable', unavailable: true, partial });
                 continue;
             }
-            series.push({ key: name, name, source, ...snap });
+            series.push({ key: name, name, source, partial, ...snap });
         }
         return series;
     }
@@ -3069,7 +3108,14 @@
                 list.innerHTML = PROJECTS.map(project => {
                     const checked = COMPARE_SELECTION.includes(project.name) ? ' checked' : '';
                     const disabled = !COMPARE_SELECTION.includes(project.name) && COMPARE_SELECTION.length >= COMPARE_MAX_SERIES ? ' disabled' : '';
-                    return `<label title="保存于 ${projectEscapeHtml(project.savedAt || '')}"><input type="checkbox" value="${projectEscapeHtml(project.name)}"${checked}${disabled} onchange="toggleCompareProject(this.value)"><span>${projectEscapeHtml(project.name)}</span></label>`;
+                    // 旧存档缺点击量/仓储计划，对比时这部分无从复原 → 直接在这里标出来，方便逐个重存
+                    const stale = isCompleteProjectPayload(project.fields)
+                        ? ''
+                        : '<em class="compare-stale-chip" title="这是修复前保存的产品，没有记录月点击量/仓储计划等输入；对比时这部分无法复原，点「保存产品」重新保存一次即可">旧存档</em>';
+                    const title = isCompleteProjectPayload(project.fields)
+                        ? `保存于 ${projectEscapeHtml(project.savedAt || '')}`
+                        : `保存于 ${projectEscapeHtml(project.savedAt || '')}｜缺月点击量、仓储计划等输入，建议重新保存`;
+                    return `<label title="${title}"><input type="checkbox" value="${projectEscapeHtml(project.name)}"${checked}${disabled} onchange="toggleCompareProject(this.value)"><span>${projectEscapeHtml(project.name)}</span>${stale}</label>`;
                 }).join('');
             }
         }
@@ -3130,8 +3176,12 @@
                 const seriesClass = `cmp-series-${Math.min(index, 3)}${isCurrent ? ' is-current' : ''}`;
                 const label = isCurrent ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
                 if (item.unavailable) {
-                    // 重算也拿不到数据：说清楚原因，不留一行空白让人以为坏了
-                    return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：该项目缺少尺寸/重量等必填项，无法估算"><i style="width:0"></i><b class="is-unavailable">缺少输入</b></span>`;
+                    // 说清楚是哪一类问题，不留一行空白让人以为坏了
+                    const why = item.partial
+                        ? '这是修复前保存的产品，没有记录月点击量/仓储计划等输入，对比数据无法复原；点「保存产品」重新保存一次即可'
+                        : '该项目缺少尺寸/重量等必填项，无法估算';
+                    const chip = item.partial ? '旧存档·请重存' : '缺少输入';
+                    return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(why)}"><i style="width:0"></i><b class="is-unavailable">${chip}</b></span>`;
                 }
                 const value = values[index];
                 const share = shares[index];
