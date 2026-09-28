@@ -722,6 +722,18 @@
         .guide-section strong { color: var(--text-primary); }
         .guide-section code { color: var(--accent); font: 700 0.9em 'Share Tech Mono', monospace; }
         .guide-section a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+        /* 「帮助&赞助」是 5 个字，单独放宽导航标签宽度，仍保持方块按钮的居中观感 */
+        .nav-label-wide { width: 3.4em; }
+        .guide-section--wide { grid-column: 1 / -1; }
+        .guide-section p + ul { margin-top: 8px; }
+        .guide-hint { color: var(--text-subtle); font-size: 0.8rem; }
+        .sponsor-contacts { list-style: none; padding-left: 0; }
+        .sponsor-contacts li { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+        .sponsor-contacts b { color: var(--accent); font: 700 1rem 'Share Tech Mono', monospace; }
+        .sponsor-qr { display: block; margin: 12px 0 4px; max-width: 180px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .footer-contacts { display: flex; flex-wrap: wrap; gap: 4px 18px; justify-content: center; }
+        .footer-contacts b { color: var(--accent); font-family: 'Share Tech Mono', monospace; }
+        .footer-meta { color: var(--text-subtle); font-size: 0.78rem; text-align: center; }
         @media (max-width: 1050px) { .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(3, minmax(0, 1fr)); } .freight-grid .cargo-fields, .storage-control-grid, .storage-batch-controls, .fee-config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .storage-forecast-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fba-rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .project-toolbar { width: 100%; justify-content: flex-start; margin-top: 6px; } .project-name-input { width: 150px; } }
         @media (max-width: 880px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-panel.full { grid-column: auto; } .calculator-fields, .profit-grid .calculator-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profit-layout { grid-template-columns: 1fr; } .profit-results .calculator-fields, .profit-results .profit-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); } .freight-grid .cargo-layout, .guide-grid { grid-template-columns: 1fr; } }
         @media (max-width: 520px) {
@@ -936,7 +948,7 @@
         <button class="nav-btn" title="格式转换" onclick="switchTab('image')"><span class="nav-label">格式转换</span></button>
         <button class="nav-btn" title="背景移除" onclick="switchTab('removebg')"><span class="nav-label">背景移除</span></button>
         <button class="nav-btn" title="实时汇率" onclick="switchTab('currency')"><span class="nav-label">实时汇率</span></button>
-        <button class="nav-btn" title="功能说明" onclick="switchTab('guide')"><span class="nav-label">功能说明</span></button>
+        <button class="nav-btn" title="帮助与赞助：使用说明、建议反馈、赞助支持" onclick="switchTab('guide')"><span class="nav-label nav-label-wide">帮助&amp;赞助</span></button>
         <div class="nav-divider" aria-hidden="true"></div>
         <button id="themeToggle" class="nav-btn theme-toggle" type="button" title="切换深浅主题" onclick="toggleTheme()" aria-pressed="false"><span class="nav-label">切换深色</span></button>
     </div>
@@ -1379,21 +1391,42 @@
 
     <!-- 功能说明 -->
     <div id="module-guide" class="container">
-        <h1>功能说明</h1>
+        <h1>帮助 &amp; 赞助</h1>
         <div class="guide-grid">
-            <section class="guide-section"><h2>使用流程</h2><ul><li>“利润测算”是默认首页，默认使用美国站和详细计算；单位换算已移到左侧独立的“单位换算”页。</li><li>在利润测算中填写包装尺寸、重量和采购数据；详细计算会联动头程、FBA、仓储、广告、佣金和利润结果。</li><li>需要单独做长度、重量、体积或温度换算时，切换到“单位换算”页。</li></ul></section>
-            <section class="guide-section"><h2>单位换算</h2><ul><li>当前聚焦的输入是换算源，其他同组单位会同步更新；数字最多保留两位小数。</li><li>尺寸支持 <code>11x11x11</code>、<code>11*11*11</code>、<code>11×11×11</code>，也支持简单分数输入。</li><li>运费模块中的厘米/英寸、千克/磅可以从任一侧修改，另一侧和后续计算会立即刷新。</li></ul></section>
-            <section class="guide-section"><h2>运费与 FBA</h2><ul><li><strong>头程体积：</strong>长 × 宽 × 高；头程体积重 = 体积（cm³） ÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>美国/加拿大使用 139 in³/lb 估算体积重；英国/欧洲使用官方 5000 cm³/kg，并按站点规则比较实重与体积重。亚马逊最终收费仍可能受类目、尺寸细分和包装规则影响。</li><li><strong>旺季发货：</strong>美国/加拿大按 2026-10-15 至 2027-01-14 的公开平均增量估算；英国/欧洲切换为官方旺季费率（低价 FBA 不适用旺季加价）。</li><li><strong>尺寸分级：</strong>美国/加拿大按标准件、大号大件、超大件判断；英国/欧洲按官方信封、包裹、小号大件、标准大件、大号大件、重型大件和特殊大件尺寸段判断；墨西哥保留手动费用。</li><li><strong>燃油附加费：</strong>美国/加拿大按 3.5% 估算；英国、德国/CEP 等欧洲站点自 2026-04-17 起按官方 1.5% 燃油和物流附加费计入最终配送费。</li><li><strong>单件仓储费：</strong>美国按「FBA 费率设置」中的淡旺季费率；日本、英国、欧洲按官方月度仓储费率自动估算。英国按 £/ft³，欧洲（德国/CEP 口径）按 €/m³，10-12 月使用旺季费率。</li><li><strong>产品类目与价格档：</strong>美国按「类目 × &lt;$10/$10-$50/&gt;$50」匹配，且标准件售价低于 $9.90 自动使用低价 FBA 阶梯；英国/欧洲按官方低价 FBA 阈值（一般 £20/€20，符合尺寸重量限制时）自动切换，其他商品按普通、服装类或危险品费率表计算。</li><li><strong>产品变体（多 SKU）：</strong>在「产品变体」面板勾选启用后可添加多个变体。各变体独立填写名称、售价与销量占比；默认所有变体规格相同（共用上方尺寸/实重，仅售价不同），取消勾选后每个变体可单独填写尺寸与实重，FBA 配送费按各自规格与售价档位计算。主变体售价取运费模块的售价输入。销量占比按比例自动归一化，月销量与利润按占比分摊到各变体。</li><li><strong>退货处理费：</strong>利润测算中的退货处理费自动计算 = 售价 × 平台佣金率 × 20%（亚马逊 Refund Administration Fee，卖家承担佣金的 20%），随售价与佣金率变化，不可手动填写。</li></ul></section>
-            <section class="guide-section"><h2>仓储费每月详细计算（美国/日本）</h2><ul><li>美国站和日本站支持连续 12 个月预测。点击“展开明细”后，填写起始月份、期初库存、过去 13 周销量（美国站）、每月计划销量和补货量；日本站另可切换服装/鞋靴/箱包费率。</li><li>批量填充可将销量或补货写入前 1–12 个月；填充月数外的月份保持原值，其中一项留空时也不会改动对应列。一键清空只清除 12 个月的计划销量、补货和批量填写框，保留起始月、期初库存及历史销量。</li><li>库存采用 FIFO 消耗，月度仓储计费库存 =（月初库存 + 月末库存）÷ 2；预测销量超过可售库存时，状态会显示缺货件数。</li><li>日均库存体积按立方英尺计费。美国站内置 1–9 月常规费率和 10–12 月旺季费率，标准件、大件费率不同；日本站按官方体积费率、月份和服饰类别计算。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量。首月使用历史 13 周销量，后续月份按预测中的实际售出量滚动；达到 22 周后计入利用率附加费。新品需要经过完整 13 周观察期，之后才按滚动实际销量判断库存利用率附加费。</li><li>勾选新卖家低库存资格且日均库存体积低于 25 ft³ 时，使用新卖家费率并跳过利用率附加费。该模型不包含库龄附加费、危险品和特殊品类费。</li><li>利润测算中的“仓储/件” = 计划期仓储总费 ÷ 计划期实际售出总件数，零销量月份的仓储费仍计入总费用；没有实际售出量时，包含仓储的利润结果会显示为不可用。</li><li>补货建议不会改写计划补货。系统按到仓提前期和安全库存比例计算每月最小建议到仓量；首月无法提前下单的建议会标为“立即安排/已有在途”。</li></ul></section>
-            <section class="guide-section"><h2>英国、欧洲与其他站点仓储</h2><ul><li>英国站使用官方 £/ft³/月费率；欧洲站采用官方德国/CEP（DE/PL/CZ）€/m³/月费率。普通、服装类、大件和危险品分别取不同费率，10-12 月自动切换旺季费率。</li><li>英国/欧洲的仓储/件 = 官方单件月仓储费 × 平均库存月数。平均库存月数可在利润测算中调整；加拿大、墨西哥仍保留手动仓储单价和月数。</li><li>法国、意大利、西班牙、瑞典、荷兰、波兰、比利时和爱尔兰与德国/CEP 费率并不完全相同；当前欧洲站是德国/CEP 口径，其他欧洲国家请以 Seller Central 实际站点费率为准。</li></ul></section>
-            <section class="guide-section"><h2>广告费换算</h2><ul><li><strong>CPA</strong> = CPC ÷ CVR；<strong>POS</strong> = 广告订单量 ÷ 月销量。</li><li><strong>ACOS</strong> = CPA ÷ 售价；<strong>混合广告费/件</strong> = CPA × POS，表示摊到每个总订单的平均广告成本。</li><li><strong>ACoAS</strong> = 混合广告费/件 ÷ 售价；<strong>ROAS</strong> = 售价 ÷ CPA。</li><li>CVR 可直接编辑为百分比；点击量和广告订单量都有值、且 CVR 留空或为 0 时，程序用广告订单量 ÷ 点击量补齐。利润测算读取混合广告费/件。</li><li><strong>变体销量分布：</strong>启用多变体后，本模块下方展示各变体的售价、销量占比、预估月销量与广告成本/件（广告成本按件均摊，各变体相同），并给出加权平均售价与加权 ACOS。</li></ul></section>
-            <section class="guide-section"><h2>利润测算</h2><ul><li>售价、CPC、CVR、广告订单量和月销量统一取自广告费换算；头程、计费重和 FBA 取自运费模块。</li><li>总成本/件 = 采购（扣除退税/折扣） + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货。</li><li>采购/件和总采购成本单独列出；总采购成本 = 采购/件 × 月销量。</li><li>日本、英国和欧洲站按商品类别与售价阶梯自动计算销售佣金；美国/加拿大保留可编辑佣金率。</li><li>退货成本 = 售价 × 退货率 + 退货处理费；退货率、处理费、促销费和入库配置费需要手动确认。</li><li>单件结果同时显示站点币种和人民币；销量相关的总采购成本、总费用和总利润显示人民币，并同时换算为对应美元金额，便于统一比较。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li><li><strong>变体利润明细：</strong>启用多变体后，经营结果栏下方展示各变体明细（售价、占比、FBA 配送费、单件利润、利润率、月销量、月利润）与加权合计。主指标区（利润/件、FBA/件、利润率、保本 ACOS 等）同步显示加权口径结果。</li></ul></section>
-            <section class="guide-section"><h2>汇率与曲线</h2><ul><li>切换站点会自动刷新该站点汇率；“更新汇率”读取 ExchangeRate-API 的 CNY 基准实时数据，显示为 1 目标币 = X 人民币，保留两位小数。</li><li>实时汇率页支持手动汇率覆盖。历史曲线固定以人民币为目标币，支持 1 个月、1 年、5 年；接口不可用时不影响手动换算。</li><li>历史曲线的数据点来自 Frankfurter 工作日参考汇率，不等同于平台结算汇率。</li></ul></section>
-            <section class="guide-section"><h2>结果定位与提示</h2><ul><li>点击任一自动结果，页面会滚动到相关输入；缺少的字段会优先高亮，已填写完整时会高亮全部依赖项。</li><li>悬停或键盘聚焦带提示的名称可查看公式、费率范围和适用条件；提示不会改变计算值。</li><li>默认文字颜色表示需要人工确认的基础数据，强调色表示换算或联动结果。API 失败、销量不足、无历史销量和缺货会在状态文字中说明。</li></ul></section>
-            <section class="guide-section"><h2>其他工具</h2><ul><li><strong>PDF 聚合：</strong>首次选择文件会按文件名中的数字顺序排序并自动处理；继续添加文件后可重新合并下载。</li><li><strong>格式转换：</strong>图片在浏览器本地转换为 JPG、PNG 或 WEBP，选择文件后点击执行并下载。</li><li><strong>背景移除：</strong>模型在本地浏览器推理，可选择 GPU/WebGPU 或 CPU；首次使用可能需要下载模型，处理期间不要关闭页面。</li><li><strong>主题切换：</strong>主题选择保存在当前浏览器，下次打开会沿用上次选择。</li></ul></section>
-            <section class="guide-section"><h2>来源与边界</h2><ul><li>日本站 FBA 配送和仓储采用 <a href="https://sell.amazon.co.jp/pricing" target="_blank" rel="noopener noreferrer">Amazon 日本站 2026 官方费率</a>；实际收费以 Seller Central 为准。</li><li>英国、德国/CEP 及其他欧洲站点的配送、低价 FBA、月度仓储、1.5% 燃油附加费和佣金采用 <a href="https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf" target="_blank" rel="noopener noreferrer">Amazon Europe Fees Rate Card（2026-07-01 生效）</a>。英国官方费率入口：<a href="https://sell.amazon.co.uk/pricing#download-rate-cards" target="_blank" rel="noopener noreferrer">sell.amazon.co.uk/pricing</a>。</li><li>美国 FBA 仓储费率：<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero《FBA Storage Fees 2026》</a>，为本工具采用的用户提供参考表；不是实时费率接口。</li><li>2026 旺季窗口和出库计费口径：<a href="https://sellercentral.amazon.com/help/hub/reference/external/GABBX6GZPA8MSZGW?mons_sel_locale=zh_CN" target="_blank" rel="noopener noreferrer">Amazon Seller Central 2026 US FBA fulfillment fee changes</a>；公开公告给出平均旺季增量，具体 SKU 费率请以 Amazon 工具为准。</li><li>实时汇率：ExchangeRate-API（<code>open.er-api.com</code>）；历史曲线：Frankfurter（<code>api.frankfurter.dev</code>）。</li><li>FBA 分级、体积重和配送费为页面内置估算规则，最终收费以 Amazon Seller Central、入库配置服务和实际结算报表为准。欧洲站当前不区分法国、意大利、西班牙、瑞典、荷兰、波兰、比利时和爱尔兰的国别差异。</li></ul></section>
+            <section class="guide-section"><h2>使用流程</h2><ul><li>默认进入「利润测算」，默认美国站详细计算；单位换算在左侧独立页。</li><li>先填包装尺寸、重量、采购价和售价，头程、FBA、仓储、广告、佣金与利润会自动联动。</li><li>点击任一结果会跳回对应输入；缺少的字段会优先高亮。</li></ul></section>
+            <section class="guide-section"><h2>费用与口径</h2><ul><li><strong>头程计费重：</strong>头程体积重 = 体积（cm³）÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>美国/加拿大使用 139 in³/lb 估算体积重，英国/欧洲按 5000 cm³/kg，并与实重取大。</li><li><strong>尺寸分级：</strong>按站点官方尺寸段判断；标准件低价档（US &lt; $9.90、UK/EU ≤ £20/€20）自动切换低价 FBA。</li><li><strong>佣金：</strong>日本、英国与欧洲按类目和售价阶梯自动计算，美国/加拿大保留可编辑费率。</li><li><strong>总成本/件：</strong>采购 + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货成本。</li><li><strong>退货成本：</strong>售价 × 退货率 + 退货处理费（平台佣金的 20%）。</li></ul></section>
+            <section class="guide-section"><h2>广告与利润指标</h2><ul><li>CPA = CPC ÷ CVR；POS = 广告订单量 ÷ 月销量；ACOS = CPA ÷ 售价。</li><li>混合广告费/件 = CPA × POS；ACoAS = 混合广告费/件 ÷ 售价；ROAS = 售价 ÷ CPA。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
+            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>美国与日本支持 12 个月预测：填起始月、期初库存、计划销量和补货量，可批量填充前 1–12 个月。</li><li>库存按 FIFO 消耗，月度仓储计费库存 =（月初 + 月末）÷ 2；日均库存体积按 ft³ 计费，10–12 月使用旺季费率。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量，达到 22 周计入附加费；新品需要经过完整 13 周观察期；新卖家日均库存低于 25 ft³ 时可用低库存费率。</li><li>「仓储/件」= 计划期仓储总费 ÷ 计划期实际售出件数；零销量月份的仓储费仍计入总费用，没有实际售出量时，包含仓储的利润结果会显示为不可用。它与利润模块的「月销量」口径不同，可用「用月销量填充」统一。</li><li>补货建议不会改写计划补货，只按到仓提前期与安全库存比例给出每月建议到仓量。</li></ul></section>
+            <section class="guide-section"><h2>英国、欧洲与其他站点仓储</h2><ul><li>英国站按 £/ft³/月，欧洲站（德国/CEP 口径）按 €/m³/月，10–12 月自动切换旺季费率。</li><li>英国/欧洲的仓储/件 = 官方单件月仓储费 × 平均库存月数；加拿大、墨西哥保留手填仓储单价。</li><li>法国、意大利、西班牙等欧洲国家与德国/CEP 费率并不完全相同，请以 Seller Central 实际站点费率为准。</li></ul></section>
+            <section class="guide-section"><h2>结果定位与提示</h2><ul><li>点击自动结果会滚动到相关输入，缺少的字段会优先高亮；填写完整时高亮全部依赖项。</li><li>带提示的名称支持悬停或键盘聚焦查看公式、费率范围与适用条件，提示不会改变计算值。</li><li>默认文字色表示需要人工确认的基础数据，强调色表示换算或联动结果；API 失败、销量不足与缺货会在状态文字中说明。</li></ul></section>
+            <section class="guide-section"><h2>其他工具与汇率</h2><ul><li>汇率：切换站点自动刷新；「更新汇率」读取 ExchangeRate-API 实时数据，历史曲线来自 Frankfurter，均支持手动覆盖。</li><li>PDF 聚合、格式转换、背景移除全部在浏览器本地完成，文件不会上传服务器。</li><li>输入会自动保存到本机浏览器，刷新即恢复；主题选择同样保存在本地。</li></ul></section>
+            <section class="guide-section"><h2>数据来源与边界</h2><ul><li>日本与英国/欧洲费率来自官方费率卡：<a href="https://sell.amazon.co.jp/pricing" target="_blank" rel="noopener noreferrer">Amazon 日本站 2026</a> · <a href="https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf" target="_blank" rel="noopener noreferrer">260630-FBA-Rate-Card-EN1.pdf</a>；美国仓储为项目采用的参考表（<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero</a>）。</li><li>结果仅供估算，最终以 Amazon Seller Central 与实际结算报表为准；暂未覆盖 Coupon 兑现费、库龄附加费、长期仓储费等特殊费用。</li><li>欧洲站当前为德国/CEP 口径，不区分法国、意大利、西班牙等国的国别费率差异。</li></ul></section>
+            <section class="guide-section guide-section--wide"><h2>建议与反馈</h2><p>算得不对、用着不顺手、想要新功能，或者哪个站点的费率过期了，都欢迎直接告诉作者 —— 每条反馈都会看。</p>
+                <ul class="sponsor-contacts">
+                    <li>微信：<b id="authorWechat">bibliobibule</b><span class="guide-hint">添加时备注「LT-TOOL」</span></li>
+                    <li>小红书：<b>bibliobibule</b><span class="guide-hint">私信或评论都可以</span></li>
+                    <li>邮箱：<b><a href="mailto:782465050@qq.com">782465050@qq.com</a></b></li>
+                </ul>
+            </section>
+            <section class="guide-section guide-section--wide"><h2>赞助支持</h2><p>这个工具一直免费、无广告，数据也只留在你自己的浏览器里。如果它帮你省下了时间或成本，欢迎请作者喝杯咖啡 —— 完全自愿，不影响任何功能，也不会有任何区别对待。</p>
+                <ul class="sponsor-contacts">
+                    <li>微信：<b>bibliobibule</b><span class="guide-hint">添加时备注「LT-TOOL」，可微信转账 / 赞赏</span></li>
+                </ul>
+                <p class="guide-hint">赞助会用于核对官方费率公告、更新费率表和站点维护。谢谢每一个提反馈和愿意支持的人。</p>
+                <!-- 想放收款 / 赞赏二维码时：把图片放进仓库（例如 assets/donate.png），取消下面注释并改路径即可。
+                <img class="sponsor-qr" src="assets/donate.png" alt="微信赞赏码" width="180">
+                -->
+            </section>
         </div>
     </div>
+
+    <footer>
+        <div class="footer-contacts"><span>微信：<b>bibliobibule</b></span><span>小红书：<b>bibliobibule</b></span><span>邮箱：<b>782465050@qq.com</b></span></div>
+        <div class="footer-meta">LT-TOOL · 亚马逊利润测算工具 · 结果仅供估算，最终以 Seller Central 结算报表为准</div>
+    </footer>
+
+
+
 
 
 <script>

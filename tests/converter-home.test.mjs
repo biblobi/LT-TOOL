@@ -1271,8 +1271,27 @@ test('automatic result values guide users to their dependent inputs and explain 
   assert.match(html, /targetField\.focus\(\{ preventScroll: true \}\)/);
 });
 
-test('legacy author and contact footer is removed', () => {
-  assert.doesNotMatch(html, /SYSTEM CORE DESIGNED BY CHE RUI|小红书：bibliobibule|VX：bibliobibule|footer-contacts/);
+test('help tab shows author contacts and keeps the legacy author brand removed', () => {
+  // 作者自己的联系方式要展示（原来的 footer 元素被误删过），但历史作者品牌不得回归。
+  assert.doesNotMatch(html, /SYSTEM CORE DESIGNED BY CHE RUI/);
+  assert.match(html, /<footer>[\s\S]*?<div class="footer-contacts">/);
+  assert.match(html, /微信：<b>bibliobibule<\/b>/);
+  assert.match(html, /小红书：<b>bibliobibule<\/b>/);
+  assert.match(html, /<span class="nav-label nav-label-wide">帮助&amp;赞助<\/span>/);
+});
+
+test('help tab keeps a suggestion section as plain contacts (no form) and a sponsor section', () => {
+  const start = html.indexOf('id="module-guide"');
+  const end = html.indexOf('<footer>', start);
+  const guide = html.slice(start, end);
+  for (const required of [
+    '建议与反馈', '赞助支持', 'id="authorWechat"', '782465050@qq.com',
+    'mailto:782465050@qq.com', '完全自愿',
+  ]) assert.match(guide, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(guide, /bibliobibule/);
+  // 静态站没有后端，不再放表单：只留联系方式，让访客自己加微信/发邮件。
+  assert.doesNotMatch(guide, /feedback-form|feedbackIdea|feedbackWechat|feedbackContact|feedbackPayload|feedbackStatus|submitFeedback|copyFeedbackPayload/);
+  assert.doesNotMatch(html, /function submitFeedback|function copyFeedbackPayload|function buildFeedbackPayload/);
 });
 
 test('theme switch defaults to light, persists the choice, and redraws chart colors', () => {
@@ -1301,7 +1320,7 @@ test('site navigation keeps profit and unit conversion as separate sidebar pages
   const navStart = html.indexOf('<div class="nav-deck">');
   const pdfStart = html.indexOf('<div id="module-pdf"');
   const navMarkup = html.slice(navStart, pdfStart);
-  for (const label of ['利润测算', '单位换算', '功能说明', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
+  for (const label of ['利润测算', '单位换算', '帮助&amp;赞助', 'themeToggle']) assert.match(navMarkup, new RegExp(label));
   assert.doesNotMatch(navMarkup, /converter-subnav|converter-jump/);
   assert.match(html, /<div id="module-converter" class="container converter-home">[\s\S]*?<h1>单位换算<\/h1>/);
   assert.match(html, /<div id="module-profit" class="container converter-home active">[\s\S]*?<h1>利润测算<\/h1>/);
