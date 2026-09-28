@@ -1196,34 +1196,37 @@ test('freight and storage detail rows match the profit row form', () => {
   assert.match(html, /\.fba-basis \{[^}]*border: 1px solid var\(--border-color\);/s);
 });
 
-test('each comparison row shows its own price share and amount instead of a bare pp delta', () => {
+test('each comparison row shows its own price share and amount with no pp delta unit', () => {
   const barsSrc = extractFunctionSource('renderProfitBars');
 
-  // 每个系列先算占售价比例，涨跌用同一口径相减
+  // 每个系列先算占售价比例，条的刻度和它一致
   assert.match(barsSrc, /const shares = series\.map\(\(item, index\) => \{/);
   assert.match(barsSrc, /return profitShareOfPrice\(values\[index\], itemPrice\);/);
-  assert.match(barsSrc, /const change = \(share - baseShare\) \* 100;/);
 
   // 每行给到 占比 + 数值 两列，数值就是这个产品自己的金额，不是与当前的差价
   assert.match(barsSrc, /<i style="width:\$\{barWidth\.toFixed\(1\)\}%"[\s\S]{0,80}<\/i><b>\$\{shareText\}<\/b><span>\$\{projectEscapeHtml\(text\)\}<\/span>/);
-  // 差价降级为名称列里的附属信息，不再是这一行唯一的数字
-  assert.match(barsSrc, /class="profit-compare-delta\$\{change < 0 \? ' negative' : ''\}"/);
-  // 名称与 pp 差分两行，长产品名不会把 pp 顶掉
-  assert.match(barsSrc, /<em title="\$\{projectEscapeHtml\(label\)\}"><b>\$\{projectEscapeHtml\(showLabel\)\}<\/b>\$\{delta\}<\/em>/);
+  // 名称列只有产品名，没有 pp 之类的自造单位挂在下面
+  assert.match(barsSrc, /<em title="\$\{projectEscapeHtml\(label\)\}"><b>\$\{projectEscapeHtml\(showLabel\)\}<\/b><\/em>/);
   assert.match(html, /\.profit-bar-stack-row > em > b \{ display: block; overflow: hidden;/);
   assert.match(html, /\.profit-bar-stack-row > b \{ color: var\(--accent\); font: 700 0\.76rem 'Share Tech Mono', monospace;/);
   assert.match(html, /\.profit-bar-stack-row > span \{ color: var\(--text-muted\); font: 500 0\.76rem 'Share Tech Mono', monospace;/);
 
-  // 不再出现「绝对金额相减再除」的旧口径
+  // pp 口径与旧的换算全部清干净：不留 pp 文案、不留 pp 结构、不留旧口径
+  assert.doesNotMatch(barsSrc, /const change = \(share - baseShare\) \* 100;/);
+  assert.doesNotMatch(barsSrc, /baseShare/);
+  assert.doesNotMatch(barsSrc, /pp/);
+  assert.doesNotMatch(barsSrc, /profit-compare-delta/);
+  assert.doesNotMatch(html, /profit-compare-delta/);
+  assert.doesNotMatch(html, /[0-9]pp|\.pp\b|\bpp\b/);
   assert.doesNotMatch(barsSrc, /\(value - base\) \/ Math\.abs\(base\)/);
   assert.doesNotMatch(barsSrc, /higherIsBetter/);
   assert.doesNotMatch(barsSrc, /is-up|is-down/);
 
   // 占比列（条长刻度）与数值列（同系列同色）都要与所在数据条对得上
   for (let i = 0; i < 4; i += 1) {
-    assert.match(html, new RegExp(`\\.cmp-series-${i} > b \\{ color: var\\(--${i === 0 ? 'accent' : `series-${i}`}\\); \\}`));
+    const color = i === 0 ? 'accent' : `series-${i}`;
+    assert.match(html, new RegExp(`\\.cmp-series-${i} > b, \\.cmp-series-${i} > span \\{ color: var\\(--${color}\\); \\}`));
   }
-  assert.doesNotMatch(html, /\.profit-compare-delta\.is-(up|down)/);
 });
 
 test('the margin row reuses the ratio column so it lines up with the rows below', () => {
