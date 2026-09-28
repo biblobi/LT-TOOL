@@ -580,24 +580,56 @@
         .compare-dropdown-tools button { padding: 3px 8px; border: 1px solid var(--border-strong); background: var(--input-bg); color: var(--text-primary); font: 600 0.78rem Roboto, sans-serif; cursor: pointer; }
         .compare-dropdown-tools .storage-switch { font-size: 0.8rem; }
         .profit-compare-warning { margin-top: 7px; padding: 5px 8px; border: 1px solid var(--danger); color: var(--danger); font-size: 0.78rem; font-weight: 600; line-height: 1.5; }
-        .profit-bar-stack { display: grid; gap: 2px; min-width: 0; }
-        .profit-bar-stack-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0; }
-        .profit-bar-stack-row > i { display: block; height: 7px; border-radius: 4px; background: var(--series-track); }
+        /* 每行 = 「名称 │ 条轨 │ 占售价 │ 数值」四段对齐，
+           多行叠起来就是一张小表：眼睛顺着列往下走即可，不用读任何一个缩写。
+           名称列只在有多条数据时才占宽，单条时整列坍缩，不挤占条轨。 */
+        .profit-bar-stack { display: grid; gap: 3px; min-width: 0; }
+        /* 条轨必须拿到绝对大头，否则 20% 的条只剩几十像素，长短就看不出差别了。
+           名称/占比/数值三列都按内容宽度收紧，把剩余空间让给条轨。 */
+        .profit-bar-stack.is-stacked .profit-bar-stack-row { grid-template-columns: minmax(0, 84px) minmax(140px, 1fr) 42px max-content; }
+        .profit-bar-stack-row { display: grid; grid-template-columns: minmax(90px, 1fr) 42px max-content; align-items: center; gap: 8px; min-width: 0; }
+        /* 名称栏：产品名一行、与「当前」的百分点差一行，
+           名字再长也只在自己那行省略号截断，不会把 pp 顶掉 */
+        .profit-bar-stack-row > em { display: block; min-width: 0; color: var(--text-subtle); font: 500 0.74rem/1.2 Roboto, sans-serif; font-style: normal; }
+        .profit-bar-stack-row > em > b { display: block; overflow: hidden; font-weight: inherit; text-overflow: ellipsis; white-space: nowrap; }
+        .profit-bar-stack-row.is-current > em { color: var(--text-primary); font-weight: 700; }
+        .profit-bar-stack-row > i { display: block; height: 7px; min-width: 0; border-radius: 4px; background: var(--series-track); }
         .profit-bar-stack-row > i[data-negative="1"] { background: var(--danger); }
-        .profit-bar-stack-row > b { text-align: right; font: 700 0.72rem 'Share Tech Mono', monospace; color: var(--text-muted); white-space: nowrap; }
-        .profit-bar-stack-row.is-current > b { color: var(--text-primary); }
+        /* 占售价比例：与条长同刻度，条长多少这里就是多少 */
+        .profit-bar-stack-row > b { color: var(--accent); font: 700 0.76rem 'Share Tech Mono', monospace; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+        .profit-bar-stack-row > span { color: var(--text-muted); font: 500 0.76rem 'Share Tech Mono', monospace; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+        .profit-bar-stack-row.is-current > b,
+        .profit-bar-stack-row.is-current > span { color: var(--text-primary); font-weight: 700; }
         /* 对比项算不出来时，明确写出原因，而不是留一行空白 */
-        .profit-bar-stack-row > b.is-unavailable { color: var(--danger); font-family: Roboto, sans-serif; font-size: 0.72rem; }
-        .profit-compare-delta { font: 600 0.7rem Roboto, sans-serif; font-style: normal; }
+        .profit-bar-stack-row > span.is-unavailable { color: var(--danger); font-family: Roboto, sans-serif; font-size: 0.72rem; }
         .cmp-series-0 > i { background: var(--accent); }
         .cmp-series-1 > i { background: var(--series-1); }
         .cmp-series-2 > i { background: var(--series-2); }
         .cmp-series-3 > i { background: var(--series-3); }
-        /* 涨跌与所在数据条同色，条长和数字一一对应，不用再去数第几条 */
-        .cmp-series-0 .profit-compare-delta { color: var(--accent); }
-        .cmp-series-1 .profit-compare-delta { color: var(--series-1); }
-        .cmp-series-2 .profit-compare-delta { color: var(--series-2); }
-        .cmp-series-3 .profit-compare-delta { color: var(--series-3); }
+        /* 数值与所在数据条同色，条长和数字一一对应，不用再去数第几条 */
+        .cmp-series-0 > b, .cmp-series-0 > span { color: var(--accent); }
+        .cmp-series-1 > b, .cmp-series-1 > span { color: var(--series-1); }
+        .cmp-series-2 > b, .cmp-series-2 > span { color: var(--series-2); }
+        .cmp-series-3 > b, .cmp-series-3 > span { color: var(--series-3); }
+        .cmp-series-0.is-current > b, .cmp-series-0.is-current > span { color: var(--text-primary); }
+        .profit-bar-stack-row.is-current > span { color: var(--text-primary); font-weight: 700; }
+        /* 对比项算不出来时，明确写出原因，而不是留一行空白 */
+        .profit-bar-stack-row > span.is-unavailable { color: var(--danger); font-family: Roboto, sans-serif; font-size: 0.72rem; text-align: right; }
+        .cmp-series-0 > i { background: var(--accent); }
+        .cmp-series-1 > i { background: var(--series-1); }
+        .cmp-series-2 > i { background: var(--series-2); }
+        .cmp-series-3 > i { background: var(--series-3); }
+        /* 数值与所在数据条同色，条长和数字一一对应，不用再去数第几条 */
+        .cmp-series-0 > b { color: var(--accent); }
+        .cmp-series-1 > b { color: var(--series-1); }
+        .cmp-series-2 > b { color: var(--series-2); }
+        .cmp-series-3 > b { color: var(--series-3); }
+        .cmp-series-0.is-current > b { color: var(--text-primary); }
+        /* 涨跌幅写在名称同一栏里，独立成行 */
+        .profit-bar-stack.is-stacked .profit-bar-stack-row > em .profit-compare-delta { display: block; font: 700 0.72rem/1.2 'Share Tech Mono', monospace; font-variant-numeric: tabular-nums; }
+        .profit-bar-stack.is-stacked .cmp-series-1 > em .profit-compare-delta { color: var(--series-1); }
+        .profit-bar-stack.is-stacked .cmp-series-2 > em .profit-compare-delta { color: var(--series-2); }
+        .profit-bar-stack.is-stacked .cmp-series-3 > em .profit-compare-delta { color: var(--series-3); }
         .freight-grid .cargo-check { margin: 0 0 7px; padding: 0; border: 0; background: transparent; }
         .freight-grid .cargo-layout { grid-template-columns: minmax(280px, .9fr) minmax(420px, 1.1fr); gap: 12px; }
         .freight-grid .cargo-title { margin-bottom: 7px; }
@@ -606,6 +638,14 @@
         .freight-grid .fba-summary { margin-top: 7px; padding-top: 6px; }
         .freight-grid .fba-basis { padding: 8px; }
         .storage-forecast-panel { margin: 10px 0 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+                        .profit-bar-stack-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) 56px; align-items: center; gap: 4px 8px; }
+        .profit-bar-stack-row > i { grid-column: 2 / 4; }
+        .profit-bar-stack-row > span { grid-column: 4; }
+        .profit-delta { color: var(--text-subtle); font: 500 0.72rem Roboto, sans-serif; font-variant-numeric: tabular-nums; padding-left: 4px; }
+        .profit-delta::before { content: '('; }
+        .profit-delta::after { content: ')'; }
+        .profit-delta.negative { color: var(--danger); }
+        .profit-bar-stack.is-stacked .profit-bar-stack-row { grid-template-columns: minmax(44px, 74px) minmax(0, 1fr) 60px 92px; }
         .fee-config-panel { margin-top: 2px; border-top: 1px dashed var(--border-strong); }
         .fee-config-summary[hidden] { display: none; }
         .fee-config-panel .storage-forecast-title { color: var(--accent-hover); }
@@ -882,10 +922,12 @@
         .quick-cost-track { height: 8px; background: var(--surface-muted); overflow: hidden; }
         .quick-cost-track i { display: block; height: 100%; background: var(--accent); }
         .profit-results .profit-breakdown.profit-result-bars { grid-template-columns: 1fr; gap: 4px; }
-        /* 结果行保留基础边框：紧凑但不裸奔，隔行间距统一 4px，行高统一避免利润率那行矮一截 */
+        /* 结果行保留基础边框：紧凑但不裸奔，隔行间距统一 4px，行高统一避免利润率那行矮一截。
+           对比行现在是「名称 │ 条轨 │ 占售价 │ 数值」四段，内容都落在数据条这一列里，
+           所以给小字留出足够宽度，否则条轨会被挤到看不见。 */
         .profit-result-bars .metric {
             display: grid;
-            grid-template-columns: minmax(92px, 0.6fr) minmax(150px, 2fr) 84px minmax(220px, 1.2fr);
+            grid-template-columns: minmax(80px, 0.42fr) minmax(360px, 3.2fr) 62px minmax(180px, 1fr);
             gap: 8px 14px;
             align-items: center;
             min-height: 46px;
@@ -909,7 +951,7 @@
         .profit-result-bars .metric.is-ratio-only .metric-action strong.is-low { color: var(--danger); }
         .profit-result-bars .metric > .term-tip { font-size: 1rem; }
         .profit-result-bars .profit-bar-stack { width: 100%; }
-        .profit-result-bars .profit-bar-stack-row > i { height: 7px; transition: width 0.2s ease; }
+        .profit-result-bars .profit-bar-stack-row > i { height: 8px; transition: width 0.2s ease; }
         /* 占比左对齐，字号放大，与数据条之间留出更明显的间距 */
         .profit-result-bars .profit-bar-ratio { color: var(--accent); font: 700 1.25rem 'Share Tech Mono', monospace; font-variant-numeric: tabular-nums; text-align: left; white-space: nowrap; }
         .profit-result-bars .metric-action { display: grid; gap: 2px; }
@@ -927,7 +969,7 @@
         .quick-note { margin: 10px 0 0; color: var(--text-subtle); font-size: .82rem; }
         @media (max-width: 900px) { .quick-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .quick-results { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 1050px) {
-            .profit-result-bars .metric { grid-template-columns: 110px minmax(100px, 1fr) 60px; }
+            .profit-result-bars .metric { grid-template-columns: 100px minmax(220px, 1fr) 56px; }
             .profit-result-bars .metric-action { grid-column: 1 / -1; }
         }
         @media (max-width: 560px) {
@@ -1414,6 +1456,7 @@
             <section class="guide-section"><h2>广告与利润指标</h2><ul><li>CPA = CPC ÷ CVR；POS = 广告订单量 ÷ 月销量；ACOS = CPA ÷ 售价。</li><li>混合广告费/件 = CPA × POS；ACoAS = 混合广告费/件 ÷ 售价；ROAS = 售价 ÷ CPA。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
             <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>美国与日本支持 12 个月预测：填起始月、期初库存、计划销量和补货量，可批量填充前 1–12 个月。</li><li>库存按 FIFO 消耗，月度仓储计费库存 =（月初 + 月末）÷ 2；日均库存体积按 ft³ 计费，10–12 月使用旺季费率。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量，达到 22 周计入附加费；新品需要经过完整 13 周观察期；新卖家日均库存低于 25 ft³ 时可用低库存费率。</li><li>「仓储/件」= 计划期仓储总费 ÷ 计划期实际售出件数；零销量月份的仓储费仍计入总费用，没有实际售出量时，包含仓储的利润结果会显示为不可用。它与利润模块的「月销量」口径不同，可用「用月销量填充」统一。</li><li>补货建议不会改写计划补货，只按到仓提前期与安全库存比例给出每月建议到仓量。</li></ul></section>
             <section class="guide-section"><h2>英国、欧洲与其他站点仓储</h2><ul><li>英国站按 £/ft³/月，欧洲站（德国/CEP 口径）按 €/m³/月，10–12 月自动切换旺季费率。</li><li>英国/欧洲的仓储/件 = 官方单件月仓储费 × 平均库存月数；加拿大、墨西哥保留手填仓储单价。</li><li>法国、意大利、西班牙等欧洲国家与德国/CEP 费率并不完全相同，请以 Seller Central 实际站点费率为准。</li></ul></section>
+            <section class="guide-section"><h2>产品对比怎么看</h2><ul><li>勾选「对比产品」后，每个产品在「经营结果」里多出一条，名称列只在对比时出现。</li><li>每条从左到右：产品名、条轨、占售价、单件金额。条轨和「占售价」是同一刻度 —— 条越长，占比数字就越大。</li><li>产品名下面的 <strong>+x.xpp / −x.xpp</strong> 是与「当前」的百分点差：正数表示这个产品该项占售价更高，亏损类指标出现负值属正常。</li><li>各产品售价不同，所以不直接比每件金额的差值，只比「占售价比例」，这是唯一口径一致的部分。</li></ul></section>
             <section class="guide-section"><h2>结果定位与提示</h2><ul><li>点击自动结果会滚动到相关输入，缺少的字段会优先高亮；填写完整时高亮全部依赖项。</li><li>带提示的名称支持悬停或键盘聚焦查看公式、费率范围与适用条件，提示不会改变计算值。</li><li>默认文字色表示需要人工确认的基础数据，强调色表示换算或联动结果；API 失败、销量不足与缺货会在状态文字中说明。</li></ul></section>
             <section class="guide-section"><h2>其他工具与汇率</h2><ul><li>汇率：切换站点自动刷新；「更新汇率」读取 ExchangeRate-API 实时数据，历史曲线来自 Frankfurter，均支持手动覆盖。</li><li>PDF 聚合、格式转换、背景移除全部在浏览器本地完成，文件不会上传服务器。</li><li>输入会自动保存到本机浏览器，刷新即恢复；主题选择同样保存在本地。</li></ul></section>
             <section class="guide-section"><h2>数据来源与边界</h2><ul><li>日本与英国/欧洲费率来自官方费率卡：<a href="https://sell.amazon.co.jp/pricing" target="_blank" rel="noopener noreferrer">Amazon 日本站 2026</a> · <a href="https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf" target="_blank" rel="noopener noreferrer">260630-FBA-Rate-Card-EN1.pdf</a>；美国仓储为项目采用的参考表（<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero</a>）。</li><li>结果仅供估算，最终以 Amazon Seller Central 与实际结算报表为准；暂未覆盖 Coupon 兑现费、库龄附加费、长期仓储费等特殊费用。</li><li>欧洲站当前为德国/CEP 口径，不区分法国、意大利、西班牙等国的国别费率差异。</li></ul></section>
@@ -3173,6 +3216,14 @@
     function renderProfitBars(price) {
         const series = compareSeries();
         const fallbackPrice = Number.isFinite(price) && price > 0 ? price : 0;
+        // 名称列只在多产品对比时出现：单条数据下「当前」这个名字没有信息量，还会挤掉条轨宽度
+        const showLabels = series.length > 1;
+        // 对比项重名时（例如「当前」与某个叫「当前」的存档），名称不再唯一，回退到序号
+        const labelCount = new Map();
+        for (const item of series) {
+            const label = item.isCurrent ? '当前' : String(item.name ?? '');
+            labelCount.set(label, (labelCount.get(label) ?? 0) + 1);
+        }
         for (const [valueId, ratioId, key, mode] of PROFIT_BAR_METRICS) {
             const metric = document.getElementById(valueId)?.closest('.metric');
             if (!metric) continue;
@@ -3204,17 +3255,19 @@
                 return profitShareOfPrice(values[index], itemPrice);
             });
             const baseShare = shares.find((share, index) => share !== null && series[index].isCurrent) ?? null;
+            stack.classList.toggle('is-stacked', showLabels);
             stack.innerHTML = series.map((item, index) => {
                 const isCurrent = Boolean(item.isCurrent);
                 const seriesClass = `cmp-series-${Math.min(index, 3)}${isCurrent ? ' is-current' : ''}`;
-                const label = isCurrent ? '当前' : item.name + (item.source === 'recomputed' ? '（重算）' : '');
+                const label = isCurrent ? '当前' : String(item.name ?? '');
+                const showLabel = labelCount.get(label) > 1 ? `${index + 1}. ${label}` : label;
                 if (item.unavailable) {
                     // 说清楚是哪一类问题，不留一行空白让人以为坏了
                     const why = item.partial
                         ? '这是修复前保存的产品，没有记录月点击量/仓储计划等输入，对比数据无法复原；点「保存产品」重新保存一次即可'
                         : '该项目缺少尺寸/重量等必填项，无法估算';
                     const chip = item.partial ? '旧存档·请重存' : '缺少输入';
-                    return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(why)}"><i style="width:0"></i><b class="is-unavailable">${chip}</b></span>`;
+                    return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(why)}"><i style="width:0"></i><b>-</b><span class="is-unavailable">${chip}</span></span>`;
                 }
                 const value = values[index];
                 const share = shares[index];
@@ -3223,16 +3276,19 @@
                 const negative = share !== null && share < 0;
                 const barWidth = width > 0 && width < 1 ? 1 : width;
                 const text = value === null ? '-' : formatCompareValue(value, item, kind);
+                // 条长与占比同刻度：这两列说的是同一件事，只是一个给人看长度，一个给人读数字
                 const shareText = share === null ? '-' : `${(share * 100).toFixed(1)}%`;
                 let delta = '';
-                // 跨产品比每件金额没有意义（售价与包装都不同），改用占售价比例的百分点差，
-                // 这样条长差多少，数字就是多少 pp
+                // 跨产品比每件金额没有意义（售价与包装都不同），改用占售价比例的百分点差
                 if (!isCurrent && share !== null && baseShare !== null) {
                     const change = (share - baseShare) * 100;
-                    delta = ` <em class="profit-compare-delta">${change > 0 ? '+' : ''}${change.toFixed(1)}pp</em>`;
+                    delta = `<em class="profit-compare-delta${change < 0 ? ' negative' : ''}">${change > 0 ? '+' : ''}${change.toFixed(1)}pp</em>`;
                 }
-                // 条上不再重复金额（右侧已有 站点币种 + 人民币），只留涨跌；完整数值与占比放悬停提示
-                return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}（占售价 ${projectEscapeHtml(shareText)}）"><i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${delta}</b></span>`;
+                // 四列固定：名称 │ 条轨 │ 占售价 │ 数值；名称列由 showLabels 决定是否显示，
+                // 名称与 pp 差分两行，谁都不会把谁挤掉。
+                // 数值就是这一个产品自己的金额，不再与「当前」做差（差价已改用 pp 放在名称列）
+                const labelCell = showLabels ? `<em title="${projectEscapeHtml(label)}"><b>${projectEscapeHtml(showLabel)}</b>${delta}</em>` : '';
+                return `<span class="profit-bar-stack-row ${seriesClass}" title="${projectEscapeHtml(label)}：${projectEscapeHtml(text)}（占售价 ${projectEscapeHtml(shareText)}）">${labelCell}<i style="width:${barWidth.toFixed(1)}%"${negative ? ' data-negative="1"' : ''}></i><b>${shareText}</b><span>${projectEscapeHtml(text)}</span></span>`;
             }).join('');
         }
     }

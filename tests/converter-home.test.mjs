@@ -1043,7 +1043,12 @@ test('comparison never silently falls back to the live form, and failed recomput
 
   // 不可用的对比项要写明原因，不留空白
   assert.match(barsSrc, /缺少输入/);
-  assert.match(html, /\.profit-bar-stack-row > b\.is-unavailable \{ color: var\(--danger\);/);
+  assert.match(html, /\.profit-bar-stack-row > span\.is-unavailable \{ color: var\(--danger\);/);
+
+  // 名称列只在多产品对比时出现，单条数据下不占宽
+  assert.match(html, /\.profit-bar-stack\.is-stacked \.profit-bar-stack-row \{ grid-template-columns: minmax\(0, 84px\) minmax\(140px, 1fr\) 42px max-content; \}/);
+  assert.match(barsSrc, /const showLabels = series\.length > 1;/);
+  assert.match(barsSrc, /stack\.classList\.toggle\('is-stacked', showLabels\);/);
 });
 
 test('a project never inherits the live form for inputs it did not save', () => {
@@ -1191,23 +1196,32 @@ test('freight and storage detail rows match the profit row form', () => {
   assert.match(html, /\.fba-basis \{[^}]*border: 1px solid var\(--border-color\);/s);
 });
 
-test('comparison deltas are percentage points of the price share, not raw money deltas', () => {
+test('each comparison row shows its own price share and amount instead of a bare pp delta', () => {
   const barsSrc = extractFunctionSource('renderProfitBars');
 
   // 每个系列先算占售价比例，涨跌用同一口径相减
   assert.match(barsSrc, /const shares = series\.map\(\(item, index\) => \{/);
   assert.match(barsSrc, /return profitShareOfPrice\(values\[index\], itemPrice\);/);
   assert.match(barsSrc, /const change = \(share - baseShare\) \* 100;/);
-  assert.match(barsSrc, /toFixed\(1\)\}pp<\/em>/);
+
+  // 每行给到 占比 + 数值 两列，数值就是这个产品自己的金额，不是与当前的差价
+  assert.match(barsSrc, /<i style="width:\$\{barWidth\.toFixed\(1\)\}%"[\s\S]{0,80}<\/i><b>\$\{shareText\}<\/b><span>\$\{projectEscapeHtml\(text\)\}<\/span>/);
+  // 差价降级为名称列里的附属信息，不再是这一行唯一的数字
+  assert.match(barsSrc, /class="profit-compare-delta\$\{change < 0 \? ' negative' : ''\}"/);
+  // 名称与 pp 差分两行，长产品名不会把 pp 顶掉
+  assert.match(barsSrc, /<em title="\$\{projectEscapeHtml\(label\)\}"><b>\$\{projectEscapeHtml\(showLabel\)\}<\/b>\$\{delta\}<\/em>/);
+  assert.match(html, /\.profit-bar-stack-row > em > b \{ display: block; overflow: hidden;/);
+  assert.match(html, /\.profit-bar-stack-row > b \{ color: var\(--accent\); font: 700 0\.76rem 'Share Tech Mono', monospace;/);
+  assert.match(html, /\.profit-bar-stack-row > span \{ color: var\(--text-muted\); font: 500 0\.76rem 'Share Tech Mono', monospace;/);
 
   // 不再出现「绝对金额相减再除」的旧口径
   assert.doesNotMatch(barsSrc, /\(value - base\) \/ Math\.abs\(base\)/);
   assert.doesNotMatch(barsSrc, /higherIsBetter/);
   assert.doesNotMatch(barsSrc, /is-up|is-down/);
 
-  // 涨跌与所在数据条同色
+  // 占比列（条长刻度）与数值列（同系列同色）都要与所在数据条对得上
   for (let i = 0; i < 4; i += 1) {
-    assert.match(html, new RegExp(`\\.cmp-series-${i} \\.profit-compare-delta \\{ color: var\\(--${i === 0 ? 'accent' : `series-${i}`}\\); \\}`));
+    assert.match(html, new RegExp(`\\.cmp-series-${i} > b \\{ color: var\\(--${i === 0 ? 'accent' : `series-${i}`}\\); \\}`));
   }
   assert.doesNotMatch(html, /\.profit-compare-delta\.is-(up|down)/);
 });
@@ -1239,13 +1253,12 @@ test('profit results show market currency plus CNY, and the bar rows never repea
   assert.match(moneySrc, /valueEl\.textContent = money\(value\)/);
   assert.match(moneySrc, /rmbEl\.textContent = rmbMoney\(value, fx\)/);
 
-  // 重复的是数据条上的美元文案：条上只留涨跌幅，完整数值放悬停提示
+  // 重复的是数据条上的美元文案：数值列放在行尾，跟占比列一起说明这一条是谁、多少
   const barsSrc = extractFunctionSource('renderProfitBars');
-  assert.match(barsSrc, /<b>\$\{delta\}<\/b>/);
-  assert.doesNotMatch(barsSrc, /<b>\$\{projectEscapeHtml\(text\)\}/);
+  assert.match(barsSrc, /<b>\$\{shareText\}<\/b><span>\$\{projectEscapeHtml\(text\)\}<\/span>/);
   assert.match(barsSrc, /title="\$\{projectEscapeHtml\(label\)\}：\$\{projectEscapeHtml\(text\)\}（占售价 \$\{projectEscapeHtml\(shareText\)\}）"/);
   const dupCount = (barsSrc.match(/formatCompareValue\(value, item, kind\)/g) ?? []).length;
-  assert.equal(dupCount, 1, 'the formatted price is only used for the hover tooltip');
+  assert.equal(dupCount, 1, '每个系列只格式化一次金额，数据条上不重复金额');
 
   assert.doesNotMatch(html, /id="profitChargeableWeightValue"/);
   assert.doesNotMatch(html, /id="profitPackageVolumeValue"/);
