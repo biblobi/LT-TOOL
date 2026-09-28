@@ -1287,11 +1287,19 @@ test('help tab keeps a suggestion section as plain contacts (no form) and a spon
   for (const required of [
     '建议与反馈', '赞助支持', 'id="authorWechat"', '782465050@qq.com',
     'mailto:782465050@qq.com', '完全自愿',
+    '你还想要什么新功能', '哪里用得不够顺手', '日常维护支出',
   ]) assert.match(guide, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(guide, /bibliobibule/);
+  // 两个区块要排在帮助内容之前（正文从「使用流程」开始）。
+  const feedbackAt = guide.indexOf('建议与反馈');
+  const sponsorAt = guide.indexOf('赞助支持');
+  const usageAt = guide.indexOf('使用流程');
+  assert.ok(feedbackAt >= 0 && feedbackAt < sponsorAt, '建议与反馈 应在 赞助支持 之前');
+  assert.ok(sponsorAt < usageAt, '建议与反馈 / 赞助支持 应排在帮助内容之前');
   // 静态站没有后端，不再放表单：只留联系方式，让访客自己加微信/发邮件。
   assert.doesNotMatch(guide, /feedback-form|feedbackIdea|feedbackWechat|feedbackContact|feedbackPayload|feedbackStatus|submitFeedback|copyFeedbackPayload/);
   assert.doesNotMatch(html, /function submitFeedback|function copyFeedbackPayload|function buildFeedbackPayload/);
+  assert.doesNotMatch(guide, /每条反馈都会看/);
 });
 
 test('theme switch defaults to light, persists the choice, and redraws chart colors', () => {
