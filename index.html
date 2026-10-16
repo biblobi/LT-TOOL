@@ -301,16 +301,6 @@
         .conversion-table td:first-child { white-space: nowrap; }
         .conversion-table td input { border: 1px solid #333; background: #000; color: #fff; padding: 5px; width: 100%; min-width: 0; font-size: 0.82rem; }
         .len-input { white-space: nowrap; }
-        .optional-units { margin-top: 6px; background: #0b0b0b; }
-        .optional-units summary {
-            cursor: pointer;
-            color: #777;
-            font-size: 0.78rem;
-            padding: 9px 8px;
-            border-bottom: 1px solid #222;
-        }
-        .optional-units summary:hover { color: var(--neon-cyan); }
-        .optional-units table { margin: 6px 0 0; }
 
         .cargo-check {
             margin-top: 16px;
@@ -782,7 +772,6 @@
         :root[data-theme] footer { background: var(--surface); border-color: var(--border-color); color: var(--text-muted); }
         :root[data-theme] .converter-jump,
         :root[data-theme] .conversion-table tr,
-        :root[data-theme] .optional-units,
         :root[data-theme] .cargo-check,
         :root[data-theme] .calculator-panel,
         :root[data-theme] .currency-chart { background: var(--surface-raised); border-color: var(--border-color); }
@@ -824,13 +813,11 @@
         :root[data-theme] .fba-rule-label,
         :root[data-theme] .fba-rule-value .metric-value,
         :root[data-theme] .link-control { color: var(--text-muted); }
-        :root[data-theme] .optional-units summary,
         :root[data-theme] .field-hint,
         :root[data-theme] .currency-chart-status,
         :root[data-theme] .cargo-note,
         :root[data-theme] .formula-note,
         :root[data-theme] .source-note { color: var(--text-subtle); }
-        :root[data-theme] .optional-units summary:hover,
         :root[data-theme] .currency-range button:hover,
         :root[data-theme] .currency-range button.active { color: var(--accent); }
         :root[data-theme] .cyber-input,
@@ -994,20 +981,15 @@
                     <tr><td>米（m）</td><td><input type="text" inputmode="text" class="len-input" data-unit="m" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>厘米（cm）</td><td><input type="text" inputmode="text" class="len-input" data-unit="cm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>毫米（mm）</td><td><input type="text" inputmode="text" class="len-input" data-unit="mm" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>千米（km）</td><td><input type="text" inputmode="text" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
 
                     <tr><th colspan="2">英美制</th></tr>
                     <tr><td>英寸（in）</td><td><input type="text" inputmode="text" class="len-input" data-unit="in" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                     <tr><td>英尺（ft）</td><td><input type="text" inputmode="text" class="len-input" data-unit="ft" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>码（yd）</td><td><input type="text" inputmode="text" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>英里（mi）</td><td><input type="text" inputmode="text" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
+                    <tr><td>海里（nmi）</td><td><input type="text" inputmode="text" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
                 </table>
-                <details class="optional-units">
-                    <summary>展开低频单位：千米 / 码 / 英里 / 海里</summary>
-                    <table class="conversion-table">
-                        <tr><td>千米（km）</td><td><input type="text" inputmode="text" class="len-input" data-unit="km" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>码（yd）</td><td><input type="text" inputmode="text" class="len-input" data-unit="yd" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>英里（mi）</td><td><input type="text" inputmode="text" class="len-input" data-unit="mi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                        <tr><td>海里（nmi）</td><td><input type="text" inputmode="text" class="len-input" data-unit="nmi" placeholder="11x11x11" oninput="convertLength()"></td></tr>
-                    </table>
-                </details>
             </div>
 
             <div class="converter-panel">
@@ -1033,18 +1015,30 @@
                     <tr><td>升（L）</td><td><input type="number" class="vol-input" data-unit="l" oninput="convertVolume()"></td></tr>
                     <tr><td>毫升（mL）</td><td><input type="number" class="vol-input" data-unit="ml" oninput="convertVolume()"></td></tr>
 
+                    <tr><th colspan="2">英制</th></tr>
+                    <tr><td>英制加仑（gal）</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制夸脱（qt）</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制品脱（pt）</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
+                    <tr><td>英制液盎司（fl oz）</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
+
                     <tr><th colspan="2">美制</th></tr>
                     <tr><td>立方英尺（ft3）</td><td><input type="number" class="vol-input" data-unit="ft3" oninput="convertVolume()"></td></tr>
                     <tr><td>美制加仑（gal）</td><td><input type="number" class="vol-input" data-unit="gal_us" oninput="convertVolume()"></td></tr>
                     <tr><td>美制夸脱（qt）</td><td><input type="number" class="vol-input" data-unit="qt_us" oninput="convertVolume()"></td></tr>
                     <tr><td>美制品脱（pt）</td><td><input type="number" class="vol-input" data-unit="pt_us" oninput="convertVolume()"></td></tr>
                     <tr><td>美制液盎司（fl oz）</td><td><input type="number" class="vol-input" data-unit="floz_us" oninput="convertVolume()"></td></tr>
+                </table>
+            </div>
 
-                    <tr><th colspan="2">英制</th></tr>
-                    <tr><td>英制加仑（gal）</td><td><input type="number" class="vol-input" data-unit="gal_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制夸脱（qt）</td><td><input type="number" class="vol-input" data-unit="qt_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制品脱（pt）</td><td><input type="number" class="vol-input" data-unit="pt_imp" oninput="convertVolume()"></td></tr>
-                    <tr><td>英制液盎司（fl oz）</td><td><input type="number" class="vol-input" data-unit="floz_imp" oninput="convertVolume()"></td></tr>
+            <div class="converter-panel">
+                <div class="section-title">压力</div>
+                <table class="conversion-table">
+                    <tr><td>帕斯卡（Pa）</td><td><input type="number" class="press-input" data-unit="pa" oninput="convertPressure()"></td></tr>
+                    <tr><td>千帕（kPa）</td><td><input type="number" class="press-input" data-unit="kpa" oninput="convertPressure()"></td></tr>
+                    <tr><td>兆帕（MPa）</td><td><input type="number" class="press-input" data-unit="mpa" oninput="convertPressure()"></td></tr>
+                    <tr><td>巴（bar）</td><td><input type="number" class="press-input" data-unit="bar" oninput="convertPressure()"></td></tr>
+                    <tr><td>标准大气压（atm）</td><td><input type="number" class="press-input" data-unit="atm" oninput="convertPressure()"></td></tr>
+                    <tr><td>磅力/平方英寸（psi）</td><td><input type="number" class="press-input" data-unit="psi" oninput="convertPressure()"></td></tr>
                 </table>
             </div>
 
@@ -5200,8 +5194,18 @@
         nmi: 1852
     };
 
+    const PRESSURE = {
+        pa: 1,
+        kpa: 1000,
+        mpa: 1000000,
+        bar: 100000,
+        atm: 101325,
+        psi: 6894.757293168
+    };
+
     window.convertMass = () => convertByFactor('.mass-input', MASS);
     window.convertVolume = () => convertByFactor('.vol-input', VOL);
+    window.convertPressure = () => convertByFactor('.press-input', PRESSURE);
     window.convertLength = convertLengthValues;
     window.updateCargoCheck = updateCargoCheck;
 

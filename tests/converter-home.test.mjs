@@ -288,9 +288,13 @@ test('cargo checker calculates volume weight and cargo type from cm dimensions',
   assert.equal(calculateCargoMetrics('11*11*11', '0.10', '5000').volumeWeightKg, 0.27);
 });
 
-test('low-frequency distance units are grouped in a collapsible section', () => {
-  assert.match(html, /<details class="optional-units">/);
-  assert.match(html, /展开低频单位：千米 \/ 码 \/ 英里 \/ 海里/);
+test('low-frequency distance units are shown inline without a collapsible section', () => {
+  assert.doesNotMatch(html, /<details class="optional-units">/);
+  assert.doesNotMatch(html, /展开低频单位/);
+  for (const unit of ['km', 'yd', 'mi', 'nmi']) {
+    assert.match(html, new RegExp(`data-unit="${unit}"`));
+  }
+  assert.equal((html.match(/class="len-input"/g) ?? []).length, 9);
 });
 
 test('volume conversion includes cubic centimetres and cubic feet', () => {
@@ -298,6 +302,20 @@ test('volume conversion includes cubic centimetres and cubic feet', () => {
     'data-unit="cm3"', '立方厘米（cm3）', 'data-unit="ft3"', '立方英尺（ft3）',
     'cm3: 0.001', 'ft3: 28.316846592', '体积（立方米）', 'function fmtVolumeM3',
   ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
+
+test('pressure conversion covers bar, psi and common pressure units', () => {
+  for (const required of [
+    'class="section-title">压力<',
+    'data-unit="bar"', '巴（bar）',
+    'data-unit="psi"', '磅力/平方英寸（psi）',
+    'data-unit="pa"', 'data-unit="kpa"', 'data-unit="atm"',
+    'window.convertPressure', 'PRESSURE', 'bar: 100000', 'psi: 6894.757293168',
+  ]) assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const removed of ['mbar', 'torr', 'mmhg', 'inhg', 'kgfcm2']) {
+    assert.doesNotMatch(html, new RegExp(`data-unit="${removed}"`));
+  }
+  assert.match(html, /<input[^>]+class="press-input"[^>]+>/);
 });
 
 test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () => {
