@@ -18,17 +18,18 @@ function extract(name) {
  const end=html.indexOf('\n    function ',start+1);
  return html.slice(start,end);
 }
-test('low price fee uses explicit valid prices and respects 9.90 boundary',()=>{
+test('low price fee uses explicit valid prices and respects the $10 boundary',()=>{
  const configSource=html.match(/const DEFAULT_FEE_CONFIG = ([\s\S]*?);\r?\n    const FEE_CONFIG_KEY/)?.[1];
  assert.ok(configSource,'missing default fee configuration');
  const feeConfig=vm.runInNewContext(`(${configSource})`);
  const fee=vm.runInNewContext(extract('estimateFbaFee')+';estimateFbaFee',{FEE_CONFIG:feeConfig});
  const standard='\u6807\u51c6\u4ef6';
-  assert.equal(fee(standard,0.25,9.89),2.91);
-  for(const p of [9.9,10,undefined,null,'',0,-1,NaN]) assert.equal(fee(standard,0.25,p),3.68);
-  assert.equal(fee('\u5927\u53f7\u5927\u4ef6',2,9),9.99);
-  feeConfig.fulfillment.categories.standard.under10.stdBrackets[0][1]=2.77;
-  assert.equal(fee(standard,0.25,9.89),2.77);
+ assert.equal(fee(standard,0.25,9.89),2.91);
+ assert.equal(fee(standard,0.25,9.99),2.91);
+ for(const p of [10,10.01,undefined,null,'',0,-1,NaN]) assert.equal(fee(standard,0.25,p),3.73);
+ assert.equal(fee('\u5927\u53f7\u5927\u4ef6',2,9),8.96);
+ feeConfig.fulfillment.categories.standard.under10.stdBrackets[0][1]=2.77;
+ assert.equal(fee(standard,0.25,9.89),2.77);
 });
 test('monthly totals execute safely and convert CNY-base exchange rates correctly',()=>{
  const el={textContent:''};

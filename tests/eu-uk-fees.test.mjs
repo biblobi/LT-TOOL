@@ -68,6 +68,15 @@ test('UK and EU use the official 2026-07-01 rate card and 1.5% fuel surcharge', 
   assert.equal(ukLow.baseFee, 1.67);
   assert.equal(ukLow.fuelPct, 1.5);
   assert.ok(Math.abs(ukLow.fee - (1.67 + 1.67 * 0.015)) < 1e-10);
+  // 低价 FBA 阈值按类目区分：美妆/食品饮料/图书类目为 £10/€11，其余类目 £20/€20
+  const ukBeautyAboveThreshold = getEuFbaMetrics([20, 15, 2], 0.08, 15, 'UK', 'standard', false, 'beauty');
+  const ukBeautyBelowThreshold = getEuFbaMetrics([20, 15, 2], 0.08, 10, 'UK', 'standard', false, 'beauty');
+  const euGroceryAboveThreshold = getEuFbaMetrics([20, 15, 2], 0.08, 15, 'EU', 'standard', false, 'grocery');
+  assert.equal(ukBeautyAboveThreshold.priceBand, 'standard');
+  assert.equal(ukBeautyAboveThreshold.baseFee, 2.07);
+  assert.equal(ukBeautyBelowThreshold.priceBand, 'lowprice');
+  assert.equal(euGroceryAboveThreshold.priceBand, 'standard');
+  assert.equal(euGroceryAboveThreshold.lowPriceMax, 11);
   assert.equal(ukStandard.priceBand, 'standard');
   assert.equal(ukStandard.baseFee, 2.07);
   assert.equal(ukLowPriceTooHeavy.priceBand, 'standard');
@@ -103,6 +112,11 @@ test('UK and EU referral fees follow category price tiers and minimums', () => {
   assert.equal(calculateEuReferralFee(300, 'jewelry', 'UK', '小号包裹').base, 48.75);
   assert.equal(calculateEuReferralFee(1, 'other', 'UK', '小号包裹').base, 0.25);
   assert.equal(calculateEuReferralFee(100, 'other', 'EU', '重型大件').base, 20);
+  // Home & Kitchen 与 Grocery 在官方费率卡中归「Everything else」15% 平价，没有低客单价折扣档
+  assert.equal(calculateEuReferralFee(20, 'home-kitchen', 'EU', '小号包裹').base, 3);
+  assert.equal(calculateEuReferralFee(10, 'home-kitchen', 'UK', '小号包裹').base, 1.5);
+  assert.equal(calculateEuReferralFee(10, 'grocery', 'UK', '小号包裹').base, 1.5);
+  assert.equal(calculateEuReferralFee(15, 'grocery', 'EU', '小号包裹').base, 2.25);
 });
 
 test('marketplace UI exposes UK/EU automatic fees and official sources', () => {

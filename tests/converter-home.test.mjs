@@ -322,13 +322,15 @@ test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () 
   const { getFbaTierAnalysis, getFbaSizeTier, estimateFbaFee, calculateFbaMetrics, formatFbaBlockers } = loadFbaHelpers();
 
   assert.equal(getFbaSizeTier([18, 14, 8], 20), '标准件');
-  assert.equal(getFbaSizeTier([19, 14, 8], 20), '大号大件');
+  assert.equal(getFbaSizeTier([19, 14, 8], 20), '小号大件');
   assert.equal(getFbaSizeTier([59, 33, 33], 50), '超大件'); // length + girth exceeds 130 in
   assert.equal(getFbaSizeTier([50, 20, 15], 50), '大号大件');
   assert.equal(getFbaSizeTier([50, 20, 15], 51), '超大件');
+  assert.equal(getFbaSizeTier([13.8, 9, 0.7], 0.18), '小号标准件');
+  assert.equal(getFbaSizeTier([30, 25, 18], 40), '小号大件');
 
   const bulkyAnalysis = getFbaTierAnalysis([19, 14, 8], 20);
-  assert.equal(bulkyAnalysis.tier, '大号大件');
+  assert.equal(bulkyAnalysis.tier, '小号大件');
   assert.deepEqual(JSON.parse(JSON.stringify(bulkyAnalysis.standardBlockers.map(item => item.label))), ['最长边']);
   assert.deepEqual(JSON.parse(JSON.stringify(bulkyAnalysis.bulkyBlockers)), []);
 
@@ -340,16 +342,26 @@ test('FBA calculator follows the referenced 2026 US tiers and fee brackets', () 
   const weightAnalysis = getFbaTierAnalysis([18, 14, 8], 21);
   assert.equal(formatFbaBlockers(weightAnalysis.standardBlockers), '重量 21 lb (9.53 kg) > 20 lb (9.07 kg)');
 
-  assert.equal(estimateFbaFee('标准件', 0.25), 3.68);
-  assert.equal(estimateFbaFee('标准件', 3), 6.28);
-  assert.equal(estimateFbaFee('标准件', 3.1), 6.96);
-  assert.equal(estimateFbaFee('大号大件', 2), 9.99);
-  assert.equal(estimateFbaFee('超大件', 51), 40.12);
+  // 2026 官方费率：大号标准件 $10–$50 档、小号标准件、小号大件、超大件分段
+  assert.equal(estimateFbaFee('标准件', 0.25), 3.73);
+  assert.equal(estimateFbaFee('标准件', 3), 6.67);
+  assert.equal(estimateFbaFee('标准件', 3.1), 7.05);
+  assert.equal(estimateFbaFee('大号大件', 2), 9.73);
+  assert.equal(estimateFbaFee('超大件', 51), 37.32);
+  assert.equal(estimateFbaFee('小号标准件', 0.18), 3.42);
+  assert.equal(estimateFbaFee('小号标准件', 0.18, 9.99), 2.49);
+  assert.ok(Math.abs(estimateFbaFee('小号大件', 10) - 10.97) < 1e-9);
+  assert.ok(Math.abs(estimateFbaFee('小号大件', 10, 9.99) - 10.2) < 1e-9);
 
   const fba = calculateFbaMetrics([45.72, 35.56, 20.32], 9.0718474);
   assert.equal(fba.tier, '标准件');
   assert.equal(Math.round(fba.weightLb), 20);
-  assert.equal(fba.fee, 20.1825);
+  assert.equal(fba.fee, 12.84435);
+
+  // 官方示例：手机壳 13.8×9×0.7in、2.88oz、ASP <$10 → 小号标准件低价费率 $2.49 + 3.5% 燃油附加费
+  const phoneCase = calculateFbaMetrics([35.05, 22.86, 1.78], 0.0816, { price: 9.99 });
+  assert.equal(phoneCase.tier, '小号标准件');
+  assert.ok(Math.abs(phoneCase.fee - 2.49 * 1.035) < 1e-10);
 });
 
 test('FBA uses its own dimensional shipping weight and applies the 2026 peak option separately from cargo freight', () => {
@@ -482,6 +494,7 @@ test('quick Japan estimate calculates automated referral, FBA, storage, ads, pro
     extractFunctionSource('calculateJpReferralFee'),
     extractFunctionSource('getJpFbaMetrics'),
     extractFunctionSource('calculateJpFbaStorageFee'),
+    extractFunctionSource('getJpStorageUtilizationSurcharge'),
     extractFunctionSource('calculateQuickEstimate'),
     '({ calculateQuickEstimate })',
   ].join('\n');
@@ -511,6 +524,7 @@ test('quick Japan break-even recalculates category commission and low-price FBA 
     extractFunctionSource('calculateJpReferralFee'),
     extractFunctionSource('getJpFbaMetrics'),
     extractFunctionSource('calculateJpFbaStorageFee'),
+    extractFunctionSource('getJpStorageUtilizationSurcharge'),
     extractFunctionSource('calculateQuickEstimate'),
     '({ calculateQuickEstimate })',
   ].join('\n');
@@ -681,9 +695,11 @@ test('US FBA storage forecast uses daily-average inventory, seasonal rates, roll
 test('Japan storage forecast supports the same 12-month sales and replenishment workflow', () => {
   const code = [
     extractConstantSource('JP_FBA_STORAGE_2026'),
+    extractConstantSource('US_FBA_STORAGE_2026'),
     extractFunctionSource('storageMonthNumber'),
     extractFunctionSource('storageDaysInMonth'),
     extractFunctionSource('calculateJpFbaStorageFee'),
+    extractFunctionSource('getJpStorageUtilizationSurcharge'),
     extractFunctionSource('calculateJpFbaStorageForecast'),
     '({ calculateJpFbaStorageForecast })',
   ].join('\n');
@@ -1487,6 +1503,7 @@ test('Japan marketplace uses official 2026 JPY fulfillment and storage rules', (
     extractConstantSource('JP_FBA_STORAGE_2026'),
     extractFunctionSource('getJpFbaMetrics'),
     extractFunctionSource('calculateJpFbaStorageFee'),
+    extractFunctionSource('getJpStorageUtilizationSurcharge'),
     '({ getJpFbaMetrics, calculateJpFbaStorageFee })',
   ].join('\n');
   const { getJpFbaMetrics, calculateJpFbaStorageFee } = vm.runInNewContext(code);
@@ -1497,10 +1514,18 @@ test('Japan marketplace uses official 2026 JPY fulfillment and storage rules', (
   assert.equal(getJpFbaMetrics([40, 30, 20], 9, 1500).fee, 532);
   assert.equal(getJpFbaMetrics([70, 60, 50], 30, 1500).fee, 1532);
   assert.equal(getJpFbaMetrics([90, 80, 70], 50, 1500).fee, 4496);
-  assert.equal(getJpFbaMetrics([100, 90, 80], 50, 1500), null);
+  assert.equal(getJpFbaMetrics([100, 90, 80], 50, 1500).fee, 13950); // 超大件 4b：三边和 ≤400cm
+  assert.equal(getJpFbaMetrics([100, 90, 80], 50, 1000).fee, 13884); // ≤1,000 日元低价档
+  assert.equal(getJpFbaMetrics([150, 150, 150], 50, 1500), null); // 三边和 450cm 超出上限
+  assert.equal(getJpFbaMetrics([100, 90, 80], 60, 1500), null); // 重量超过 50kg
 
   assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 9, 30, false), 5.676);
   assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 10, 31, false), 10.087);
   assert.equal(calculateJpFbaStorageFee(1000, '大型', 9, 30, false), 3.278);
   assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 10, 31, true), 5.5);
+  // 2025-05 起库存利用率附加费：26 周起按尺寸段加收
+  assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 9, 30, false, 20), 5.676);
+  assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 9, 30, false, 30), 5.676 + 1.462);
+  assert.equal(calculateJpFbaStorageFee(1000, '标准尺寸', 9, 30, false, 60), 5.676 + 16.762);
+  assert.equal(calculateJpFbaStorageFee(1000, '大型', 9, 30, false, 60), 3.278 + 3.842);
 });

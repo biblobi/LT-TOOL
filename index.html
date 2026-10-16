@@ -1129,8 +1129,8 @@
                         <div class="storage-control-grid">
                             <label><span class="term-tip" tabindex="0" data-tip="预测连续计算 12 个月。起始月决定淡季/旺季基础仓储费率。">起始月份</span><select id="storageStartMonth" oninput="updateStorageForecast()"></select></label>
                             <label><span class="term-tip" tabindex="0" data-tip="预测第一个月开始时，已经可售的 FBA 库存数量。">期初 FBA 库存</span><input id="storageOpeningUnits" type="number" min="0" step="1" value="500" placeholder="例如 500" oninput="updateStorageForecast()"></label>
-                            <label id="storageUsHistoryField"><span class="term-tip" tabindex="0" data-tip="库存利用率附加费以过去 13 周实际发货量作为首月基准。后续月份会逐日滚动采用预测中的实际可售量。">过去 13 周销量</span><input id="storagePast13WeekSales" type="number" min="0" step="1" placeholder="例如 1300" oninput="updateStorageForecast()"></label>
-                            <label id="storageUsNewSellerField" class="storage-switch"><input id="storageNewSeller" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="仅在新卖家资格有效且日均库存体积低于 25 立方英尺时，使用新卖家低库存费率；否则自动回到常规费率。">新卖家低库存资格</span></label>
+                            <label id="storageUsHistoryField"><span class="term-tip" tabindex="0" data-tip="库存利用率附加费以过去 13 周实际发货量作为首月基准，后续月份逐日滚动采用预测中的实际可售量；美国/欧洲超过 22 周、日本超过 26 周开始收取。">过去 13 周销量</span><input id="storagePast13WeekSales" type="number" min="0" step="1" placeholder="例如 1300" oninput="updateStorageForecast()"></label>
+                            <label id="storageUsNewSellerField" class="storage-switch"><input id="storageNewSeller" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="新卖家（首次入仓不满一年）、个人计划卖家，或日均库存体积 ≤25 立方英尺（日本 0.71 m³）时，免征仓储利用率附加费。">新卖家/低库存体积豁免</span></label>
                             <label id="storageJpFashionField" class="storage-switch" hidden><input id="storageJpFashion" type="checkbox" oninput="updateStorageForecast()"><span class="term-tip" tabindex="0" data-tip="日本站服装服饰、鞋靴与箱包使用独立仓储费率。">服装/鞋靴/箱包</span></label>
                             <label><span class="term-tip" tabindex="0" data-tip="从下单到货件到仓可用的月数，用于把建议到仓提前换算成建议下单月份。">到仓提前期（月）</span><input id="storageLeadTimeMonths" type="number" min="1" step="1" value="1" oninput="updateStorageForecast()"></label>
                             <label><span class="term-tip" tabindex="0" data-tip="每月售完后保留下一月计划销量的一定比例作为不断货安全库存。">安全库存比例</span><input id="storageSafetyStockRatio" type="number" min="0" step="0.01" value="0.5" oninput="updateStorageForecast()"></label>
@@ -1146,7 +1146,7 @@
                         <div class="storage-table-scroll">
                         <table class="storage-forecast-table" aria-label="美国仓储费每月详细计算">
                             <colgroup><col style="width:7%"><col style="width:8%"><col style="width:8%"><col style="width:13%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:21%"></colgroup>
-                            <thead><tr><th>月份</th><th>计划销量</th><th>补货</th><th><span class="term-tip" tabindex="0" data-tip="不断货前提下该月最少需要到仓的数量；点击「采纳」可一键写入该月的补货列。">建议到仓</span></th><th><span class="term-tip" tabindex="0" data-tip="按到仓提前期倒推：应下单的月份；显示「立即安排」表示已来不及按提前期下单。">建议下单</span></th><th>日均库存</th><th><span class="term-tip" tabindex="0" data-tip="滚动 13 周库存利用率 = 日均库存 ÷ 过去 13 周日均发货量。超过 22 周开始收取附加费。">利用率</span></th><th>仓储费</th><th><span class="term-tip" tabindex="0" data-tip="该月月底按安全库存比例应保留的库存数量。">月末安全库存</span></th><th>状态</th></tr></thead>
+                            <thead><tr><th>月份</th><th>计划销量</th><th>补货</th><th><span class="term-tip" tabindex="0" data-tip="不断货前提下该月最少需要到仓的数量；点击「采纳」可一键写入该月的补货列。">建议到仓</span></th><th><span class="term-tip" tabindex="0" data-tip="按到仓提前期倒推：应下单的月份；显示「立即安排」表示已来不及按提前期下单。">建议下单</span></th><th>日均库存</th><th><span class="term-tip" tabindex="0" data-tip="滚动 13 周库存利用率 = 日均库存 ÷ 过去 13 周日均发货量。美国/欧洲超过 22 周、日本超过 26 周开始收取附加费。">利用率</span></th><th>仓储费</th><th><span class="term-tip" tabindex="0" data-tip="该月月底按安全库存比例应保留的库存数量。">月末安全库存</span></th><th>状态</th></tr></thead>
                             <tbody id="storageForecastRows"></tbody>
                         </table>
                         </div>
@@ -1167,7 +1167,7 @@
                                 <label>价格档位<select id="feeBandSelect" onchange="onFeeScopeChange()"><option value="under10">售价 &lt; $10</option><option value="mid" selected>$10 – $50</option><option value="over50">售价 &gt; $50</option></select></label>
                                 <span id="feeConfigScopeLabel" class="fee-config-scope-label"></span>
                             </div>
-                            <p class="fee-config-note">仓储费率与类目无关；配送费阶梯、大号大件与超大件分段仅作用于上方所选「类目 × 价格档」。修改后自动保存并立即生效。</p>
+                            <p class="fee-config-note">仓储费率与类目无关；小号标准件阶梯、配送费阶梯、小号/大号大件与超大件分段仅作用于上方所选「类目 × 价格档」。修改后自动保存并立即生效。</p>
                             <div class="fee-config-group">
                                 <div class="fee-config-group-title">仓储费率（美元/立方英尺/月）</div>
                                 <div class="fee-config-grid">
@@ -1191,11 +1191,17 @@
                                 </div>
                             </div>
                             <div class="fee-config-group">
+                                <div class="fee-config-group-title">小号标准件配送费阶梯（≤16oz 且 ≤15×12×0.75in，按单位重量计费）</div>
+                                <div id="feeSmallStdBrackets" class="fee-bracket-editor"></div>
+                            </div>
+                            <div class="fee-config-group">
                                 <div class="fee-config-group-title">标准件配送费阶梯（≤重量 lb → 费用 $，超档按基数+增量）</div>
                                 <div id="feeStdBrackets" class="fee-bracket-editor"></div>
                                 <div class="fee-config-grid">
                                     <label>超档基数 $（>3lb 起）<input id="feeStdOverBase" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
-                                    <label>超档增量 $（每 0.5lb）<input id="feeStdOverInc" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
+                                    <label>超档增量 $（每 0.25lb）<input id="feeStdOverInc" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
+                                    <label>小号大件基数 $<input id="feeSmBase" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
+                                    <label>小号大件增量 $（每 lb）<input id="feeSmInc" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
                                     <label>大号大件基数 $<input id="feeLgBase" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
                                     <label>大号大件增量 $（每 lb）<input id="feeLgInc" type="number" min="0" step="0.01" oninput="feeConfigChanged()"></label>
                                 </div>
@@ -1419,14 +1425,14 @@
                 -->
             </section>
             <section class="guide-section"><h2>使用流程</h2><ul><li>默认进入「利润测算」，默认美国站详细计算；单位换算在左侧独立页。</li><li>先填包装尺寸、重量、采购价和售价，头程、FBA、仓储、广告、佣金与利润会自动联动。</li><li>点击任一结果会跳回对应输入；缺少的字段会优先高亮。</li></ul></section>
-            <section class="guide-section"><h2>费用与口径</h2><ul><li><strong>头程计费重：</strong>头程体积重 = 体积（cm³）÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>美国/加拿大使用 139 in³/lb 估算体积重，英国/欧洲按 5000 cm³/kg，并与实重取大。</li><li><strong>尺寸分级：</strong>按站点官方尺寸段判断；标准件低价档（US &lt; $9.90、UK/EU ≤ £20/€20）自动切换低价 FBA。</li><li><strong>佣金：</strong>日本、英国与欧洲按类目和售价阶梯自动计算，美国/加拿大保留可编辑费率。</li><li><strong>总成本/件：</strong>采购 + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货成本。</li><li><strong>退货成本：</strong>售价 × 退货率 + 退货处理费（平台佣金的 20%）。</li></ul></section>
+            <section class="guide-section"><h2>费用与口径</h2><ul><li><strong>头程计费重：</strong>头程体积重 = 体积（cm³）÷ 头程体积系数，默认系数为 6000。该系数只用于头程，不能直接套用到 FBA。</li><li><strong>FBA 计费重：</strong>美国/加拿大使用 139 in³/lb 估算体积重，英国/欧洲按 5000 cm³/kg，并与实重取大。</li><li><strong>尺寸分级：</strong>按站点官方尺寸段判断（美国自 2026-01-15 起新增小号标准件、小号大件两档）；低价档自动切换：US &lt; $10（$10 整归标准档）、UK/EU ≤ £20/€20（美妆、食品饮料、图书等类目为 £10/€11）、日本 ≤ JPY 1,000。</li><li><strong>佣金：</strong>日本、英国与欧洲按类目和售价阶梯自动计算，美国/加拿大保留可编辑费率。</li><li><strong>总成本/件：</strong>采购 + 头程 + 佣金 + FBA + 入库配置费 + 仓储 + 广告 + 促销 + 退货成本。</li><li><strong>退货成本：</strong>退货率 ×（售价 + 退货处理费）；售价部分按「退货即未实现销售」的保守口径，退货处理费按 FBA 配送费的 50% 自动估算（欧盟官方口径：退货率超过类目阈值的高退货率商品按配送费的 50% 收取，未超阈值不收）。</li></ul></section>
             <section class="guide-section"><h2>广告与利润指标</h2><ul><li>CPA = CPC ÷ CVR；POS = 广告订单量 ÷ 月销量；ACOS = CPA ÷ 售价。</li><li>混合广告费/件 = CPA × POS；ACoAS = 混合广告费/件 ÷ 售价；ROAS = 售价 ÷ CPA。</li><li>保本 ACOS =（售价 − 不含广告的成本）÷ 售价；最大 CPC = 售价 × 保本 ACOS × CVR；目标采购上限按目标利润率反推。</li></ul></section>
-            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>美国与日本支持 12 个月预测：填起始月、期初库存、计划销量和补货量，可批量填充前 1–12 个月。</li><li>库存按 FIFO 消耗，月度仓储计费库存 =（月初 + 月末）÷ 2；日均库存体积按 ft³ 计费，10–12 月使用旺季费率。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量，达到 22 周计入附加费；新品需要经过完整 13 周观察期；新卖家日均库存低于 25 ft³ 时可用低库存费率。</li><li>「仓储/件」= 计划期仓储总费 ÷ 计划期实际售出件数；零销量月份的仓储费仍计入总费用，没有实际售出量时，包含仓储的利润结果会显示为不可用。它与利润模块的「月销量」口径不同，可用「用月销量填充」统一。</li><li>补货建议不会改写计划补货，只按到仓提前期与安全库存比例给出每月建议到仓量。</li></ul></section>
-            <section class="guide-section"><h2>英国、欧洲与其他站点仓储</h2><ul><li>英国站按 £/ft³/月，欧洲站（德国/CEP 口径）按 €/m³/月，10–12 月自动切换旺季费率。</li><li>英国/欧洲的仓储/件 = 官方单件月仓储费 × 平均库存月数；加拿大、墨西哥保留手填仓储单价。</li><li>法国、意大利、西班牙等欧洲国家与德国/CEP 费率并不完全相同，请以 Seller Central 实际站点费率为准。</li></ul></section>
+            <section class="guide-section"><h2>仓储费每月详细计算（美国）</h2><ul><li>美国与日本支持 12 个月预测：填起始月、期初库存、计划销量和补货量，可批量填充前 1–12 个月。</li><li>库存按 FIFO 消耗，月度仓储计费库存 =（月初 + 月末）÷ 2；日均库存体积按 ft³ 计费，10–12 月使用旺季费率。</li><li>库存利用率周数 = 日均库存 × 13 ÷ 滚动 13 周发货量；美国达到 22 周计入附加费，日本为 26 周（2025-05 起）；新品需要经过完整 13 周观察期；新卖家（首次入仓不满一年）、个人计划卖家或日均库存体积 ≤ 25 ft³（日本 0.71 m³）免征附加费。</li><li>「仓储/件」= 计划期仓储总费 ÷ 计划期实际售出件数；零销量月份的仓储费仍计入总费用，没有实际售出量时，包含仓储的利润结果会显示为不可用。它与利润模块的「月销量」口径不同，可用「用月销量填充」统一。</li><li>补货建议不会改写计划补货，只按到仓提前期与安全库存比例给出每月建议到仓量。</li></ul></section>
+            <section class="guide-section"><h2>英国、欧洲与其他站点仓储</h2><ul><li>英国站按 £/ft³/月，欧洲站（德国/CEP 口径）按 €/m³/月，10–12 月自动切换旺季费率。</li><li>英国/欧洲的仓储/件 = 当前月起算的库存覆盖月份淡旺季费率均值 × 平均库存月数；加拿大、墨西哥保留手填仓储单价。</li><li>法国、意大利、西班牙等欧洲国家与德国/CEP 费率并不完全相同，请以 Seller Central 实际站点费率为准；德国非 CEP 库存每件另有 €0.26 配送附加费。</li><li>欧洲/英国月度仓储为简化口径，未含仓储利用率附加费（22 周起，最高 £2.29/ft³ 或 €76.87/m³）；美国与日本站的 12 个月预测已按官方口径计入该附加费。</li></ul></section>
             <section class="guide-section"><h2>产品对比怎么看</h2><ul><li>勾选「对比产品」后，每个产品在「经营结果」里多出一条，名称列只在对比时出现。</li><li>每条从左到右：产品名、条轨、占售价、单件金额。条轨和「占售价」是同一刻度 —— 条越长，占比数字就越大，直接横向比长短即可。</li><li>只比「占售价」这一个口径，因为它不受各产品售价不同的影响；单件金额只作参考，不要跨产品直接相减。</li><li>亏损类指标占比可能出现负值，条会变成警示色，属正常情况。</li></ul></section>
             <section class="guide-section"><h2>结果定位与提示</h2><ul><li>点击自动结果会滚动到相关输入，缺少的字段会优先高亮；填写完整时高亮全部依赖项。</li><li>带提示的名称支持悬停或键盘聚焦查看公式、费率范围与适用条件，提示不会改变计算值。</li><li>默认文字色表示需要人工确认的基础数据，强调色表示换算或联动结果；API 失败、销量不足与缺货会在状态文字中说明。</li></ul></section>
             <section class="guide-section"><h2>其他工具与汇率</h2><ul><li>汇率：切换站点自动刷新；「更新汇率」读取 ExchangeRate-API 实时数据，历史曲线来自 Frankfurter，均支持手动覆盖。</li><li>PDF 聚合、格式转换、背景移除全部在浏览器本地完成，文件不会上传服务器。</li><li>输入会自动保存到本机浏览器，刷新即恢复；主题选择同样保存在本地。</li></ul></section>
-            <section class="guide-section"><h2>数据来源与边界</h2><ul><li>日本与英国/欧洲费率来自官方费率卡：<a href="https://sell.amazon.co.jp/pricing" target="_blank" rel="noopener noreferrer">Amazon 日本站 2026</a> · <a href="https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf" target="_blank" rel="noopener noreferrer">260630-FBA-Rate-Card-EN1.pdf</a>；美国仓储为项目采用的参考表（<a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero</a>）。</li><li>结果仅供估算，最终以 Amazon Seller Central 与实际结算报表为准；暂未覆盖 Coupon 兑现费、库龄附加费、长期仓储费等特殊费用。</li><li>欧洲站当前为德国/CEP 口径，不区分法国、意大利、西班牙等国的国别费率差异。</li></ul></section>
+            <section class="guide-section"><h2>数据来源与边界</h2><ul><li>日本与英国/欧洲费率来自官方费率卡：<a href="https://sell.amazon.co.jp/pricing" target="_blank" rel="noopener noreferrer">Amazon 日本站 2026</a>（2026-04-01 生效）· <a href="https://m.media-amazon.com/images/G/02/sell/images/260630-FBA-Rate-Card-EN1.pdf" target="_blank" rel="noopener noreferrer">260630-FBA-Rate-Card-EN1.pdf</a>（2026-07-01 生效）；美国配送与仓储采用 Seller Central「2026 US FBA fulfillment fee changes」「Monthly inventory storage fees」「Product size tiers」官方费率（2026-01-15 起，燃油附加费 2026-04-17 起），另参考 <a href="https://www.inventoryhero.ai/blog/fba-storage-fees-2026#how-to-keep-storage-costs-down" target="_blank" rel="noopener noreferrer">InventoryHero</a> 的美国仓储整理。费率核对时间：2026-10-16。</li><li>结果仅供估算，最终以 Amazon Seller Central 与实际结算报表为准；暂未覆盖 Coupon 兑现费、媒介成交费（UK £0.50/件、EU €0.81–1.01/件）、库龄/超龄库存附加费、低库存水平费、Pan-EU 低库存覆盖费与大件跨境附加费、Overmax 处理费等特殊费用。</li><li>美国旺季（2026-10-15 至 2027-01-14）按官方平均增量 $0.32/件估算，大件与超大件的实际旺季涨幅高于该均值；欧洲站已内置完整旺季费率表。</li></ul></section>
         </div>
     </div>
 
@@ -1529,14 +1535,31 @@
             [60, 2, 589, 523], [80, 5, 624, 558], [100, 10, 675, 609], [120, 15, 781, 715],
             [140, 20, 1020, 954], [160, 25, 1100, 1034], [180, 30, 1532, 1466], [200, 40, 1756, 1690]
         ],
-        supersize: [[200, 50, 2755, 2689], [220, 50, 3573, 3507], [240, 50, 4496, 4430], [260, 50, 5625, 5559]]
+        supersize: [[200, 50, 2755, 2689], [220, 50, 3573, 3507], [240, 50, 4496, 4430], [260, 50, 5625, 5559], [400, 50, 13950, 13884]]
     });
     const JP_FBA_STORAGE_2026 = Object.freeze({
         source: 'Amazon 日本站 2026 FBA 在庫保管手数料',
         general: { standard: { regular: 5.676, peak: 10.087 }, oversize: { regular: 3.278, peak: 6.984 } },
         fashion: { standard: { regular: 3.10, peak: 5.50 }, oversize: { regular: 3.10, peak: 5.50 } },
+        // 2025-05-01 起日本站同步收取仓储利用率附加费（每 1000cm³/月，含 10% 消费税），按利用率周数分档
+        utilizationSurcharges: {
+            generalStandard: [[26, 1.462], [39, 3.997], [52, 16.762]],
+            generalOversize: [[26, 0.316], [39, 1.023], [52, 3.842]],
+            fashion: [[26, 0.817], [39, 3.645], [52, 10.370]]
+        },
+        utilizationExemptVolumeCm3: 710000,
         forecastMonths: 12
     });
+    function getJpStorageUtilizationSurcharge(weeks, sizeClass, isFashion) {
+        if (!Number.isFinite(weeks) || weeks < 26) return 0;
+        const table = isFashion ? JP_FBA_STORAGE_2026.utilizationSurcharges.fashion
+            : (sizeClass === 'standard' ? JP_FBA_STORAGE_2026.utilizationSurcharges.generalStandard : JP_FBA_STORAGE_2026.utilizationSurcharges.generalOversize);
+        let rate = 0;
+        for (const [minWeeks, surcharge] of table) {
+            if (weeks >= minWeeks) rate = surcharge;
+        }
+        return rate;
+    }
     const JP_REFERRAL_RULES_2026 = Object.freeze({
         'home-kitchen': [[750, 0.05], [Infinity, 0.154]],
         'consumer-electronics': [[750, 0.05], [Infinity, 0.084]],
@@ -1560,6 +1583,9 @@
         peakStart: '2026-10-15',
         peakEnd: '2027-01-14',
         lowPriceThreshold: { UK: 20, EU: 20 },
+        // 低价 FBA 阈值按类目区分（均含税）：美妆/健康/个护、办公用品、食品、图书、亚马逊设备配件、Kitchen 类目为 £10 / €11（DE），其余类目 £20 / €20
+        lowPriceRestrictedThreshold: { UK: 10, EU: 11 },
+        lowPriceRestrictedCategories: ['beauty', 'grocery', 'media'],
         hazmatSurcharge: { UK: 0.10, EU: 0.10 },
         tiers: [
             {
@@ -1657,11 +1683,12 @@
         }
     });
     const EU_REFERRAL_RULES_2026 = Object.freeze({
-        'home-kitchen': { tiers: [[20, 0.08], [Infinity, 0.15]] },
+        // 2026-07-01 欧洲费率卡：Home & Kitchen 与 Grocery 均归「Everything else」15% 平价，无低客单价折扣档
+        'home-kitchen': { tiers: [[Infinity, 0.15]] },
         'consumer-electronics': { tiers: [[Infinity, 0.07]] },
         beauty: { tiers: [[10, 0.08], [Infinity, 0.15]] },
         sports: { tiers: [[Infinity, 0.15]] },
-        grocery: { tiers: [[10, 0.05], [Infinity, 0.15]] },
+        grocery: { tiers: [[Infinity, 0.15]] },
         pet: { tiers: [[Infinity, 0.15]] },
         baby: { tiers: [[10, 0.08], [Infinity, 0.15]] },
         clothing: { tiers: [[15, 0.05], [20, 0.10], [Infinity, 0.15]] },
@@ -1715,7 +1742,7 @@
         return base + excessSteps * increment;
     }
 
-    function getEuFbaMetrics(dimensionsCm, weightKg, price, country, category, peakShipping) {
+    function getEuFbaMetrics(dimensionsCm, weightKg, price, country, category, peakShipping, referralCategory) {
         if (!Array.isArray(dimensionsCm) || dimensionsCm.length !== 3 || dimensionsCm.some(value => !Number.isFinite(value) || value <= 0) || !Number.isFinite(weightKg) || weightKg <= 0) return null;
         const marketKey = euMarketKey(country);
         const sortedDimensions = [...dimensionsCm].sort((a, b) => b - a);
@@ -1723,7 +1750,10 @@
         const dimensionalWeightKg = volumeCm3 / EU_FBA_FULFILLMENT_2026.dimensionalWeightDivisor;
         const priceNumber = Number(price);
         const validPrice = Number.isFinite(priceNumber) && priceNumber > 0;
-        const lowPriceEligible = validPrice && priceNumber <= EU_FBA_FULFILLMENT_2026.lowPriceThreshold[marketKey];
+        const lowPriceMax = EU_FBA_FULFILLMENT_2026.lowPriceRestrictedCategories.includes(referralCategory)
+            ? EU_FBA_FULFILLMENT_2026.lowPriceRestrictedThreshold[marketKey]
+            : EU_FBA_FULFILLMENT_2026.lowPriceThreshold[marketKey];
+        const lowPriceEligible = validPrice && priceNumber <= lowPriceMax;
         const categoryKey = category === 'hazmat' ? 'hazmat' : category === 'apparel' ? 'apparel' : 'standard';
         const specialOversize = weightKg > 31.5 || sortedDimensions[0] > 175 || sortedDimensions[0] + 2 * (sortedDimensions[1] + sortedDimensions[2]) > 360;
 
@@ -1789,7 +1819,7 @@
                 weightLb: weightKg / 0.45359237, volumeIn3: volumeCm3 / 16.387064, volumeCm3, dimensionalWeightKg, shippingWeightKg,
                 dimensionalWeightLb: dimensionalWeightKg / 0.45359237, shippingWeightLb: shippingWeightKg / 0.45359237,
                 baseFee: plan.value, fuelSurcharge, fuelPct: EU_FBA_FULFILLMENT_2026.fuelSurchargePct, peakSurcharge: 0, hazmatSurcharge,
-                peakShipping: false, fee: plan.value + fuelSurcharge + hazmatSurcharge, analysis: null, category: categoryKey, priceBand: lowPriceUsed ? 'lowprice' : 'standard', rawPrice: validPrice ? priceNumber : null
+                peakShipping: false, fee: plan.value + fuelSurcharge + hazmatSurcharge, analysis: null, category: categoryKey, priceBand: lowPriceUsed ? 'lowprice' : 'standard', lowPriceMax, rawPrice: validPrice ? priceNumber : null
             };
         }
 
@@ -1814,7 +1844,7 @@
             baseFee: selectedFee, fuelSurcharge, fuelPct: EU_FBA_FULFILLMENT_2026.fuelSurchargePct, peakSurcharge, hazmatSurcharge,
             peakShipping: peakRequested, fee: selectedFee + fuelSurcharge + hazmatSurcharge,
             analysis: { tierRule: `${tierLabel}；${weightOnly ? '按实重' : '按实重与体积重较大值'} ${shippingWeightKg.toFixed(3)} kg` },
-            category: categoryKey, priceBand: lowPriceUsed ? 'lowprice' : 'standard', rawPrice: validPrice ? priceNumber : null
+            category: categoryKey, priceBand: lowPriceUsed ? 'lowprice' : 'standard', lowPriceMax, rawPrice: validPrice ? priceNumber : null
         };
     }
 
@@ -1832,6 +1862,22 @@
         const rate = Number(monthNumber) >= 10 ? rates.peak : rates.regular;
         const volume = marketKey === 'UK' ? volumeCm3 / 28316.846592 : volumeCm3 / 1000000;
         return volume * rate;
+    }
+
+    // 英国/欧洲仓储/件：按当前月份起算的库存覆盖月份取淡旺季费率均值，再乘平均库存月数
+    function calculateEuStoragePerUnit(volumeCm3, tier, country, inventoryMonths) {
+        const months = Math.max(0, Number(inventoryMonths) || 0);
+        if (months <= 0) return 0;
+        const coveredMonths = Math.ceil(months);
+        const currentMonth = new Date().getMonth() + 1;
+        let total = 0;
+        for (let offset = 0; offset < coveredMonths; offset += 1) {
+            const monthNumber = ((currentMonth - 1 + offset) % 12) + 1;
+            const monthly = calculateEuFbaStorageFee(volumeCm3, tier, readProductCategory(), country, monthNumber);
+            if (!Number.isFinite(monthly)) return null;
+            total += monthly;
+        }
+        return (total / coveredMonths) * months;
     }
 
     function calculateEuReferralFee(price, category, country, fbaTier) {
@@ -1879,13 +1925,14 @@
         return null;
     }
 
-    function calculateJpFbaStorageFee(volumeCm3, tier, month, storageDays, isFashion) {
+    function calculateJpFbaStorageFee(volumeCm3, tier, month, storageDays, isFashion, utilizationWeeks) {
         if (![volumeCm3, month, storageDays].every(Number.isFinite) || volumeCm3 < 0 || storageDays < 0) return null;
         const sizeClass = tier === '小型' || tier === '标准尺寸' ? 'standard' : 'oversize';
         const table = isFashion ? JP_FBA_STORAGE_2026.fashion : JP_FBA_STORAGE_2026.general;
         const rate = month >= 10 ? table[sizeClass].peak : table[sizeClass].regular;
+        const surchargeRate = getJpStorageUtilizationSurcharge(utilizationWeeks, sizeClass, isFashion);
         const daysInMonth = new Date(2026, month, 0).getDate();
-        return rate * (volumeCm3 / 1000) * storageDays / daysInMonth;
+        return (rate + surchargeRate) * (volumeCm3 / 1000) * storageDays / daysInMonth;
     }
 
     function calculateQuickEstimate(values) {
@@ -1923,12 +1970,12 @@
             tier = metrics.tier;
             fba = metrics.fee;
             const volumeFt3 = volumeCm3 / 28316.846592;
-            const sizeClass = tier === '标准件' ? 'standard' : 'oversize';
+            const sizeClass = tier === '标准件' || tier === '小号标准件' ? 'standard' : 'oversize';
             const rate = US_FBA_STORAGE_2026.baseRates[sizeClass][month >= 10 ? 'peak' : 'regular'];
             storage = volumeFt3 * rate * storageDays / new Date(2026, month, 0).getDate();
         } else if (market === 'UK' || market === 'EU') {
             const fbaCategory = ['clothing', 'shoes-bags'].includes(values.category) ? 'apparel' : 'standard';
-            const metrics = calculateFbaMetrics(dimensionsCm, weightKg, { country: market, peakShipping: false, price, category: fbaCategory });
+            const metrics = calculateFbaMetrics(dimensionsCm, weightKg, { country: market, peakShipping: false, price, category: fbaCategory, referralCategory: values.category });
             if (!metrics || metrics.fee === null) return { unavailable: true, reason: `商品超出${market === 'UK' ? '英国站' : '欧洲站'}内置FBA尺寸或重量范围` };
             tier = metrics.tier;
             fba = metrics.fee;
@@ -1944,25 +1991,40 @@
         if (adRate < 1) {
             if (market === 'JP') {
                 const maximumCandidate = Math.max(1000, Math.ceil((purchase + freight + fba + storage) / Math.max(0.01, 1 - adRate) * 4));
-                for (let candidate = 1; candidate <= maximumCandidate; candidate += 1) {
+                const jpProfitAt = candidate => {
                     const candidateReferral = calculateJpReferralFee(candidate, values.category || 'other', true).total;
                     const candidateFba = getJpFbaMetrics(dimensionsCm, weightKg, candidate)?.fee;
-                    if (!Number.isFinite(candidateFba)) continue;
-                    if (candidate - purchase - freight - candidateReferral - candidateFba - storage - candidate * adRate >= 0) {
-                        breakEvenPrice = candidate;
-                        break;
+                    if (!Number.isFinite(candidateFba)) return -1;
+                    return candidate - purchase - freight - candidateReferral - candidateFba - storage - candidate * adRate;
+                };
+                // 先粗扫定位区间，再按 1 日元细化，避免逐价全量计算
+                const coarseStep = Math.max(1, Math.ceil(maximumCandidate / 2000));
+                let crossing = -1;
+                for (let candidate = 1; candidate <= maximumCandidate; candidate += coarseStep) {
+                    if (jpProfitAt(candidate) >= 0) { crossing = candidate; break; }
+                }
+                if (crossing > 0) {
+                    for (let candidate = Math.max(1, crossing - coarseStep); candidate <= crossing; candidate += 1) {
+                        if (jpProfitAt(candidate) >= 0) { breakEvenPrice = candidate; break; }
                     }
                 }
             } else if (market === 'UK' || market === 'EU') {
                 const fbaCategory = ['clothing', 'shoes-bags'].includes(values.category) ? 'apparel' : 'standard';
                 const maximumCandidate = Math.min(10000, Math.max(100, Math.ceil((purchase + freight + fba + storage) / Math.max(0.05, 1 - adRate) * 4)));
-                for (let candidate = 0.5; candidate <= maximumCandidate; candidate += 0.1) {
+                const euProfitAt = candidate => {
                     const candidateReferral = calculateEuReferralFee(candidate, values.category || 'other', market, tier).total;
-                    const candidateFba = calculateFbaMetrics(dimensionsCm, weightKg, { country: market, peakShipping: false, price: candidate, category: fbaCategory })?.fee;
-                    if (!Number.isFinite(candidateFba)) continue;
-                    if (candidate - purchase - freight - candidateReferral - candidateFba - storage - candidate * adRate >= 0) {
-                        breakEvenPrice = candidate;
-                        break;
+                    const candidateFba = calculateFbaMetrics(dimensionsCm, weightKg, { country: market, peakShipping: false, price: candidate, category: fbaCategory, referralCategory: values.category })?.fee;
+                    if (!Number.isFinite(candidateFba)) return -1;
+                    return candidate - purchase - freight - candidateReferral - candidateFba - storage - candidate * adRate;
+                };
+                // 先按 1.0 粗扫定位区间，再按 0.1 细化
+                let crossing = -1;
+                for (let candidate = 1; candidate <= maximumCandidate; candidate += 1) {
+                    if (euProfitAt(candidate) >= 0) { crossing = candidate; break; }
+                }
+                if (crossing > 0) {
+                    for (let candidate = Math.max(0.1, crossing - 1); candidate <= crossing; candidate += 0.1) {
+                        if (euProfitAt(candidate) >= 0) { breakEvenPrice = Math.round(candidate * 100) / 100; break; }
                     }
                 }
             } else {
@@ -2042,6 +2104,8 @@
 
     /* ===== 本地版新增：FBA 费率自定义（仓储费/配送费/旺季/加国系数均可改） ===== */
     const DEFAULT_FEE_CONFIG = {
+        // 费率表版本：官方费率卡更新后 bump 此值，本地旧配置自动回退到新默认值（仓储自定义仍保留）
+        version: '2026-10-16',
         storage: {
             standard: { regular: 0.78, peak: 2.40, newSeller: 0.78 },
             oversize: { regular: 0.56, peak: 1.40, newSeller: 0.56 }
@@ -2057,8 +2121,10 @@
             categories: {
                 standard: {
                     under10: {
-                        stdBrackets: [[0.25, 2.91], [0.5, 3.13], [0.75, 3.38], [1, 3.78], [1.5, 4.60], [2, 5.00], [2.5, 5.28], [3, 5.85]],
-                        stdOver3: { base: 6.15, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 2.43], [0.25, 2.49], [0.375, 2.56], [0.5, 2.66], [0.625, 2.77], [0.75, 2.82], [0.875, 2.92], [1, 2.95]],
+                        stdBrackets: [[0.25, 2.91], [0.5, 3.13], [0.75, 3.38], [1, 3.78], [1.25, 4.22], [1.5, 4.60], [1.75, 4.75], [2, 5.00], [2.25, 5.10], [2.5, 5.28], [2.75, 5.44], [3, 5.85]],
+                        stdOver3: { base: 6.15, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 6.78, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 8.58, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 25.56, excessStartLb: 1, increment: 0.38 },
@@ -2068,43 +2134,10 @@
                         ]
                     },
                     mid: {
-                        stdBrackets: [[0.25, 3.68], [0.5, 3.98], [0.75, 4.28], [1, 4.75], [1.5, 5.37], [2, 5.68], [2.5, 5.98], [3, 6.28]],
-                        stdOver3: { base: 6.58, overStartLb: 3, stepLb: 0.5, increment: 0.38 },
-                        largeBulky: { base: 9.61, excessStartLb: 1, increment: 0.38 },
-                        oversizeSegments: [
-                            { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
-                            { maxLb: 70, base: 40.12, excessStartLb: 51, increment: 0.75 },
-                            { maxLb: 150, base: 54.81, excessStartLb: 71, increment: 0.75 },
-                            { maxLb: Infinity, base: 194.45, excessStartLb: 151, increment: 0.19 }
-                        ]
-                    },
-                    over50: {
-                        stdBrackets: [[0.25, 3.68], [0.5, 3.98], [0.75, 4.28], [1, 4.75], [1.5, 5.37], [2, 5.68], [2.5, 5.98], [3, 6.28]],
-                        stdOver3: { base: 6.58, overStartLb: 3, stepLb: 0.5, increment: 0.38 },
-                        largeBulky: { base: 9.61, excessStartLb: 1, increment: 0.38 },
-                        oversizeSegments: [
-                            { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
-                            { maxLb: 70, base: 40.12, excessStartLb: 51, increment: 0.75 },
-                            { maxLb: 150, base: 54.81, excessStartLb: 71, increment: 0.75 },
-                            { maxLb: Infinity, base: 194.45, excessStartLb: 151, increment: 0.19 }
-                        ]
-                    }
-                },
-                apparel: {
-                    under10: {
-                        stdBrackets: [[0.25, 3.48], [0.5, 3.68], [0.75, 3.90], [1, 4.35], [1.5, 5.22], [2, 5.43], [2.5, 5.90], [3, 6.08]],
-                        stdOver3: { base: 6.15, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
-                        largeBulky: { base: 8.58, excessStartLb: 1, increment: 0.38 },
-                        oversizeSegments: [
-                            { maxLb: 50, base: 25.56, excessStartLb: 1, increment: 0.38 },
-                            { maxLb: 70, base: 36.55, excessStartLb: 51, increment: 0.75 },
-                            { maxLb: 150, base: 50.55, excessStartLb: 71, increment: 0.75 },
-                            { maxLb: Infinity, base: 194.18, excessStartLb: 151, increment: 0.19 }
-                        ]
-                    },
-                    mid: {
-                        stdBrackets: [[0.25, 4.30], [0.5, 4.50], [0.75, 4.72], [1, 5.17], [1.5, 6.04], [2, 6.25], [2.5, 6.72], [3, 6.90]],
-                        stdOver3: { base: 6.97, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 3.32], [0.25, 3.42], [0.375, 3.45], [0.5, 3.54], [0.625, 3.68], [0.75, 3.78], [0.875, 3.91], [1, 3.96]],
+                        stdBrackets: [[0.25, 3.73], [0.5, 3.95], [0.75, 4.20], [1, 4.60], [1.25, 5.04], [1.5, 5.42], [1.75, 5.57], [2, 5.82], [2.25, 5.92], [2.5, 6.10], [2.75, 6.26], [3, 6.67]],
+                        stdOver3: { base: 6.97, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 7.55, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 9.35, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
@@ -2114,8 +2147,51 @@
                         ]
                     },
                     over50: {
-                        stdBrackets: [[0.25, 4.56], [0.5, 4.76], [0.75, 4.98], [1, 5.43], [1.5, 6.30], [2, 6.51], [2.5, 6.98], [3, 7.16]],
-                        stdOver3: { base: 7.23, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 3.58], [0.25, 3.68], [0.375, 3.71], [0.5, 3.80], [0.625, 3.94], [0.75, 4.04], [0.875, 4.17], [1, 4.22]],
+                        stdBrackets: [[0.25, 3.99], [0.5, 4.21], [0.75, 4.46], [1, 4.86], [1.25, 5.30], [1.5, 5.68], [1.75, 5.83], [2, 6.08], [2.25, 6.18], [2.5, 6.36], [2.75, 6.52], [3, 6.93]],
+                        stdOver3: { base: 7.23, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 7.55, excessStartLb: 1, increment: 0.38 },
+                        largeBulky: { base: 9.35, excessStartLb: 1, increment: 0.38 },
+                        oversizeSegments: [
+                            { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
+                            { maxLb: 70, base: 37.32, excessStartLb: 51, increment: 0.75 },
+                            { maxLb: 150, base: 51.32, excessStartLb: 71, increment: 0.75 },
+                            { maxLb: Infinity, base: 194.95, excessStartLb: 151, increment: 0.19 }
+                        ]
+                    }
+                },
+                apparel: {
+                    under10: {
+                        smallStdBrackets: [[0.125, 2.62], [0.25, 2.64], [0.375, 2.68], [0.5, 2.81], [0.625, 3.00], [0.75, 3.10], [0.875, 3.20], [1, 3.30]],
+                        stdBrackets: [[0.25, 3.48], [0.5, 3.68], [0.75, 3.90], [1, 4.35], [1.25, 5.05], [1.5, 5.22], [1.75, 5.32], [2, 5.43], [2.25, 5.78], [2.5, 5.90], [2.75, 5.95], [3, 6.08]],
+                        stdOver3: { base: 6.15, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 6.78, excessStartLb: 1, increment: 0.38 },
+                        largeBulky: { base: 8.58, excessStartLb: 1, increment: 0.38 },
+                        oversizeSegments: [
+                            { maxLb: 50, base: 25.56, excessStartLb: 1, increment: 0.38 },
+                            { maxLb: 70, base: 36.55, excessStartLb: 51, increment: 0.75 },
+                            { maxLb: 150, base: 50.55, excessStartLb: 71, increment: 0.75 },
+                            { maxLb: Infinity, base: 194.18, excessStartLb: 151, increment: 0.19 }
+                        ]
+                    },
+                    mid: {
+                        smallStdBrackets: [[0.125, 3.51], [0.25, 3.54], [0.375, 3.59], [0.5, 3.69], [0.625, 3.91], [0.75, 4.09], [0.875, 4.20], [1, 4.25]],
+                        stdBrackets: [[0.25, 4.30], [0.5, 4.50], [0.75, 4.72], [1, 5.17], [1.25, 5.87], [1.5, 6.04], [1.75, 6.14], [2, 6.25], [2.25, 6.60], [2.5, 6.72], [2.75, 6.77], [3, 6.90]],
+                        stdOver3: { base: 6.97, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 7.55, excessStartLb: 1, increment: 0.38 },
+                        largeBulky: { base: 9.35, excessStartLb: 1, increment: 0.38 },
+                        oversizeSegments: [
+                            { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
+                            { maxLb: 70, base: 37.32, excessStartLb: 51, increment: 0.75 },
+                            { maxLb: 150, base: 51.32, excessStartLb: 71, increment: 0.75 },
+                            { maxLb: Infinity, base: 194.95, excessStartLb: 151, increment: 0.19 }
+                        ]
+                    },
+                    over50: {
+                        smallStdBrackets: [[0.125, 3.77], [0.25, 3.80], [0.375, 3.85], [0.5, 3.95], [0.625, 4.17], [0.75, 4.35], [0.875, 4.46], [1, 4.51]],
+                        stdBrackets: [[0.25, 4.56], [0.5, 4.76], [0.75, 4.98], [1, 5.43], [1.25, 6.13], [1.5, 6.30], [1.75, 6.40], [2, 6.51], [2.25, 6.86], [2.5, 6.98], [2.75, 7.03], [3, 7.16]],
+                        stdOver3: { base: 7.23, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 7.55, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 9.35, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 26.33, excessStartLb: 1, increment: 0.38 },
@@ -2127,8 +2203,10 @@
                 },
                 hazmat: {
                     under10: {
-                        stdBrackets: [[0.25, 3.73], [0.5, 3.94], [0.75, 4.17], [1, 4.37], [1.5, 5.20], [2, 5.49], [2.5, 5.74], [3, 6.31]],
-                        stdOver3: { base: 6.61, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 3.40], [0.25, 3.43], [0.375, 3.48], [0.5, 3.55], [0.625, 3.64], [0.75, 3.65], [0.875, 3.73], [1, 3.77]],
+                        stdBrackets: [[0.25, 3.73], [0.5, 3.94], [0.75, 4.17], [1, 4.37], [1.25, 4.82], [1.5, 5.20], [1.75, 5.35], [2, 5.49], [2.25, 5.56], [2.5, 5.74], [2.75, 5.90], [3, 6.31]],
+                        stdOver3: { base: 6.61, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 7.50, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 9.30, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 27.67, excessStartLb: 1, increment: 0.38 },
@@ -2138,8 +2216,10 @@
                         ]
                     },
                     mid: {
-                        stdBrackets: [[0.25, 4.55], [0.5, 4.76], [0.75, 4.99], [1, 5.19], [1.5, 6.02], [2, 6.31], [2.5, 6.56], [3, 7.13]],
-                        stdOver3: { base: 7.43, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 4.29], [0.25, 4.36], [0.375, 4.37], [0.5, 4.43], [0.625, 4.55], [0.75, 4.61], [0.875, 4.72], [1, 4.78]],
+                        stdBrackets: [[0.25, 4.55], [0.5, 4.76], [0.75, 4.99], [1, 5.19], [1.25, 5.64], [1.5, 6.02], [1.75, 6.17], [2, 6.31], [2.25, 6.38], [2.5, 6.56], [2.75, 6.72], [3, 7.13]],
+                        stdOver3: { base: 7.43, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 8.27, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 10.07, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 28.44, excessStartLb: 1, increment: 0.38 },
@@ -2149,8 +2229,10 @@
                         ]
                     },
                     over50: {
-                        stdBrackets: [[0.25, 4.81], [0.5, 5.02], [0.75, 5.25], [1, 5.45], [1.5, 6.28], [2, 6.57], [2.5, 6.82], [3, 7.39]],
-                        stdOver3: { base: 7.69, overStartLb: 3, stepLb: 0.5, increment: 0.16 },
+                        smallStdBrackets: [[0.125, 4.55], [0.25, 4.62], [0.375, 4.63], [0.5, 4.69], [0.625, 4.81], [0.75, 4.87], [0.875, 4.98], [1, 5.04]],
+                        stdBrackets: [[0.25, 4.81], [0.5, 5.02], [0.75, 5.25], [1, 5.45], [1.25, 5.90], [1.5, 6.28], [1.75, 6.43], [2, 6.57], [2.25, 6.64], [2.5, 6.82], [2.75, 6.98], [3, 7.39]],
+                        stdOver3: { base: 7.69, overStartLb: 3, stepLb: 0.25, increment: 0.08 },
+                        smallBulky: { base: 8.27, excessStartLb: 1, increment: 0.38 },
                         largeBulky: { base: 10.07, excessStartLb: 1, increment: 0.38 },
                         oversizeSegments: [
                             { maxLb: 50, base: 28.44, excessStartLb: 1, increment: 0.38 },
@@ -2190,7 +2272,7 @@
                 feeMerge(defaults.storage.oversize, saved.storage.oversize);
                 feeMerge(defaults.fulfillment, saved.fulfillment);
                 // 旧版配置迁移：顶层 standardBrackets/oversizeSegments 视为 $10-$50 普通商品档
-                if (saved.fulfillment && !saved.fulfillment.categories) {
+                if (saved.fulfillment && !saved.fulfillment.categories && saved.version === defaults.version) {
                     const legacy = saved.fulfillment;
                     if (Array.isArray(legacy.standardBrackets) && legacy.standardBrackets.length) {
                         defaults.fulfillment.categories.standard.mid.stdBrackets = legacy.standardBrackets.map(b => [Number(b[0]), Number(b[1])]);
@@ -2210,7 +2292,7 @@
                             maxLb: s.maxLb === 'Infinity' || !Number.isFinite(Number(s.maxLb)) ? Infinity : Number(s.maxLb), base: Number(s.base), excessStartLb: Number(s.excessStartLb), increment: Number(s.increment)
                         }));
                     }
-                } else if (saved.fulfillment && saved.fulfillment.categories) {
+                } else if (saved.fulfillment && saved.fulfillment.categories && saved.version === defaults.version) {
                     // 新结构：逐类目逐档合并
                     for (const cat of ['standard', 'apparel', 'hazmat']) {
                         const savedCat = saved.fulfillment.categories[cat];
@@ -2219,11 +2301,17 @@
                             const savedPlan = savedCat[band];
                             if (!savedPlan) continue;
                             const target = defaults.fulfillment.categories[cat][band];
+                            if (Array.isArray(savedPlan.smallStdBrackets) && savedPlan.smallStdBrackets.length) {
+                                target.smallStdBrackets = savedPlan.smallStdBrackets.map(b => [Number(b[0]), Number(b[1])]);
+                            }
                             if (Array.isArray(savedPlan.stdBrackets) && savedPlan.stdBrackets.length) {
                                 target.stdBrackets = savedPlan.stdBrackets.map(b => [Number(b[0]), Number(b[1])]);
                             }
                             if (savedPlan.stdOver3 && Number.isFinite(Number(savedPlan.stdOver3.base))) {
-                                target.stdOver3 = { base: Number(savedPlan.stdOver3.base), overStartLb: 3, stepLb: 0.5, increment: Number(savedPlan.stdOver3.increment) };
+                                target.stdOver3 = { base: Number(savedPlan.stdOver3.base), overStartLb: 3, stepLb: Number(savedPlan.stdOver3.stepLb) || 0.25, increment: Number(savedPlan.stdOver3.increment) };
+                            }
+                            if (savedPlan.smallBulky && Number.isFinite(Number(savedPlan.smallBulky.base))) {
+                                target.smallBulky = { base: Number(savedPlan.smallBulky.base), excessStartLb: 1, increment: Number(savedPlan.smallBulky.increment) };
                             }
                             if (savedPlan.largeBulky && Number.isFinite(Number(savedPlan.largeBulky.base))) {
                                 target.largeBulky = { base: Number(savedPlan.largeBulky.base), excessStartLb: 1, increment: Number(savedPlan.largeBulky.increment) };
@@ -2294,12 +2382,14 @@
         setVal('feeDivisor', gf.dimensionalWeightDivisor); setVal('feeCaScale', gf.caScale);
         setVal('feePeakSurcharge', gf.peakSurcharge); setVal('feeFuelSurcharge', gf.fuelSurchargePct); setVal('feePeakStart', gf.peakStart); setVal('feePeakEnd', gf.peakEnd);
         setVal('feeStdOverBase', f.stdOver3.base); setVal('feeStdOverInc', f.stdOver3.increment);
+        setVal('feeSmBase', f.smallBulky.base); setVal('feeSmInc', f.smallBulky.increment);
         setVal('feeLgBase', f.largeBulky.base); setVal('feeLgInc', f.largeBulky.increment);
         setVal('feeOs1Base', seg[0].base); setVal('feeOs1Inc', seg[0].increment);
         setVal('feeOs2Base', seg[1].base); setVal('feeOs2Inc', seg[1].increment);
         setVal('feeOs3Base', seg[2].base); setVal('feeOs3Inc', seg[2].increment);
         setVal('feeOs4Base', seg[3].base); setVal('feeOs4Inc', seg[3].increment);
         renderStdBrackets();
+        renderSmallStdBrackets();
     }
     function collectFeeConfigFromForm() {
         const s = FEE_CONFIG.storage, gf = FEE_CONFIG.fulfillment, f = currentFeePlan(), seg = f.oversizeSegments;
@@ -2312,6 +2402,7 @@
         gf.peakStart = document.getElementById('feePeakStart').value.trim() || gf.peakStart;
         gf.peakEnd = document.getElementById('feePeakEnd').value.trim() || gf.peakEnd;
         f.stdOver3.base = num('feeStdOverBase'); f.stdOver3.increment = num('feeStdOverInc');
+        f.smallBulky.base = num('feeSmBase'); f.smallBulky.increment = num('feeSmInc');
         f.largeBulky.base = num('feeLgBase'); f.largeBulky.increment = num('feeLgInc');
         seg[0].base = num('feeOs1Base'); seg[0].increment = num('feeOs1Inc');
         seg[1].base = num('feeOs2Base'); seg[1].increment = num('feeOs2Inc');
@@ -2371,11 +2462,65 @@
         const addButton = document.querySelector('#feeStdBrackets .fee-bracket-add');
         if (addButton) addButton.addEventListener('click', addStdBracket);
     }
+    function renderSmallStdBrackets() {
+        const container = document.getElementById('feeSmallStdBrackets');
+        if (!container) return;
+        container.innerHTML = '';
+        currentFeePlan().smallStdBrackets.forEach((bracket, index) => {
+            const row = document.createElement('div');
+            row.className = 'fee-bracket-row';
+            row.innerHTML = '<span>≤</span><input type="number" min="0.01" step="0.01" data-idx="' + index + '" data-field="max" value="' + bracket[0] + '"><span>lb → $</span><input type="number" min="0" step="0.01" data-idx="' + index + '" data-field="fee" value="' + bracket[1] + '"><button type="button" class="fee-bracket-del" data-idx="' + index + '" title="删除该档">×</button>';
+            container.appendChild(row);
+        });
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.className = 'fee-bracket-add';
+        addButton.textContent = '+ 添加档位';
+        container.appendChild(addButton);
+    }
+    function onSmallStdBracketInput(event) {
+        const input = event.target;
+        const index = Number(input.dataset.idx);
+        const field = input.dataset.field;
+        const brackets = currentFeePlan().smallStdBrackets;
+        if (!Number.isInteger(index) || index < 0 || index >= brackets.length) return;
+        const value = feeNum(input.value);
+        if (field === 'max') brackets[index][0] = value;
+        else brackets[index][1] = value;
+        saveFeeConfig();
+        updateCargoCheck(); updateStorageForecast(); updateProfitCalculator();
+    }
+    function addSmallStdBracket() {
+        const brackets = currentFeePlan().smallStdBrackets;
+        const lastMax = brackets.length ? brackets[brackets.length - 1][0] : 0;
+        brackets.push([Number((lastMax + 0.125).toFixed(3)), 0]);
+        saveFeeConfig();
+        renderSmallStdBrackets();
+        updateCargoCheck(); updateStorageForecast(); updateProfitCalculator();
+        bindSmallStdBracketEvents();
+    }
+    function bindSmallStdBracketEvents() {
+        document.querySelectorAll('#feeSmallStdBrackets input').forEach(input => input.addEventListener('input', onSmallStdBracketInput));
+        const delButtons = document.querySelectorAll('#feeSmallStdBrackets .fee-bracket-del');
+        delButtons.forEach(button => button.addEventListener('click', () => {
+            const index = Number(button.dataset.idx);
+            const brackets = currentFeePlan().smallStdBrackets;
+            if (brackets.length <= 1 || !Number.isInteger(index) || index < 0 || index >= brackets.length) return;
+            brackets.splice(index, 1);
+            saveFeeConfig();
+            renderSmallStdBrackets();
+            bindSmallStdBracketEvents();
+            updateCargoCheck(); updateStorageForecast(); updateProfitCalculator();
+        }));
+        const addButton = document.querySelector('#feeSmallStdBrackets .fee-bracket-add');
+        if (addButton) addButton.addEventListener('click', addSmallStdBracket);
+    }
     function onFeeScopeChange() {
         collectFeeConfigFromForm();
         saveFeeConfig();
         applyFeeConfigToForm();
         bindStdBracketEvents();
+        bindSmallStdBracketEvents();
         syncPeakLabel();
         updateFeeConfigScopeLabel();
         updateCargoCheck(); updateStorageForecast(); updateProfitCalculator();
@@ -2415,6 +2560,7 @@
     function initFeeConfig() {
         applyFeeConfigToForm();
         bindStdBracketEvents();
+        bindSmallStdBracketEvents();
         syncPeakLabel();
         updateFeeConfigScopeLabel();
     }
@@ -3664,33 +3810,53 @@
         };
     }
 
-    function getFbaTierAnalysis(dimensionsIn, weightLb) {
+    function getFbaTierAnalysis(dimensionsIn, weightLb, dimensionalWeightLb) {
         if (!dimensionsIn || dimensionsIn.length !== 3) return '未知';
         const [longest, median, shortest] = [...dimensionsIn].sort((a, b) => b - a);
         const lengthGirth = longest + 2 * (median + shortest);
+        // 官方规则：尺寸分段按「单位重量与体积重的较大值」（shipping weight）判定
+        const shippingWeightLb = Math.max(Number(weightLb) || 0, Number(dimensionalWeightLb) || 0);
         const compare = (label, actual, limit) => ({ label, actual, limit, exceeded: actual > limit });
+        const smallStandardChecks = [
+            compare('最长边', longest, 15),
+            compare('次长边', median, 12),
+            compare('最短边', shortest, 0.75),
+            compare('重量', shippingWeightLb, 1),
+        ];
         const standardChecks = [
             compare('最长边', longest, 18),
             compare('次长边', median, 14),
             compare('最短边', shortest, 8),
-            compare('重量', weightLb, 20),
+            compare('重量', shippingWeightLb, 20),
+        ];
+        const smallBulkyChecks = [
+            compare('最长边', longest, 37),
+            compare('次长边', median, 28),
+            compare('最短边', shortest, 20),
+            compare('长+围', lengthGirth, 130),
+            compare('重量', shippingWeightLb, 50),
         ];
         const bulkyChecks = [
             compare('最长边', longest, 59),
             compare('次长边', median, 33),
             compare('最短边', shortest, 33),
             compare('长+围', lengthGirth, 130),
-            compare('重量', weightLb, 50),
+            compare('重量', shippingWeightLb, 50),
         ];
         const standardBlockers = standardChecks.filter(check => check.exceeded);
         const bulkyBlockers = bulkyChecks.filter(check => check.exceeded);
-        const tier = standardBlockers.length === 0
-            ? '标准件'
-            : bulkyBlockers.length === 0
-                ? '大号大件'
-                : '超大件';
+        const smallBulkyBlockers = smallBulkyChecks.filter(check => check.exceeded);
+        const tier = smallStandardChecks.every(check => !check.exceeded)
+            ? '小号标准件'
+            : standardBlockers.length === 0
+                ? '标准件'
+                : smallBulkyBlockers.length === 0
+                    ? '小号大件'
+                    : bulkyBlockers.length === 0
+                        ? '大号大件'
+                        : '超大件';
 
-        return { tier, longest, median, shortest, lengthGirth, standardChecks, bulkyChecks, standardBlockers, bulkyBlockers };
+        return { tier, longest, median, shortest, lengthGirth, shippingWeightLb, smallStandardChecks, standardChecks, smallBulkyChecks, bulkyChecks, standardBlockers, bulkyBlockers, smallBulkyBlockers };
     }
 
     function getFbaSizeTier(dimensionsIn, weightLb) {
@@ -3703,14 +3869,23 @@
         const catKey = category && FEE_CONFIG.fulfillment.categories[category] ? category : 'standard';
         const bandKey = priceBand && FEE_CONFIG.fulfillment.categories[catKey][priceBand] ? priceBand : 'mid';
         const priceNumber = Number(price);
-        const lowPrice = tier === '标准件' && price !== null && price !== undefined && String(price).trim() !== '' && Number.isFinite(priceNumber) && priceNumber > 0 && priceNumber < 9.9;
+        // 官方：售价 <$10 的商品自动适用低价 FBA 费率（各尺寸档均有低价费率表）
+        const lowPrice = price !== null && price !== undefined && String(price).trim() !== '' && Number.isFinite(priceNumber) && priceNumber > 0 && priceNumber < 10;
         const effectiveBand = lowPrice ? 'under10' : bandKey === 'under10' ? 'mid' : bandKey;
         const effectivePlan = FEE_CONFIG.fulfillment.categories[catKey][effectiveBand] || FEE_CONFIG.fulfillment.categories[catKey].mid;
+        if (tier === '小号标准件') {
+            const bracket = (effectivePlan.smallStdBrackets || []).find(([maxWeight]) => shippingWeightLb <= maxWeight);
+            return bracket ? bracket[1] : null;
+        }
         if (tier === '标准件') {
             const bracket = effectivePlan.stdBrackets.find(([maxWeight]) => shippingWeightLb <= maxWeight);
             if (bracket) return bracket[1];
             const over = effectivePlan.stdOver3;
             return over.base + Math.ceil((shippingWeightLb - over.overStartLb) / over.stepLb) * over.increment;
+        }
+        if (tier === '小号大件') {
+            const bulky = effectivePlan.smallBulky || effectivePlan.largeBulky;
+            return bulky.base + Math.ceil(Math.max(0, shippingWeightLb - bulky.excessStartLb)) * bulky.increment;
         }
         if (tier === '大号大件') {
             const bulky = effectivePlan.largeBulky;
@@ -3737,7 +3912,8 @@
             const category = options.category || readProductCategory();
             const rawPrice = options.price != null ? Number(options.price) : readProductPrice();
             const peakShipping = options.peakShipping ?? (typeof document !== 'undefined' && Boolean(document.getElementById('fbaPeakShipping')?.checked));
-            const eu = getEuFbaMetrics(dimensionsCm, weightKg, rawPrice, country, category, peakShipping);
+            const referralCategory = options.referralCategory ?? (typeof document !== 'undefined' ? document.getElementById('profitReferralCategory')?.value : null) ?? null;
+            const eu = getEuFbaMetrics(dimensionsCm, weightKg, rawPrice, country, category, peakShipping, referralCategory);
             const dimensionsIn = dimensionsCm.map(value => value / 2.54);
             const weightLb = weightKg / 0.45359237;
             if (!eu) {
@@ -3749,11 +3925,12 @@
         }
         const dimensionsIn = dimensionsCm.map(value => value / 2.54);
         const weightLb = weightKg / 0.45359237;
-        const analysis = getFbaTierAnalysis(dimensionsIn, weightLb);
-        const tier = analysis.tier;
         const volumeIn3 = dimensionsIn.reduce((total, value) => total * value, 1);
         const dimensionalWeightLb = volumeIn3 / FEE_CONFIG.fulfillment.dimensionalWeightDivisor;
-        const shippingWeightLb = Math.max(weightLb, dimensionalWeightLb);
+        const analysis = getFbaTierAnalysis(dimensionsIn, weightLb, dimensionalWeightLb);
+        const tier = analysis.tier;
+        // 小号标准件按单位重量计费；其余尺寸分段按单位重量与体积重的较大值
+        const shippingWeightLb = tier === '小号标准件' ? weightLb : Math.max(weightLb, dimensionalWeightLb);
         const category = options.category || readProductCategory();
         const rawPrice = options.price != null ? Number(options.price) : readProductPrice();
         const priceBand = getPriceBand(rawPrice);
@@ -3910,7 +4087,7 @@
                 setCargoText('cargoStoragePeakValue', money(peakStorage));
                 syncCargoStorageRows();
                 setFbaRuleSummary(`<div class="fba-basis-heading">${fba.market === 'UK' ? '英国站' : '欧洲站（德国/CEP）'} 2026</div><div>${fba.analysis?.tierRule || '按官方尺寸段、实重/体积重和售价匹配。'}</div>`);
-                setFbaTrigger(fba.fee === null ? '超出欧洲 FBA 内置尺寸或重量范围，请以 Seller Central 为准。' : fba.priceBand === 'lowprice' ? `已匹配低价 FBA；售价不超过 ${fba.market === 'UK' ? '£20' : '€20'} 且符合尺寸重量限制。` : `已匹配${fba.tier}；配送费已包含 1.5% 燃油和物流附加费。`, fba.fee !== null);
+                setFbaTrigger(fba.fee === null ? '超出欧洲 FBA 内置尺寸或重量范围，请以 Seller Central 为准。' : fba.priceBand === 'lowprice' ? `已匹配低价 FBA；该类别官方低价阈值为 ${fba.market === 'UK' ? '£' : '€'}${fba.lowPriceMax}（含税）。` : `已匹配${fba.tier}；配送费已包含 1.5% 燃油和物流附加费。`, fba.fee !== null);
                 updateProfitCalculator();
                 return;
             }
@@ -3930,13 +4107,15 @@
             setCargoText('cargoStoragePeakValue', money(unitVolumeFt3 * storageRates.peak));
             syncCargoStorageRows();
             const { analysis } = fba;
-            const activeChecks = fba.tier === '标准件' ? analysis.standardChecks : analysis.bulkyChecks;
-            const tierName = fba.tier === '标准件' ? '标准件' : '大号大件';
-            setFbaRuleSummary(`<div class="fba-basis-heading">${tierName}限制</div>${formatFbaChecks(activeChecks)}`);
-            if (fba.tier === '标准件') {
+            const tierCheckMap = { '小号标准件': analysis.smallStandardChecks, '标准件': analysis.standardChecks, '小号大件': analysis.smallBulkyChecks, '大号大件': analysis.bulkyChecks, '超大件': analysis.bulkyChecks };
+            const activeChecks = tierCheckMap[fba.tier] || analysis.bulkyChecks;
+            setFbaRuleSummary(`<div class="fba-basis-heading">${fba.tier}限制</div>${formatFbaChecks(activeChecks)}`);
+            if (fba.tier === '小号标准件' || fba.tier === '标准件') {
                 setFbaTrigger('升档触发：无，全部标准件限制均满足。', true);
-            } else if (fba.tier === '大号大件') {
+            } else if (fba.tier === '小号大件') {
                 setFbaTrigger(`由标准件升档：${formatFbaBlockers(analysis.standardBlockers)}。`, false);
+            } else if (fba.tier === '大号大件') {
+                setFbaTrigger(`由小号大件升档：${formatFbaBlockers(analysis.smallBulkyBlockers)}。`, false);
             } else {
                 setFbaTrigger(`由大号大件升档：${formatFbaBlockers(analysis.bulkyBlockers)}。`, false);
             }
@@ -4127,7 +4306,7 @@
     }
 
     function getUsStorageSizeClass(fbaTier) {
-        return fbaTier === '标准件' ? 'standard' : 'oversize';
+        return fbaTier === '标准件' || fbaTier === '小号标准件' ? 'standard' : 'oversize';
     }
 
     function getUsStorageBaseRate(monthNumber, sizeClass, useNewSellerRate) {
@@ -4190,7 +4369,8 @@
                 ? rollingSalesUnits > 0 ? averageUnits * 13 / rollingSalesUnits : 0
                 : null;
             const averageVolumeFt3 = averageUnits * unitVolumeFt3;
-            const newSellerEligible = Boolean(values.newSellerEligible) && averageVolumeFt3 < US_FBA_STORAGE_2026.newSellerVolumeLimitFt3;
+            // 官方：新卖家（首次入仓不满一年）、个人计划卖家，或日均库存体积 ≤25 ft³ 的卖家免征仓储利用率附加费
+            const newSellerEligible = Boolean(values.newSellerEligible) || averageVolumeFt3 <= US_FBA_STORAGE_2026.newSellerVolumeLimitFt3;
             const baseRate = getUsStorageBaseRate(monthNumber, sizeClass, newSellerEligible);
             const surchargeRate = newSellerEligible || utilizationWeeks === null
                 ? 0
@@ -4230,8 +4410,16 @@
         const tier = values.tier || '标准尺寸';
         const isFashion = Boolean(values.isFashion);
         const plan = Array.isArray(values.plan) ? values.plan : [];
+        const prior13WeekSales = Math.max(0, Number(values.prior13WeekSales) || 0);
+        const hasHistory = prior13WeekSales > 0;
+        const historicalDailySales = prior13WeekSales / US_FBA_STORAGE_2026.rollingWindowDays;
+        const salesWindow = hasHistory
+            ? Array.from({ length: US_FBA_STORAGE_2026.rollingWindowDays }, () => historicalDailySales)
+            : [];
+        const sizeClass = tier === '小型' || tier === '标准尺寸' ? 'standard' : 'oversize';
         const rows = [];
         let inventory = openingUnits;
+        let simulatedDays = 0;
 
         for (let index = 0; index < JP_FBA_STORAGE_2026.forecastMonths; index += 1) {
             const monthNumber = storageMonthNumber(startMonth, index);
@@ -4246,15 +4434,31 @@
             const endingUnits = inventory;
             const averageUnits = (opening + endingUnits) / 2;
             const daysInMonth = storageDaysInMonth(monthNumber);
-            const storageCost = calculateJpFbaStorageFee(unitVolumeCm3 * averageUnits, tier, monthNumber, daysInMonth, isFashion);
-            rows.push({ index, monthNumber, plannedSales, restockUnits, openingUnits: opening, endingUnits, averageUnits, soldUnits, shortageUnits, storageCost, tier, isFashion });
+            const rollingSalesUnits = salesWindow.reduce((total, sales) => total + sales, 0);
+            const utilizationAvailable = hasHistory || simulatedDays >= US_FBA_STORAGE_2026.rollingWindowDays;
+            const utilizationWeeks = utilizationAvailable
+                ? rollingSalesUnits > 0 ? averageUnits * 13 / rollingSalesUnits : 0
+                : null;
+            const averageVolumeCm3 = averageUnits * unitVolumeCm3;
+            // 新卖家、个人计划卖家或日均库存体积低于 0.71 m³ 时免征利用率附加费
+            const utilizationExempt = Boolean(values.newSellerEligible) || averageVolumeCm3 < JP_FBA_STORAGE_2026.utilizationExemptVolumeCm3;
+            const surchargeRate = utilizationExempt || utilizationWeeks === null ? 0 : getJpStorageUtilizationSurcharge(utilizationWeeks, sizeClass, isFashion);
+            const storageCost = calculateJpFbaStorageFee(unitVolumeCm3 * averageUnits, tier, monthNumber, daysInMonth, isFashion, utilizationExempt ? null : utilizationWeeks);
+            rows.push({ index, monthNumber, plannedSales, restockUnits, openingUnits: opening, endingUnits, averageUnits, soldUnits, shortageUnits, utilizationWeeks, utilizationAvailable, utilizationExempt, surchargeRate, storageCost, tier, isFashion });
+
+            const dailySales = soldUnits / daysInMonth;
+            for (let day = 0; day < daysInMonth; day += 1) {
+                if (salesWindow.length >= US_FBA_STORAGE_2026.rollingWindowDays) salesWindow.shift();
+                salesWindow.push(dailySales);
+            }
+            simulatedDays += daysInMonth;
         }
 
         return {
             market: 'JP', rows,
             totalStorageCost: rows.reduce((total, row) => total + row.storageCost, 0),
             totalSoldUnits: rows.reduce((total, row) => total + row.soldUnits, 0),
-            remainingUnits: inventory, tier, isFashion
+            remainingUnits: inventory, tier, isFashion, hasHistory, sizeClass
         };
     }
 
@@ -4316,7 +4520,9 @@
                 plan: storageForecastPlanFromPage(),
                 unitVolumeCm3: volumeCm3,
                 tier: fbaTier,
-                isFashion: document.getElementById('storageJpFashion')?.checked
+                isFashion: document.getElementById('storageJpFashion')?.checked,
+                prior13WeekSales: inputNumber('storagePast13WeekSales'),
+                newSellerEligible: document.getElementById('storageNewSeller')?.checked
             });
         }
         return null;
@@ -4366,7 +4572,7 @@
             const costEl = document.getElementById(`storageCost${row.index}`);
             const statusEl = document.getElementById(`storageStatus${row.index}`);
             if (averageEl) averageEl.textContent = fmtNumber(row.averageUnits);
-            if (weeksEl) weeksEl.textContent = market === 'JP' ? `${fmtNumber(row.endingUnits)}件` : formatStorageWeeks(row.utilizationWeeks);
+            if (weeksEl) weeksEl.textContent = formatStorageWeeks(row.utilizationWeeks);
             if (costEl) costEl.textContent = money(row.storageCost);
             if (statusEl) {
                 const status = [];
@@ -4374,10 +4580,13 @@
                 if (market === 'US') {
                     if (row.newProductObservation) status.push('新品观察期');
                     else if (!row.utilizationAvailable) status.push('补充 13 周销量');
-                    else if (row.newSellerEligible) status.push('新卖家费率');
+                    else if (row.newSellerEligible) status.push('免利用率附加费');
                     else if (row.surchargeRate > 0) status.push(`附加 $${row.surchargeRate.toFixed(2)}/ft³`);
                 } else if (market === 'JP') {
                     status.push(row.isFashion ? '服饰费率' : (row.monthNumber >= 10 ? '旺季费率' : '常规费率'));
+                    if (row.utilizationExempt) status.push('免利用率附加费');
+                    else if (row.surchargeRate > 0) status.push(`利用率附加 ¥${row.surchargeRate.toFixed(3)}/L`);
+                    else if (row.utilizationAvailable) status.push('利用率正常');
                 }
                 statusEl.textContent = status.join('；') || '正常';
             }
@@ -4396,14 +4605,14 @@
         setText('storageForecastTotalValue', `${money(forecast.totalStorageCost)} · ${rmbMoney(forecast.totalStorageCost, fx)}`);
         setText('storageForecastPerUnitValue', allocatedStorageCost === null ? '-' : `${money(allocatedStorageCost)} · ${rmbMoney(allocatedStorageCost, fx)}`);
         setText('storageForecastSoldValue', forecast.totalSoldUnits > 0 ? `${fmtNumber(forecast.totalSoldUnits)}件` : '-');
-        setText('storageForecastWeeksValue', market === 'JP' ? '-' : formatStorageWeeks(averageUtilization));
+        setText('storageForecastWeeksValue', formatStorageWeeks(averageUtilization));
         setText('storageForecastAverageValue', averageInventory === null ? '-' : `${fmtNumber(averageInventory)}件`);
         renderStorageReplenishment(forecast);
         const status = document.getElementById('storageForecastStatus');
         if (status) {
             if (forecast.totalSoldUnits <= 0) status.textContent = '填写每月计划销量后，系统会计算库存与仓储费。';
-            else if (market === 'JP') status.textContent = `预测结束库存 ${fmtNumber(forecast.remainingUnits)} 件；日本站按商品体积、尺寸等级、月份及服饰类别计算。`;
-            else if (!forecast.hasHistory) status.textContent = '新品观察期内只按基础仓储费率估算；满 13 周后按滚动实际销量判断库存利用率附加费。';
+            else if (!forecast.hasHistory) status.textContent = '新品观察期内只按基础仓储费率估算；补充过去 13 周销量后按滚动实际销量判断库存利用率附加费。';
+            else if (market === 'JP') status.textContent = `预测结束库存 ${fmtNumber(forecast.remainingUnits)} 件；日本站按商品体积、尺寸等级、月份、服饰类别及库存利用率（26/39/52 周）计算。`;
             else status.textContent = `预测结束库存 ${fmtNumber(forecast.remainingUnits)} 件；费率按 ${forecast.sizeClass === 'standard' ? '标准尺寸' : '大件'}、日均库存和滚动 13 周发货量计算。`;
         }
     }
@@ -4800,7 +5009,8 @@
             : null;
         const euReferral = isEuUk ? calculateEuReferralFee(profitPrice, referralCategory, country, fba?.tier) : null;
         const autoReferral = isJp ? (jpReferral?.total || 0) : isEuUk ? (euReferral?.total || 0) : null;
-        const autoReturnHandling = (autoReferral !== null ? autoReferral : profitPrice * profitReferralRate / 100) * 0.2;
+        // 退货处理费按 FBA 配送费的 50% 自动估算（欧盟官方高退货率商品口径：退货率超类目阈值时按配送费 50% 收取）
+        const autoReturnHandling = (fba && fba.fee != null ? fba.fee : 0) * 0.5;
         const returnHandlingEl = document.getElementById('profitReturnHandling');
         if (returnHandlingEl) { returnHandlingEl.value = autoReturnHandling.toFixed(2); returnHandlingEl.readOnly = true; }
         const volumeFt3 = cargo ? cargo.volumeM3 * 1000000 / 28316.8466 : 0;
@@ -4809,8 +5019,7 @@
         const usesUsStorageForecast = country === 'US';
         const usesDetailedStorageForecast = usesUsStorageForecast || isJp;
         const inventoryMonths = Math.max(0, inputNumber('profitInventoryMonths'));
-        const euMonthlyStorage = isEuUk && cargo ? calculateEuFbaStorageFee(cargo.volumeCm3, fba?.tier, readProductCategory(), country, new Date().getMonth() + 1) : null;
-        const euStorageCost = Number.isFinite(euMonthlyStorage) ? euMonthlyStorage * inventoryMonths : null;
+        const euStorageCost = isEuUk && cargo ? calculateEuStoragePerUnit(cargo.volumeCm3, fba?.tier, country, inventoryMonths) : null;
         const storageCost = usesDetailedStorageForecast ? storagePeriodAllocation : isEuUk ? euStorageCost : undefined;
         const result = calculateProfitMetrics({
             price: inputNumber('adPrice'), fx: inputNumber('profitFx') || market.fx, purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
@@ -4856,9 +5065,8 @@
     function variantStorageCost(cargo, fba, market) {
         const country = document.getElementById('marketCountry')?.value;
         if (country === 'EU' || country === 'UK') {
-            const monthly = cargo ? calculateEuFbaStorageFee(cargo.volumeCm3, fba?.tier, readProductCategory(), country, new Date().getMonth() + 1) : null;
-            const months = Math.max(0, inputNumber('profitInventoryMonths'));
-            return Number.isFinite(monthly) ? monthly * months : null;
+            if (!cargo) return null;
+            return calculateEuStoragePerUnit(cargo.volumeCm3, fba?.tier, country, inputNumber('profitInventoryMonths'));
         }
         if (country !== 'US' && country !== 'JP') return null;
         const volumeFt3 = cargo ? cargo.volumeM3 * 1000000 / 28316.8466 : 0;
@@ -4895,7 +5103,8 @@
             const jpReferral = isJp ? calculateJpReferralFee(safePrice, referralCategory, jpTaxIncluded) : null;
             const euReferral = isEuUk ? calculateEuReferralFee(safePrice, referralCategory, country, fba?.tier) : null;
             const autoReferral = isJp ? (jpReferral?.total || 0) : isEuUk ? (euReferral?.total || 0) : null;
-            const autoReturnHandling = (autoReferral !== null ? autoReferral : safePrice * profitReferralRate / 100) * 0.2;
+            // 退货处理费按 FBA 配送费的 50% 自动估算（欧盟官方高退货率商品口径）
+            const autoReturnHandling = (fba && fba.fee != null ? fba.fee : 0) * 0.5;
             const detailedStorage = ['US', 'JP', 'EU', 'UK'].includes(country);
             const r = calculateProfitMetrics({
                 price: safePrice, fx, purchaseRmb: inputNumber('profitPurchaseRmb'), taxDiscount: inputNumber('profitTaxDiscount'), freightRateRmb: inputNumber('profitFreightRate'),
@@ -4927,7 +5136,7 @@
             if (fx <= 0) return null;
             return Math.max(0, (weightedPrice * (1 - targetMargin) - (weightedTotalCost - weightedPurchase)) * fx / (1 - taxDiscount));
         })();
-        if (returnHandlingEl) { returnHandlingEl.value = (weightedReferral * 0.2).toFixed(2); returnHandlingEl.readOnly = true; }
+        if (returnHandlingEl) { returnHandlingEl.value = (weightedFba * 0.5).toFixed(2); returnHandlingEl.readOnly = true; }
         // 主指标区（加权口径）
         setProfitMoneyMetric('profitPurchaseValue', 'profitPurchaseCnyValue', weightedPurchase, fx);
         setProfitMoneyMetric('profitFreightValue', 'profitFreightCnyValue', weightedFreight, fx);
@@ -5014,8 +5223,8 @@
         const usHistory = document.getElementById('storageUsHistoryField');
         const usNewSeller = document.getElementById('storageUsNewSellerField');
         const jpFashion = document.getElementById('storageJpFashionField');
-        if (usHistory) usHistory.hidden = !isUs;
-        if (usNewSeller) usNewSeller.hidden = !isUs;
+        if (usHistory) usHistory.hidden = !(isUs || isJp);
+        if (usNewSeller) usNewSeller.hidden = !(isUs || isJp);
         if (jpFashion) jpFashion.hidden = !isJp;
         const referralCategoryField = document.getElementById('profitReferralCategoryField');
         const referralRateField = document.getElementById('profitReferralRateField');
@@ -5030,7 +5239,7 @@
         if (storageTitle) storageTitle.textContent = isJp ? '日本站 FBA 月度仓储' : '仓储费每月详细计算（美国）';
         if (storageSource) storageSource.textContent = isJp ? '2026 日本站官方费率' : '2026 美国站非危险品费率参考';
         if (storageTable) storageTable.setAttribute('aria-label', isJp ? '日本 FBA 仓储费每月详细计算' : '美国仓储费每月详细计算');
-        if (storageWeeksHeader) storageWeeksHeader.textContent = isJp ? '月末库存' : '利用率';
+        if (storageWeeksHeader) storageWeeksHeader.textContent = '利用率';
         if (fx && (!fx.value || fx.dataset.marketDefault === '1')) { fx.value = Number(market.fx).toFixed(marketFxDecimals(market.currency)); fx.dataset.marketDefault = '1'; }
         const applyFeeDefault = (field, value) => {
             if (!field || field.dataset.marketDefault !== '1') return;
